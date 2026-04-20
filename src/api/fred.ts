@@ -1,6 +1,10 @@
 import type { FredObs, TimeRange, YieldSurface } from '../types'
 
 const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations'
+// allorigins.win handles CORS reliably; avoid concurrent bursting (max ~2/s)
+const PROXY = (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
 export const YIELD_MATURITIES = [
   { id: 'DGS3MO', label: '3M',  years: 0.25 },
@@ -16,10 +20,10 @@ export const YIELD_MATURITIES = [
 ] as const
 
 export const MACRO_SERIES = [
-  { id: 'FEDFUNDS',  label: 'Fed Funds Rate',     unit: '%',      color: '#e8b84b' },
-  { id: 'CPIAUCSL',  label: 'CPI (YoY %)',         unit: 'Index',  color: '#ef4444' },
-  { id: 'UNRATE',    label: 'Unemployment Rate',   unit: '%',      color: '#4a9eff' },
-  { id: 'A191RL1Q225SBEA', label: 'Real GDP Growth (YoY)', unit: '%', color: '#22c55e' },
+  { id: 'FEDFUNDS',         label: 'Fed Funds Rate',        unit: '%', color: '#e8b84b' },
+  { id: 'CPIAUCSL',         label: 'CPI (YoY %)',            unit: '%', color: '#ef4444' },
+  { id: 'UNRATE',           label: 'Unemployment Rate',      unit: '%', color: '#4a9eff' },
+  { id: 'A191RL1Q225SBEA',  label: 'Real GDP Growth (YoY)', unit: '%', color: '#22c55e' },
 ] as const
 
 export function getStartDate(range: TimeRange): string {
@@ -44,32 +48,17 @@ export async function fetchSeries(
     `${FRED_BASE}?series_id=${id}&api_key=${apiKey}&file_type=json` +
     `&observation_start=${start}&observation_end=${end}`
 
-  // Try proxies in order — corsproxy.io IPs are throttled by FRED for high-traffic series
-  const proxies = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(fredUrl)}`,
-    `https://corsproxy.io/?${encodeURIComponent(fredUrl)}`,
-  ]
-
-  let res: Response | null = null
-  let lastErr = ''
-  for (const proxy of proxies) {
-    try {
-      res = await fetch(proxy)
-      if (res.status < 500) break  // accept 4xx (real FRED errors) but retry on 500
-    } catch {
-      lastErr = `network error on ${proxy}`
-    }
-  }
-  if (!res) throw new Error(lastErr || 'All proxies failed')
+  const res = await fetch(PROXY(fredUrl))
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
-    throw new Error(body.error_message ?? `HTTP ${res.status} fetching ${id}`)
+    throw new Error((body as Record<string, string>).error_message ?? `HTTP ${res.status} fetching ${id}`)
   }
-  const data = await res.json()
+  const data = await res.json() as { error_message?: string; observations?: { date: string; value: string }[] }
   if (data.error_message) throw new Error(data.error_message)
+  if (!data.observations) throw new Error(`No observations returned for ${id}`)
 
-  return (data.observations as { date: string; value: string }[])
+  return data.observations
     .filter(o => o.value !== '.')
     .map(o => ({ date: o.date, value: parseFloat(o.value) }))
 }
@@ -88,14 +77,21 @@ function resampleWeekly(obs: FredObs[]): FredObs[] {
 
 export async function fetchYieldSurface(
   range: TimeRange,
-  apiKey: string
+  apiKey: string,
+  onProgress?: (loaded: number, total: number) => void
 ): Promise<YieldSurface> {
   const start = getStartDate(range)
   const end = getTodayStr()
+  const total = YIELD_MATURITIES.length
 
-  const allSeries = await Promise.all(
-    YIELD_MATURITIES.map(m => fetchSeries(m.id, start, end, apiKey))
-  )
+  // Sequential with 300ms gap — allorigins.win rate-limits concurrent bursts
+  const allSeries: FredObs[][] = []
+  for (let i = 0; i < total; i++) {
+    if (i > 0) await sleep(300)
+    const data = await fetchSeries(YIELD_MATURITIES[i].id, start, end, apiKey)
+    allSeries.push(data)
+    onProgress?.(i + 1, total)
+  }
 
   const weekly = allSeries.map(resampleWeekly)
   const sets = weekly.map(s => new Set(s.map(o => o.date)))
