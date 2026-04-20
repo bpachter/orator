@@ -1,9 +1,42 @@
 import type { FredObs, TimeRange, YieldSurface } from '../types'
 
 const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations'
-const PROXY = (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
+
+type FredApiResponse = {
+  error_message?: string
+  observations?: { date: string; value: string }[]
+}
+
+// FRED supports JSONP via &callback= — no CORS proxy needed, no rate limits.
+function fredJsonp(fredUrl: string, timeoutMs = 15000): Promise<FredApiResponse> {
+  return new Promise((resolve, reject) => {
+    const cbName = `_fredCb${Date.now()}${Math.floor(Math.random() * 1e6)}`
+    let settled = false
+
+    const cleanup = () => {
+      settled = true
+      clearTimeout(timer)
+      delete (window as unknown as Record<string, unknown>)[cbName]
+      document.getElementById(cbName)?.remove()
+    }
+
+    const timer = setTimeout(() => {
+      if (!settled) { cleanup(); reject(new Error('FRED request timed out')) }
+    }, timeoutMs)
+
+    ;(window as unknown as Record<string, unknown>)[cbName] = (data: FredApiResponse) => {
+      cleanup(); resolve(data)
+    }
+
+    const script = document.createElement('script')
+    script.id = cbName
+    script.src = `${fredUrl}&callback=${cbName}`
+    script.onerror = () => { cleanup(); reject(new Error('Failed to reach FRED API')) }
+    document.head.appendChild(script)
+  })
+}
 
 export const YIELD_MATURITIES = [
   { id: 'DGS3MO', label: '3M',  years: 0.25 },
@@ -52,18 +85,7 @@ export async function fetchSeries(
     observation_end: end,
     ...extraParams,
   })
-  const fredUrl = `${FRED_BASE}?${params.toString()}`
-  const res = await fetch(PROXY(fredUrl))
-
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    const msg = (body as Record<string, string>).error_message
-    throw new Error(msg ?? `HTTP ${res.status} fetching ${id}`)
-  }
-  const data = await res.json() as {
-    error_message?: string
-    observations?: { date: string; value: string }[]
-  }
+  const data = await fredJsonp(`${FRED_BASE}?${params.toString()}`)
   if (data.error_message) throw new Error(data.error_message)
   if (!data.observations) throw new Error(`No observations for ${id}`)
 
@@ -81,12 +103,11 @@ export async function fetchYieldSurface(
   const end = getTodayStr()
   const total = YIELD_MATURITIES.length
 
-  // Request weekly end-of-period directly from FRED — reduces ~1300 daily obs to
-  // ~260 weekly obs per series, keeping allorigins.win well under its size limit.
-  // Fetch sequentially with 300ms gap to avoid rate limiting.
+  // Request weekly end-of-period directly — 5x less data than daily.
+  // Small delay between calls to be a good API citizen.
   const allSeries: FredObs[][] = []
   for (let i = 0; i < total; i++) {
-    if (i > 0) await sleep(300)
+    if (i > 0) await sleep(200)
     const data = await fetchSeries(
       YIELD_MATURITIES[i].id, start, end, apiKey,
       { frequency: 'w', aggregation_method: 'eop' }
@@ -95,7 +116,6 @@ export async function fetchYieldSurface(
     onProgress?.(i + 1, total)
   }
 
-  // Find dates present in all series
   const sets = allSeries.map(s => new Set(s.map(o => o.date)))
   const commonDates = allSeries[0]
     .map(o => o.date)
@@ -108,12 +128,10 @@ export async function fetchYieldSurface(
     return m
   })
 
-  const z = commonDates.map(d => maps.map(m => m.get(d) ?? NaN))
-
   return {
     dates: commonDates,
     maturityLabels: YIELD_MATURITIES.map(m => m.label),
     maturityYears: YIELD_MATURITIES.map(m => m.years),
-    z,
+    z: commonDates.map(d => maps.map(m => m.get(d) ?? NaN)),
   }
 }
