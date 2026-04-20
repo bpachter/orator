@@ -58,3 +58,12 @@ export async function fetchSpreads(): Promise<{
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json()
 }
+
+export async function fetchGrocery(): Promise<{
+  items: { id: string; label: string; unit: string; color: string }[]
+  series: Record<string, FredObs[]>
+}> {
+  const res = await fetch(`${API_BASE}/api/grocery`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}

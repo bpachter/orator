@@ -4,12 +4,14 @@ import { YieldCurve3D } from './components/YieldCurve3D'
 import { MacroPanel } from './components/MacroPanel'
 import { CpiBreakdown } from './components/CpiBreakdown'
 import { SpreadPanel } from './components/SpreadPanel'
+import { GroceryPanel } from './components/GroceryPanel'
 
 const TABS: [ActiveView, string][] = [
   ['yield-curve', 'Yield Curve'],
   ['macro', 'Macro Dashboard'],
   ['cpi', 'CPI Breakdown'],
   ['spreads', 'Spreads'],
+  ['grocery', 'CPI Grocery'],
 ]
 
 export default function App() {
@@ -56,6 +58,7 @@ export default function App() {
         {view === 'macro' && <MacroPanel />}
         {view === 'cpi' && <CpiBreakdown />}
         {view === 'spreads' && <SpreadPanel />}
+        {view === 'grocery' && <GroceryPanel />}
       </main>
 
       <footer style={{

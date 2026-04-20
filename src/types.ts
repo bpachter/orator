@@ -5,7 +5,7 @@ export interface FredObs {
 
 export type TimeRange = '1Y' | '2Y' | '5Y' | '10Y' | 'MAX'
 
-export type ActiveView = 'yield-curve' | 'macro' | 'cpi' | 'spreads'
+export type ActiveView = 'yield-curve' | 'macro' | 'cpi' | 'spreads' | 'grocery'
 
 export interface YieldSurface {
   dates: string[]

@@ -148,6 +148,20 @@ SPREAD_SERIES = [
     {"id": "USREC",   "label": "Recession",        "color": "#ef444440"},
 ]
 
+# BLS Average Price series — actual dollars per unit, YoY % computed server-side
+GROCERY_SERIES = [
+    {"id": "APU0000708111", "label": "Eggs",          "unit": "/doz",  "color": "#f59e0b"},
+    {"id": "APU0000703112", "label": "Ground Beef",   "unit": "/lb",   "color": "#ef4444"},
+    {"id": "APU0000706111", "label": "Chicken",       "unit": "/lb",   "color": "#f97316"},
+    {"id": "APU0000709112", "label": "Whole Milk",    "unit": "/gal",  "color": "#06b6d4"},
+    {"id": "APU0000702111", "label": "White Bread",   "unit": "/lb",   "color": "#e8b84b"},
+    {"id": "APU0000704111", "label": "Bacon",         "unit": "/lb",   "color": "#ec4899"},
+    {"id": "APU0000719311", "label": "Orange Juice",  "unit": "/16oz", "color": "#fb923c"},
+    {"id": "APU0000717311", "label": "Coffee",        "unit": "/lb",   "color": "#a78bfa"},
+    {"id": "APU0000711415", "label": "Bananas",       "unit": "/lb",   "color": "#eab308"},
+    {"id": "APU0000712311", "label": "Tomatoes",      "unit": "/lb",   "color": "#22c55e"},
+]
+
 
 # ---------------------------------------------------------------------------
 # Endpoints
@@ -242,6 +256,36 @@ def spreads():
 
     result = {
         "updated": _today(),
+        "series": series_out,
+    }
+    return _store(cache_key, result)
+
+
+@app.get("/api/grocery")
+def grocery():
+    cache_key = "grocery"
+    if hit := _cached(cache_key):
+        return hit
+
+    start = _get_start("10Y")
+    end = _today()
+    series_out = {}
+    for s in GROCERY_SERIES:
+        try:
+            obs = _fetch_fred(s["id"], start, end)
+            series_out[s["id"]] = _yoy(obs)
+        except HTTPException as e:
+            if e.status_code == 503:
+                raise  # no API key — propagate
+            logger.warning("Skipping %s: %s", s["id"], e.detail)
+            series_out[s["id"]] = []
+        except Exception as exc:
+            logger.warning("Skipping %s: %s", s["id"], exc)
+            series_out[s["id"]] = []
+
+    result = {
+        "updated": _today(),
+        "items": GROCERY_SERIES,
         "series": series_out,
     }
     return _store(cache_key, result)
