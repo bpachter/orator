@@ -16,13 +16,26 @@ const END   = new Date().toISOString().slice(0, 10)
 const YIELD_IDS = ['DGS3MO','DGS6MO','DGS1','DGS2','DGS3','DGS5','DGS7','DGS10','DGS20','DGS30']
 const MACRO_IDS = ['FEDFUNDS','CPIAUCSL','UNRATE','A191RL1Q225SBEA']
 
-async function fetchSeries(id, extra = {}) {
+const sleep = ms => new Promise(r => setTimeout(r, ms))
+
+async function fetchSeries(id, extra = {}, attempt = 1) {
   const p = new URLSearchParams({
     series_id: id, api_key: API_KEY, file_type: 'json',
     observation_start: START, observation_end: END, ...extra,
   })
-  const res = await fetch(`${BASE}?${p}`)
-  if (!res.ok) throw new Error(`HTTP ${res.status} for ${id}`)
+  const url = `${BASE}?${p}`
+  const res = await fetch(url)
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    const msg = `HTTP ${res.status} for ${id}: ${body.slice(0, 200)}`
+    if (attempt < 4) {
+      const wait = attempt * 3000
+      console.warn(`  ${msg} — retrying in ${wait / 1000}s (attempt ${attempt}/3)`)
+      await sleep(wait)
+      return fetchSeries(id, extra, attempt + 1)
+    }
+    throw new Error(msg)
+  }
   const json = await res.json()
   if (json.error_message) throw new Error(`FRED: ${json.error_message}`)
   return json.observations
@@ -39,6 +52,7 @@ for (const id of YIELD_IDS) {
   process.stdout.write(`  ${id}... `)
   yieldData[id] = await fetchSeries(id, { frequency: 'w', aggregation_method: 'eop' })
   console.log(`${yieldData[id].length} obs`)
+  await sleep(500)
 }
 writeFileSync('public/data/yield-curve.json', JSON.stringify({
   updated: new Date().toISOString(),
@@ -53,6 +67,7 @@ for (const id of MACRO_IDS) {
   process.stdout.write(`  ${id}... `)
   macroData[id] = await fetchSeries(id)
   console.log(`${macroData[id].length} obs`)
+  await sleep(500)
 }
 writeFileSync('public/data/macro.json', JSON.stringify({
   updated: new Date().toISOString(),
