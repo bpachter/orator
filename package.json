@@ -1,0 +1,27 @@
+{
+  "name": "orator",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "homepage": "https://bpachter.github.io/orator",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && gh-pages -d dist"
+  },
+  "dependencies": {
+    "plotly.js-dist-min": "^2.34.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/plotly.js": "^2.12.29",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "gh-pages": "^6.1.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.3.1"
+  }
+}
