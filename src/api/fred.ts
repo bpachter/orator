@@ -1,43 +1,5 @@
 import type { FredObs, TimeRange, YieldSurface } from '../types'
 
-const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations'
-
-const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
-
-type FredApiResponse = {
-  error_message?: string
-  observations?: { date: string; value: string }[]
-}
-
-// FRED supports JSONP via &callback= — no CORS proxy needed, no rate limits.
-function fredJsonp(fredUrl: string, timeoutMs = 15000): Promise<FredApiResponse> {
-  return new Promise((resolve, reject) => {
-    const cbName = `_fredCb${Date.now()}${Math.floor(Math.random() * 1e6)}`
-    let settled = false
-
-    const cleanup = () => {
-      settled = true
-      clearTimeout(timer)
-      delete (window as unknown as Record<string, unknown>)[cbName]
-      document.getElementById(cbName)?.remove()
-    }
-
-    const timer = setTimeout(() => {
-      if (!settled) { cleanup(); reject(new Error('FRED request timed out')) }
-    }, timeoutMs)
-
-    ;(window as unknown as Record<string, unknown>)[cbName] = (data: FredApiResponse) => {
-      cleanup(); resolve(data)
-    }
-
-    const script = document.createElement('script')
-    script.id = cbName
-    script.src = `${fredUrl}&callback=${cbName}`
-    script.onerror = () => { cleanup(); reject(new Error('Failed to reach FRED API')) }
-    document.head.appendChild(script)
-  })
-}
-
 export const YIELD_MATURITIES = [
   { id: 'DGS3MO', label: '3M',  years: 0.25 },
   { id: 'DGS6MO', label: '6M',  years: 0.5  },
@@ -66,55 +28,34 @@ export function getStartDate(range: TimeRange): string {
   return d.toISOString().slice(0, 10)
 }
 
-export function getTodayStr(): string {
-  return new Date().toISOString().slice(0, 10)
+type StaticYieldFile = {
+  updated: string
+  series: Record<string, FredObs[]>
 }
 
-export async function fetchSeries(
-  id: string,
-  start: string,
-  end: string,
-  apiKey: string,
-  extraParams: Record<string, string> = {}
-): Promise<FredObs[]> {
-  const params = new URLSearchParams({
-    series_id: id,
-    api_key: apiKey,
-    file_type: 'json',
-    observation_start: start,
-    observation_end: end,
-    ...extraParams,
-  })
-  const data = await fredJsonp(`${FRED_BASE}?${params.toString()}`)
-  if (data.error_message) throw new Error(data.error_message)
-  if (!data.observations) throw new Error(`No observations for ${id}`)
-
-  return data.observations
-    .filter(o => o.value !== '.')
-    .map(o => ({ date: o.date, value: parseFloat(o.value) }))
+type StaticMacroFile = {
+  updated: string
+  series: Record<string, FredObs[]>
 }
+
+const DATA_BASE = import.meta.env.BASE_URL + 'data/'
 
 export async function fetchYieldSurface(
   range: TimeRange,
-  apiKey: string,
   onProgress?: (loaded: number, total: number) => void
 ): Promise<YieldSurface> {
-  const start = getStartDate(range)
-  const end = getTodayStr()
+  const res = await fetch(DATA_BASE + 'yield-curve.json')
+  if (!res.ok) throw new Error(`Failed to load yield data (HTTP ${res.status})`)
+  const file: StaticYieldFile = await res.json()
+
+  const startDate = getStartDate(range)
   const total = YIELD_MATURITIES.length
 
-  // Request weekly end-of-period directly — 5x less data than daily.
-  // Small delay between calls to be a good API citizen.
-  const allSeries: FredObs[][] = []
-  for (let i = 0; i < total; i++) {
-    if (i > 0) await sleep(200)
-    const data = await fetchSeries(
-      YIELD_MATURITIES[i].id, start, end, apiKey,
-      { frequency: 'w', aggregation_method: 'eop' }
-    )
-    allSeries.push(data)
+  const allSeries = YIELD_MATURITIES.map((m, i) => {
+    const raw = file.series[m.id] ?? []
     onProgress?.(i + 1, total)
-  }
+    return raw.filter(o => o.date >= startDate)
+  })
 
   const sets = allSeries.map(s => new Set(s.map(o => o.date)))
   const commonDates = allSeries[0]
@@ -134,4 +75,11 @@ export async function fetchYieldSurface(
     maturityYears: YIELD_MATURITIES.map(m => m.years),
     z: commonDates.map(d => maps.map(m => m.get(d) ?? NaN)),
   }
+}
+
+export async function fetchAllMacro(): Promise<Record<string, FredObs[]>> {
+  const res = await fetch(DATA_BASE + 'macro.json')
+  if (!res.ok) throw new Error(`Failed to load macro data (HTTP ${res.status})`)
+  const file: StaticMacroFile = await res.json()
+  return file.series
 }

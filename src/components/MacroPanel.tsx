@@ -1,11 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type Plotly from 'plotly.js'
 import type { FredObs } from '../types'
-import { fetchSeries, MACRO_SERIES, getStartDate } from '../api/fred'
-
-interface Props {
-  apiKey: string
-}
+import { fetchAllMacro, MACRO_SERIES } from '../api/fred'
 
 interface SeriesState {
   data: FredObs[]
@@ -13,31 +9,30 @@ interface SeriesState {
   error: string
 }
 
-export function MacroPanel({ apiKey }: Props) {
+export function MacroPanel() {
   const [seriesData, setSeriesData] = useState<Record<string, SeriesState>>({})
 
   useEffect(() => {
-    const start = getStartDate('10Y')
-    const end = new Date().toISOString().slice(0, 10)
-
-    // Mark all loading upfront
     setSeriesData(
       Object.fromEntries(MACRO_SERIES.map(s => [s.id, { data: [], loading: true, error: '' }]))
     )
 
-    // Stagger requests — avoids hitting corsproxy.io rate limits after the
-    // 10 concurrent yield-curve fetches that may have just completed.
-    MACRO_SERIES.forEach((s, i) => {
-      setTimeout(() => {
-        fetchSeries(s.id, start, end, apiKey)
-          .then(data => setSeriesData(prev => ({ ...prev, [s.id]: { data, loading: false, error: '' } })))
-          .catch(e => setSeriesData(prev => ({
-            ...prev,
-            [s.id]: { data: [], loading: false, error: String(e.message) },
-          })))
-      }, i * 500)
-    })
-  }, [apiKey])
+    fetchAllMacro()
+      .then(all => {
+        setSeriesData(
+          Object.fromEntries(
+            MACRO_SERIES.map(s => [s.id, { data: all[s.id] ?? [], loading: false, error: '' }])
+          )
+        )
+      })
+      .catch(e => {
+        setSeriesData(
+          Object.fromEntries(
+            MACRO_SERIES.map(s => [s.id, { data: [], loading: false, error: String(e.message) }])
+          )
+        )
+      })
+  }, [])
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, height: '100%' }}>

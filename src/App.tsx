@@ -1,16 +1,10 @@
 import { useState } from 'react'
 import type { ActiveView } from './types'
-import { ApiKeyGate, loadApiKey, clearApiKey } from './components/ApiKeyGate'
 import { YieldCurve3D } from './components/YieldCurve3D'
 import { MacroPanel } from './components/MacroPanel'
 
 export default function App() {
-  const [apiKey, setApiKey] = useState<string | null>(loadApiKey)
   const [view, setView] = useState<ActiveView>('yield-curve')
-
-  if (!apiKey) {
-    return <ApiKeyGate onKey={setApiKey} />
-  }
 
   return (
     <div style={{
@@ -49,21 +43,11 @@ export default function App() {
             ))}
           </nav>
         </div>
-        <button
-          onClick={() => { clearApiKey(); setApiKey(null) }}
-          style={{
-            padding: '4px 12px', borderRadius: 6, border: '1px solid #1e2d4a',
-            background: 'transparent', color: '#7d9bc0', fontSize: 12, cursor: 'pointer',
-          }}
-          title="Clear API key"
-        >
-          API Key
-        </button>
       </header>
 
       <main style={{ flex: 1, overflow: 'auto', padding: '1.25rem 1.5rem' }}>
-        {view === 'yield-curve' && <YieldCurve3D apiKey={apiKey} />}
-        {view === 'macro' && <MacroPanel apiKey={apiKey} />}
+        {view === 'yield-curve' && <YieldCurve3D />}
+        {view === 'macro' && <MacroPanel />}
       </main>
 
       <footer style={{

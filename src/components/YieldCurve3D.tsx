@@ -5,11 +5,7 @@ import { fetchYieldSurface } from '../api/fred'
 
 const RANGES: TimeRange[] = ['1Y', '2Y', '5Y', '10Y', 'MAX']
 
-interface Props {
-  apiKey: string
-}
-
-export function YieldCurve3D({ apiKey }: Props) {
+export function YieldCurve3D() {
   const plotRef = useRef<HTMLDivElement>(null)
   const [range, setRange] = useState<TimeRange>('5Y')
   const [surface, setSurface] = useState<YieldSurface | null>(null)
@@ -21,10 +17,10 @@ export function YieldCurve3D({ apiKey }: Props) {
     setLoading(true)
     setProgress({ loaded: 0, total: 10 })
     setError('')
-    fetchYieldSurface(range, apiKey, (loaded, total) => setProgress({ loaded, total }))
+    fetchYieldSurface(range, (loaded, total) => setProgress({ loaded, total }))
       .then(s => { setSurface(s); setLoading(false) })
       .catch(e => { setError(String(e.message)); setLoading(false) })
-  }, [range, apiKey])
+  }, [range])
 
   useEffect(() => {
     if (!surface || !plotRef.current) return
