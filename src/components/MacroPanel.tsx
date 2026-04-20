@@ -68,13 +68,7 @@ function MacroChart({ label, color, state, seriesId }: ChartProps) {
       const P = (mod as unknown as { default: typeof Plotly }).default ?? mod
       if (!ref.current) return
 
-      let data = state.data
-      if (seriesId === 'CPIAUCSL' && data.length > 12) {
-        data = data.slice(12).map((obs, i) => ({
-          date: obs.date,
-          value: ((obs.value - state.data[i].value) / state.data[i].value) * 100,
-        }))
-      }
+      const data = state.data
 
       const trace: Partial<Plotly.PlotData> = {
         type: 'scatter',
@@ -111,13 +105,7 @@ function MacroChart({ label, color, state, seriesId }: ChartProps) {
   }, [state, color, seriesId])
 
   const latest = state.data[state.data.length - 1]
-  let displayVal: string | null = null
-  if (latest && seriesId === 'CPIAUCSL' && state.data.length > 12) {
-    const prev = state.data[state.data.length - 13]
-    if (prev) displayVal = (((latest.value - prev.value) / prev.value) * 100).toFixed(2) + '%'
-  } else if (latest) {
-    displayVal = latest.value.toFixed(2) + '%'
-  }
+  const displayVal = latest ? latest.value.toFixed(2) + '%' : null
 
   return (
     <div style={{

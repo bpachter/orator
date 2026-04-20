@@ -10,14 +10,12 @@ export function YieldCurve3D() {
   const [range, setRange] = useState<TimeRange>('5Y')
   const [surface, setSurface] = useState<YieldSurface | null>(null)
   const [loading, setLoading] = useState(false)
-  const [progress, setProgress] = useState({ loaded: 0, total: 10 })
   const [error, setError] = useState('')
 
   useEffect(() => {
     setLoading(true)
-    setProgress({ loaded: 0, total: 10 })
     setError('')
-    fetchYieldSurface(range, (loaded, total) => setProgress({ loaded, total }))
+    fetchYieldSurface(range)
       .then(s => { setSurface(s); setLoading(false) })
       .catch(e => { setError(String(e.message)); setLoading(false) })
   }, [range])
@@ -162,7 +160,7 @@ export function YieldCurve3D() {
             position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
             justifyContent: 'center', color: '#7d9bc0', fontSize: 14, background: '#0f1729', zIndex: 2,
           }}>
-            Loading {range} yield data… {progress.loaded}/{progress.total} maturities
+            Loading {range} yield data…
           </div>
         )}
         {error && (

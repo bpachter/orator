@@ -2,6 +2,15 @@ import { useState } from 'react'
 import type { ActiveView } from './types'
 import { YieldCurve3D } from './components/YieldCurve3D'
 import { MacroPanel } from './components/MacroPanel'
+import { CpiBreakdown } from './components/CpiBreakdown'
+import { SpreadPanel } from './components/SpreadPanel'
+
+const TABS: [ActiveView, string][] = [
+  ['yield-curve', 'Yield Curve'],
+  ['macro', 'Macro Dashboard'],
+  ['cpi', 'CPI Breakdown'],
+  ['spreads', 'Spreads'],
+]
 
 export default function App() {
   const [view, setView] = useState<ActiveView>('yield-curve')
@@ -23,10 +32,7 @@ export default function App() {
             ORATOR
           </span>
           <nav style={{ display: 'flex', gap: 4 }}>
-            {([
-              ['yield-curve', 'Yield Curve'],
-              ['macro', 'Macro Dashboard'],
-            ] as [ActiveView, string][]).map(([v, label]) => (
+            {TABS.map(([v, label]) => (
               <button
                 key={v}
                 onClick={() => setView(v)}
@@ -48,6 +54,8 @@ export default function App() {
       <main style={{ flex: 1, overflow: 'auto', padding: '1.25rem 1.5rem' }}>
         {view === 'yield-curve' && <YieldCurve3D />}
         {view === 'macro' && <MacroPanel />}
+        {view === 'cpi' && <CpiBreakdown />}
+        {view === 'spreads' && <SpreadPanel />}
       </main>
 
       <footer style={{

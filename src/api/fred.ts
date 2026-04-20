@@ -1,4 +1,7 @@
+/// <reference types="vite/client" />
 import type { FredObs, TimeRange, YieldSurface } from '../types'
+
+const API_BASE = import.meta.env.VITE_API_BASE ?? ''
 
 export const YIELD_MATURITIES = [
   { id: 'DGS3MO', label: '3M',  years: 0.25 },
@@ -20,66 +23,38 @@ export const MACRO_SERIES = [
   { id: 'A191RL1Q225SBEA', label: 'Real GDP Growth (YoY)', unit: '%', color: '#22c55e' },
 ] as const
 
-export function getStartDate(range: TimeRange): string {
-  if (range === 'MAX') return '1990-01-01'
-  const d = new Date()
-  const years = { '1Y': 1, '2Y': 2, '5Y': 5, '10Y': 10 }[range]
-  d.setFullYear(d.getFullYear() - years)
-  return d.toISOString().slice(0, 10)
-}
-
-type StaticYieldFile = {
-  updated: string
-  series: Record<string, FredObs[]>
-}
-
-type StaticMacroFile = {
-  updated: string
-  series: Record<string, FredObs[]>
-}
-
-const DATA_BASE = import.meta.env.BASE_URL + 'data/'
-
-export async function fetchYieldSurface(
-  range: TimeRange,
-  onProgress?: (loaded: number, total: number) => void
-): Promise<YieldSurface> {
-  const res = await fetch(DATA_BASE + 'yield-curve.json')
-  if (!res.ok) throw new Error(`Failed to load yield data (HTTP ${res.status})`)
-  const file: StaticYieldFile = await res.json()
-
-  const startDate = getStartDate(range)
-  const total = YIELD_MATURITIES.length
-
-  const allSeries = YIELD_MATURITIES.map((m, i) => {
-    const raw = file.series[m.id] ?? []
-    onProgress?.(i + 1, total)
-    return raw.filter(o => o.date >= startDate)
-  })
-
-  const sets = allSeries.map(s => new Set(s.map(o => o.date)))
-  const commonDates = allSeries[0]
-    .map(o => o.date)
-    .filter(d => sets.every(s => s.has(d)))
-    .sort()
-
-  const maps = allSeries.map(s => {
-    const m = new Map<string, number>()
-    s.forEach(o => m.set(o.date, o.value))
-    return m
-  })
-
+export async function fetchYieldSurface(range: TimeRange): Promise<YieldSurface> {
+  const res = await fetch(`${API_BASE}/api/yield-curve?range=${range}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const data = await res.json()
   return {
-    dates: commonDates,
-    maturityLabels: YIELD_MATURITIES.map(m => m.label),
-    maturityYears: YIELD_MATURITIES.map(m => m.years),
-    z: commonDates.map(d => maps.map(m => m.get(d) ?? NaN)),
+    dates: data.dates,
+    maturityLabels: data.maturityLabels,
+    maturityYears: data.maturityYears,
+    z: data.z,
   }
 }
 
 export async function fetchAllMacro(): Promise<Record<string, FredObs[]>> {
-  const res = await fetch(DATA_BASE + 'macro.json')
-  if (!res.ok) throw new Error(`Failed to load macro data (HTTP ${res.status})`)
-  const file: StaticMacroFile = await res.json()
-  return file.series
+  const res = await fetch(`${API_BASE}/api/macro`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const data = await res.json()
+  return data.series
+}
+
+export async function fetchCpiBreakdown(): Promise<{
+  components: { id: string; label: string; color: string }[]
+  series: Record<string, FredObs[]>
+}> {
+  const res = await fetch(`${API_BASE}/api/cpi-breakdown`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+export async function fetchSpreads(): Promise<{
+  series: Record<string, FredObs[]>
+}> {
+  const res = await fetch(`${API_BASE}/api/spreads`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
 }

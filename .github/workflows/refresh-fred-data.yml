@@ -1,12 +1,12 @@
-name: Refresh FRED Data
+name: Deploy Orator
 
 on:
-  schedule:
-    - cron: '0 7 * * *'   # 07:00 UTC daily (3am ET)
-  workflow_dispatch:        # allow manual trigger
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  refresh:
+  deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -21,13 +21,10 @@ jobs:
 
       - run: npm ci
 
-      - name: Fetch FRED data
-        run: node scripts/fetch-fred-data.mjs
-        env:
-          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-
       - name: Build
         run: npx vite build
+        env:
+          VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
