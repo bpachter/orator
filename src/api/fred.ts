@@ -43,9 +43,25 @@ export async function fetchSeries(
   const fredUrl =
     `${FRED_BASE}?series_id=${id}&api_key=${apiKey}&file_type=json` +
     `&observation_start=${start}&observation_end=${end}`
-  const url = `https://corsproxy.io/?${encodeURIComponent(fredUrl)}`
 
-  const res = await fetch(url)
+  // Try proxies in order — corsproxy.io IPs are throttled by FRED for high-traffic series
+  const proxies = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(fredUrl)}`,
+    `https://corsproxy.io/?${encodeURIComponent(fredUrl)}`,
+  ]
+
+  let res: Response | null = null
+  let lastErr = ''
+  for (const proxy of proxies) {
+    try {
+      res = await fetch(proxy)
+      if (res.status < 500) break  // accept 4xx (real FRED errors) but retry on 500
+    } catch {
+      lastErr = `network error on ${proxy}`
+    }
+  }
+  if (!res) throw new Error(lastErr || 'All proxies failed')
+
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
     throw new Error(body.error_message ?? `HTTP ${res.status} fetching ${id}`)
