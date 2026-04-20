@@ -1,6 +1,6 @@
 import type { FredObs, TimeRange, YieldSurface } from '../types'
 
-const BASE = 'https://api.stlouisfed.org/fred/series/observations'
+const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations'
 
 export const YIELD_MATURITIES = [
   { id: 'DGS3MO', label: '3M',  years: 0.25 },
@@ -40,9 +40,10 @@ export async function fetchSeries(
   end: string,
   apiKey: string
 ): Promise<FredObs[]> {
-  const url =
-    `${BASE}?series_id=${id}&api_key=${apiKey}&file_type=json` +
+  const fredUrl =
+    `${FRED_BASE}?series_id=${id}&api_key=${apiKey}&file_type=json` +
     `&observation_start=${start}&observation_end=${end}`
+  const url = `https://corsproxy.io/?${encodeURIComponent(fredUrl)}`
 
   const res = await fetch(url)
   if (!res.ok) {
