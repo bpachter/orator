@@ -39,8 +39,8 @@ export function ApiKeyGate({ onKey }: Props) {
         background: '#0f1729', border: '1px solid #1e2d4a', borderRadius: 12,
         padding: '2.5rem', maxWidth: 420, width: '100%',
       }}>
-        <div style={{ fontSize: 28, fontWeight: 600, color: '#e8b84b', marginBottom: 8 }}>
-          ⚡ ORATOR
+        <div style={{ fontSize: 28, fontWeight: 600, color: '#e8b84b', marginBottom: 8, letterSpacing: 3 }}>
+          ORATOR
         </div>
         <div style={{ color: '#7d9bc0', marginBottom: 24, lineHeight: 1.6 }}>
           Enter your{' '}

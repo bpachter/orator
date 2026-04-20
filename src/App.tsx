@@ -26,7 +26,7 @@ export default function App() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
           <span style={{ color: '#e8b84b', fontWeight: 700, fontSize: 16, letterSpacing: 2 }}>
-            ⚡ ORATOR
+            ORATOR
           </span>
           <nav style={{ display: 'flex', gap: 4 }}>
             {([
@@ -57,7 +57,7 @@ export default function App() {
           }}
           title="Clear API key"
         >
-          🔑 Key
+          API Key
         </button>
       </header>
 

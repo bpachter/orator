@@ -20,18 +20,23 @@ export function MacroPanel({ apiKey }: Props) {
     const start = getStartDate('10Y')
     const end = new Date().toISOString().slice(0, 10)
 
-    for (const s of MACRO_SERIES) {
-      setSeriesData(prev => ({
-        ...prev,
-        [s.id]: { data: [], loading: true, error: '' },
-      }))
-      fetchSeries(s.id, start, end, apiKey)
-        .then(data => setSeriesData(prev => ({ ...prev, [s.id]: { data, loading: false, error: '' } })))
-        .catch(e => setSeriesData(prev => ({
-          ...prev,
-          [s.id]: { data: [], loading: false, error: String(e.message) },
-        })))
-    }
+    // Mark all loading upfront
+    setSeriesData(
+      Object.fromEntries(MACRO_SERIES.map(s => [s.id, { data: [], loading: true, error: '' }]))
+    )
+
+    // Stagger requests — avoids hitting corsproxy.io rate limits after the
+    // 10 concurrent yield-curve fetches that may have just completed.
+    MACRO_SERIES.forEach((s, i) => {
+      setTimeout(() => {
+        fetchSeries(s.id, start, end, apiKey)
+          .then(data => setSeriesData(prev => ({ ...prev, [s.id]: { data, loading: false, error: '' } })))
+          .catch(e => setSeriesData(prev => ({
+            ...prev,
+            [s.id]: { data: [], loading: false, error: String(e.message) },
+          })))
+      }, i * 500)
+    })
   }, [apiKey])
 
   return (

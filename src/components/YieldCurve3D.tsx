@@ -34,21 +34,6 @@ export function YieldCurve3D({ apiKey }: Props) {
       const P = (mod as unknown as { default: typeof Plotly }).default ?? mod
       if (!plotRef.current) return
 
-      const spread = surface.z.map(row => {
-        const v10y = row[7]
-        const v2y = row[3]
-        return isNaN(v10y) || isNaN(v2y) ? NaN : v10y - v2y
-      })
-
-      const minSpread = Math.min(...spread.filter(v => !isNaN(v)))
-      const maxSpread = Math.max(...spread.filter(v => !isNaN(v)))
-
-      const colorscaleZ = surface.z.map((row, i) => {
-        const s = spread[i]
-        const norm = isNaN(s) ? 0.5 : (s - minSpread) / (maxSpread - minSpread || 1)
-        return row.map(() => norm)
-      })
-
       void plot
 
       const trace: Partial<Plotly.PlotData> = {
@@ -56,23 +41,29 @@ export function YieldCurve3D({ apiKey }: Props) {
         x: surface.maturityYears,
         y: surface.dates,
         z: surface.z,
-        surfacecolor: colorscaleZ,
         colorscale: [
-          [0, '#ef4444'],
-          [0.35, '#f97316'],
-          [0.5, '#e8b84b'],
-          [0.65, '#4a9eff'],
-          [1, '#22c55e'],
+          [0,    '#1d4ed8'],  // deep blue  — near-zero rates
+          [0.15, '#0891b2'],  // cyan
+          [0.35, '#10b981'],  // green
+          [0.55, '#f59e0b'],  // amber
+          [0.75, '#f97316'],  // orange
+          [1,    '#dc2626'],  // red        — high rates
         ] as [number, string][],
-        cmin: 0,
-        cmax: 1,
-        showscale: false,
+        showscale: true,
+        colorbar: {
+          title: { text: 'Yield (%)', side: 'right' } as unknown as string,
+          thickness: 12,
+          len: 0.55,
+          tickfont: { size: 10, color: '#7d9bc0' },
+          outlinecolor: '#1e2d4a',
+          bgcolor: 'rgba(0,0,0,0)',
+        } as unknown as Plotly.ColorBar,
         hovertemplate:
           '<b>Maturity:</b> %{x}yr<br>' +
           '<b>Date:</b> %{y}<br>' +
           '<b>Yield:</b> %{z:.2f}%<extra></extra>',
         contours: {
-          z: { show: true, usecolormap: true, highlightcolor: '#ffffff', project: { z: false } },
+          z: { show: true, usecolormap: true, highlightcolor: '#ffffff55', project: { z: false } },
         },
       } as unknown as Partial<Plotly.PlotData>
 
