@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useMemo } from 'react'
+import { Box, Stack } from '@mui/material'
 import type Plotly from 'plotly.js'
 import type { FredObs } from '../types'
-import { fetchSpreads } from '../api/fred'
-
-interface State {
-  series: Record<string, FredObs[]>
-  loading: boolean
-  error: string
-}
-
-const CARD = { background: '#0f1729', border: '1px solid #1e2d4a', borderRadius: 10, padding: '1rem' }
+import { useSpreads } from '../hooks/useFredQueries'
+import { PanelCard } from './shared/PanelCard'
+import { KpiChip } from './shared/KpiChip'
+import { LoadingState } from './shared/LoadingState'
+import { ErrorState } from './shared/ErrorState'
+import { SectionHeader } from './shared/SectionHeader'
+import { PlotlyChart, type PlotlyTrace } from './shared/PlotlyChart'
+import { latest } from '../utils/series'
+import { palette } from '../theme'
 
 function recessionShapes(usrec: FredObs[]): Partial<Plotly.Shape>[] {
   const shapes: Partial<Plotly.Shape>[] = []
@@ -18,69 +19,95 @@ function recessionShapes(usrec: FredObs[]): Partial<Plotly.Shape>[] {
     if (obs.value === 1 && start === null) {
       start = obs.date
     } else if (obs.value === 0 && start !== null) {
-      shapes.push({ type: 'rect', xref: 'x', yref: 'paper', x0: start, x1: obs.date, y0: 0, y1: 1, fillcolor: '#ef444418', line: { width: 0 } })
+      shapes.push({
+        type: 'rect',
+        xref: 'x',
+        yref: 'paper',
+        x0: start,
+        x1: obs.date,
+        y0: 0,
+        y1: 1,
+        fillcolor: '#ef444418',
+        line: { width: 0 },
+      })
       start = null
     }
   }
   if (start !== null && usrec.length) {
-    shapes.push({ type: 'rect', xref: 'x', yref: 'paper', x0: start, x1: usrec[usrec.length - 1].date, y0: 0, y1: 1, fillcolor: '#ef444418', line: { width: 0 } })
+    shapes.push({
+      type: 'rect',
+      xref: 'x',
+      yref: 'paper',
+      x0: start,
+      x1: usrec[usrec.length - 1].date,
+      y0: 0,
+      y1: 1,
+      fillcolor: '#ef444418',
+      line: { width: 0 },
+    })
   }
   return shapes
 }
 
 export function SpreadPanel() {
-  const [state, setState] = useState<State>({ series: {}, loading: true, error: '' })
+  const spreads = useSpreads()
 
-  useEffect(() => {
-    fetchSpreads()
-      .then(data => setState({ series: data.series, loading: false, error: '' }))
-      .catch(e => setState(s => ({ ...s, loading: false, error: String(e.message) })))
-  }, [])
-
-  if (state.loading) {
+  if (spreads.isLoading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#7d9bc0' }}>
-        Loading spread data…
-      </div>
+      <PanelCard title="Yield Spreads & Policy">
+        <LoadingState message="Loading spread data…" />
+      </PanelCard>
+    )
+  }
+  if (spreads.isError) {
+    return (
+      <PanelCard title="Yield Spreads & Policy">
+        <ErrorState
+          message={(spreads.error as Error)?.message}
+          onRetry={() => spreads.refetch()}
+        />
+      </PanelCard>
     )
   }
 
-  if (state.error) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#ef4444' }}>
-        {state.error}
-      </div>
-    )
-  }
-
-  const usrec = state.series['USREC'] ?? []
+  const series = spreads.data?.series ?? {}
+  const usrec = series['USREC'] ?? []
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+    <Stack spacing={2}>
+      <SectionHeader
+        eyebrow="Rates"
+        title="Yield Spreads & Policy Stance"
+        subtitle="Curve inversions and the real policy rate vs. core inflation"
+      />
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+          gap: 2,
+        }}
+      >
         <SpreadChart
           title="10Y – 2Y Spread"
-          subtitle="Inversion = recession signal"
-          data={state.series['T10Y2Y'] ?? []}
-          color="#4a9eff"
+          subtitle="Inversion historically precedes recession by 12–18 months"
+          data={series['T10Y2Y'] ?? []}
+          color={palette.info}
           usrec={usrec}
-          zeroLine
         />
         <SpreadChart
           title="10Y – 3M Spread"
-          subtitle="Near-term inversion indicator"
-          data={state.series['T10Y3M'] ?? []}
-          color="#22c55e"
+          subtitle="Near-term recession indicator favored by the NY Fed"
+          data={series['T10Y3M'] ?? []}
+          color={palette.positive}
           usrec={usrec}
-          zeroLine
         />
-      </div>
+      </Box>
       <FedVsCpiChart
-        fedfunds={state.series['FEDFUNDS'] ?? []}
-        coreCpi={state.series['CPILFESL'] ?? []}
+        fedfunds={series['FEDFUNDS'] ?? []}
+        coreCpi={series['CPILFESL'] ?? []}
         usrec={usrec}
       />
-    </div>
+    </Stack>
   )
 }
 
@@ -90,147 +117,189 @@ interface SpreadChartProps {
   data: FredObs[]
   color: string
   usrec: FredObs[]
-  zeroLine?: boolean
 }
 
-function SpreadChart({ title, subtitle, data, color, usrec, zeroLine }: SpreadChartProps) {
-  const ref = useRef<HTMLDivElement>(null)
+function SpreadChart({ title, subtitle, data, color, usrec }: SpreadChartProps) {
+  const last = latest(data)
+  const isInverted = !!last && last.value < 0
+  const lineColor = isInverted ? palette.negative : color
+  const fillColor = (isInverted ? palette.negative : color) + '18'
 
-  useEffect(() => {
-    if (!ref.current || !data.length) return
-
-    import('plotly.js-dist-min').then(mod => {
-      const P = (mod as unknown as { default: typeof Plotly }).default ?? mod
-      if (!ref.current) return
-
-      const latest = data[data.length - 1]
-      const isInverted = latest && latest.value < 0
-      const lineColor = isInverted ? '#ef4444' : color
-      const fillColor = isInverted ? '#ef444418' : color + '18'
-
-      const trace: Partial<Plotly.PlotData> = {
-        type: 'scatter', mode: 'lines',
-        x: data.map(o => o.date),
-        y: data.map(o => o.value),
+  const traces = useMemo<PlotlyTrace[]>(() => {
+    if (!data.length) return []
+    return [
+      {
+        type: 'scatter',
+        mode: 'lines',
+        x: data.map((o) => o.date),
+        y: data.map((o) => o.value),
         line: { color: lineColor, width: 1.5 },
-        fill: 'tozeroy', fillcolor: fillColor,
+        fill: 'tozeroy',
+        fillcolor: fillColor,
         hovertemplate: '%{x}: %{y:.2f}%<extra></extra>',
-      }
+      },
+    ]
+  }, [data, lineColor, fillColor])
 
-      const shapes: Partial<Plotly.Shape>[] = [...recessionShapes(usrec)]
-      if (zeroLine) {
-        shapes.push({ type: 'line', xref: 'paper', yref: 'y', x0: 0, x1: 1, y0: 0, y1: 0, line: { color: '#3a5070', width: 1, dash: 'dot' } })
-      }
-
-      const layout: Partial<Plotly.Layout> = {
-        paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
-        font: { color: '#7d9bc0', family: 'Inter, sans-serif', size: 10 },
-        xaxis: { color: '#7d9bc0', showgrid: false, zeroline: false },
-        yaxis: { color: '#7d9bc0', gridcolor: '#162035', showgrid: true, zeroline: false, ticksuffix: '%' },
-        margin: { l: 44, r: 8, t: 8, b: 28 },
-        hovermode: 'x unified',
-        shapes,
-      }
-
-      P.react(ref.current, [trace], layout, { responsive: true, displayModeBar: false })
-    })
-  }, [data, color, usrec, zeroLine])
-
-  const latest = data[data.length - 1]
-  const isInverted = latest && latest.value < 0
-  const displayVal = latest != null ? `${latest.value.toFixed(2)}%` : null
+  const layout = useMemo(
+    () => ({
+      yaxis: {
+        color: palette.textSecondary,
+        gridcolor: '#162035',
+        showgrid: true,
+        zeroline: false,
+        ticksuffix: '%',
+      },
+      shapes: [
+        ...recessionShapes(usrec),
+        {
+          type: 'line' as const,
+          xref: 'paper' as const,
+          yref: 'y' as const,
+          x0: 0,
+          x1: 1,
+          y0: 0,
+          y1: 0,
+          line: { color: palette.textMuted, width: 1, dash: 'dot' as const },
+        },
+      ],
+    }),
+    [usrec],
+  )
 
   return (
-    <div style={CARD}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
-        <div>
-          <div style={{ color: '#e8edf5', fontSize: 13, fontWeight: 600 }}>{title}</div>
-          <div style={{ color: '#3a5070', fontSize: 11, marginTop: 2 }}>{subtitle}</div>
-        </div>
-        {displayVal && (
-          <div style={{
-            color: isInverted ? '#ef4444' : color,
-            fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, fontSize: 20,
-          }}>
-            {displayVal}
-            {isInverted && <span style={{ fontSize: 10, marginLeft: 6, color: '#ef4444' }}>INVERTED</span>}
-          </div>
-        )}
-      </div>
-      <div ref={ref} style={{ width: '100%', minHeight: 220 }} />
-    </div>
+    <PanelCard
+      title={title}
+      subtitle={subtitle}
+      action={
+        last && (
+          <KpiChip
+            label={isInverted ? 'Inverted' : 'Spread'}
+            value={`${last.value > 0 ? '+' : ''}${last.value.toFixed(2)}`}
+            unit="%"
+            valueColor={isInverted ? palette.negative : color}
+            size="lg"
+            align="right"
+            caption={isInverted ? 'Recession-warning regime' : 'Normal slope'}
+          />
+        )
+      }
+    >
+      {data.length === 0 ? (
+        <LoadingState message="No data" />
+      ) : (
+        <PlotlyChart traces={traces} layout={layout} minHeight={240} ariaLabel={`${title} chart`} />
+      )}
+    </PanelCard>
   )
 }
 
-function FedVsCpiChart({ fedfunds, coreCpi, usrec }: { fedfunds: FredObs[]; coreCpi: FredObs[]; usrec: FredObs[] }) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!ref.current || !fedfunds.length || !coreCpi.length) return
-
-    import('plotly.js-dist-min').then(mod => {
-      const P = (mod as unknown as { default: typeof Plotly }).default ?? mod
-      if (!ref.current) return
-
-      const fedTrace: Partial<Plotly.PlotData> = {
-        type: 'scatter', mode: 'lines', name: 'Fed Funds Rate',
-        x: fedfunds.map(o => o.date), y: fedfunds.map(o => o.value),
-        line: { color: '#e8b84b', width: 2 },
+function FedVsCpiChart({
+  fedfunds,
+  coreCpi,
+  usrec,
+}: {
+  fedfunds: FredObs[]
+  coreCpi: FredObs[]
+  usrec: FredObs[]
+}) {
+  const traces = useMemo<PlotlyTrace[]>(() => {
+    if (!fedfunds.length || !coreCpi.length) return []
+    return [
+      {
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Fed Funds Rate',
+        x: fedfunds.map((o) => o.date),
+        y: fedfunds.map((o) => o.value),
+        line: { color: palette.brand, width: 2 },
         hovertemplate: 'Fed Funds: %{y:.2f}%<extra></extra>',
-      }
-
-      const cpiTrace: Partial<Plotly.PlotData> = {
-        type: 'scatter', mode: 'lines', name: 'Core CPI YoY',
-        x: coreCpi.map(o => o.date), y: coreCpi.map(o => o.value),
-        line: { color: '#ef4444', width: 2, dash: 'dot' },
+      },
+      {
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Core CPI YoY',
+        x: coreCpi.map((o) => o.date),
+        y: coreCpi.map((o) => o.value),
+        line: { color: palette.negative, width: 2, dash: 'dot' },
         hovertemplate: 'Core CPI: %{y:.2f}%<extra></extra>',
-      }
+      },
+    ]
+  }, [fedfunds, coreCpi])
 
-      const layout: Partial<Plotly.Layout> = {
-        paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
-        font: { color: '#7d9bc0', family: 'Inter, sans-serif', size: 10 },
-        xaxis: { color: '#7d9bc0', showgrid: false, zeroline: false },
-        yaxis: { color: '#7d9bc0', gridcolor: '#162035', showgrid: true, zeroline: false, ticksuffix: '%' },
-        legend: { x: 0.01, y: 0.98, bgcolor: 'rgba(0,0,0,0)', font: { color: '#7d9bc0', size: 11 } },
-        margin: { l: 44, r: 8, t: 8, b: 28 },
-        hovermode: 'x unified',
-        shapes: recessionShapes(usrec),
-      }
+  const layout = useMemo(
+    () => ({
+      yaxis: {
+        color: palette.textSecondary,
+        gridcolor: '#162035',
+        showgrid: true,
+        zeroline: false,
+        ticksuffix: '%',
+      },
+      legend: {
+        x: 0.01,
+        y: 0.98,
+        bgcolor: 'rgba(0,0,0,0)',
+        font: { color: palette.textSecondary, size: 11 },
+      },
+      shapes: recessionShapes(usrec),
+    }),
+    [usrec],
+  )
 
-      P.react(ref.current, [fedTrace, cpiTrace], layout, { responsive: true, displayModeBar: false })
-    })
-  }, [fedfunds, coreCpi, usrec])
-
-  const latestFed = fedfunds[fedfunds.length - 1]
-  const latestCpi = coreCpi[coreCpi.length - 1]
+  const lastFed = latest(fedfunds)
+  const lastCpi = latest(coreCpi)
+  const realRate = lastFed && lastCpi ? lastFed.value - lastCpi.value : null
 
   return (
-    <div style={CARD}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
-        <div>
-          <div style={{ color: '#e8edf5', fontSize: 13, fontWeight: 600 }}>Fed Funds vs Core CPI</div>
-          <div style={{ color: '#3a5070', fontSize: 11, marginTop: 2 }}>Real interest rate context — shaded areas = recessions</div>
-        </div>
-        <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-          {latestFed && (
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ color: '#3a5070', fontSize: 10 }}>FED FUNDS</div>
-              <div style={{ color: '#e8b84b', fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, fontSize: 18 }}>
-                {latestFed.value.toFixed(2)}%
-              </div>
-            </div>
+    <PanelCard
+      title="Fed Funds vs Core CPI"
+      subtitle="Real interest-rate context — shaded areas mark recessions"
+      action={
+        <Stack direction="row" spacing={3} alignItems="center">
+          {lastFed && (
+            <KpiChip
+              label="Fed Funds"
+              value={lastFed.value.toFixed(2)}
+              unit="%"
+              valueColor={palette.brand}
+              size="md"
+              align="right"
+            />
           )}
-          {latestCpi && (
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ color: '#3a5070', fontSize: 10 }}>CORE CPI</div>
-              <div style={{ color: '#ef4444', fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, fontSize: 18 }}>
-                {latestCpi.value.toFixed(2)}%
-              </div>
-            </div>
+          {lastCpi && (
+            <KpiChip
+              label="Core CPI"
+              value={lastCpi.value.toFixed(2)}
+              unit="%"
+              valueColor={palette.negative}
+              size="md"
+              align="right"
+            />
           )}
-        </div>
-      </div>
-      <div ref={ref} style={{ width: '100%', minHeight: 280 }} />
-    </div>
+          {realRate !== null && (
+            <KpiChip
+              label="Real rate"
+              value={`${realRate > 0 ? '+' : ''}${realRate.toFixed(2)}`}
+              unit="%"
+              valueColor={realRate >= 0 ? palette.positive : palette.negative}
+              size="md"
+              align="right"
+            />
+          )}
+        </Stack>
+      }
+    >
+      {!fedfunds.length || !coreCpi.length ? (
+        <LoadingState message="No data" />
+      ) : (
+        <PlotlyChart
+          traces={traces}
+          layout={layout}
+          minHeight={300}
+          ariaLabel="Fed Funds Rate versus Core CPI"
+        />
+      )}
+    </PanelCard>
   )
 }

@@ -1,138 +1,131 @@
-import { useEffect, useRef, useState } from 'react'
-import type Plotly from 'plotly.js'
+import { useMemo } from 'react'
+import { Box, Stack } from '@mui/material'
 import type { FredObs } from '../types'
-import { fetchAllMacro, MACRO_SERIES } from '../api/fred'
-
-interface SeriesState {
-  data: FredObs[]
-  loading: boolean
-  error: string
-}
+import { MACRO_SERIES } from '../api/fred'
+import { useMacro } from '../hooks/useFredQueries'
+import { PanelCard } from './shared/PanelCard'
+import { KpiChip } from './shared/KpiChip'
+import { LoadingState } from './shared/LoadingState'
+import { ErrorState } from './shared/ErrorState'
+import { SectionHeader } from './shared/SectionHeader'
+import { PlotlyChart, type PlotlyTrace } from './shared/PlotlyChart'
+import { latest, trendDirection } from '../utils/series'
+import { palette } from '../theme'
 
 export function MacroPanel() {
-  const [seriesData, setSeriesData] = useState<Record<string, SeriesState>>({})
+  const macro = useMacro()
 
-  useEffect(() => {
-    setSeriesData(
-      Object.fromEntries(MACRO_SERIES.map(s => [s.id, { data: [], loading: true, error: '' }]))
+  if (macro.isLoading) {
+    return (
+      <PanelCard title="Macro Dashboard" subtitle="Loading core indicators…">
+        <LoadingState />
+      </PanelCard>
     )
+  }
+  if (macro.isError) {
+    return (
+      <PanelCard title="Macro Dashboard">
+        <ErrorState message={(macro.error as Error)?.message} onRetry={() => macro.refetch()} />
+      </PanelCard>
+    )
+  }
 
-    fetchAllMacro()
-      .then(all => {
-        setSeriesData(
-          Object.fromEntries(
-            MACRO_SERIES.map(s => [s.id, { data: all[s.id] ?? [], loading: false, error: '' }])
-          )
-        )
-      })
-      .catch(e => {
-        setSeriesData(
-          Object.fromEntries(
-            MACRO_SERIES.map(s => [s.id, { data: [], loading: false, error: String(e.message) }])
-          )
-        )
-      })
-  }, [])
+  const series = macro.data?.series ?? {}
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, height: '100%' }}>
-      {MACRO_SERIES.map(s => (
-        <MacroChart
-          key={s.id}
-          label={s.label}
-          unit={s.unit}
-          color={s.color}
-          state={seriesData[s.id] ?? { data: [], loading: true, error: '' }}
-          seriesId={s.id}
-        />
-      ))}
-    </div>
+    <Stack spacing={2}>
+      <SectionHeader
+        eyebrow="Overview"
+        title="Macro Dashboard"
+        subtitle={`Core U.S. indicators${macro.data?.updated ? ` · updated ${macro.data.updated}` : ''}`}
+      />
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+          gap: 2,
+        }}
+      >
+        {MACRO_SERIES.map((s) => (
+          <MacroChart
+            key={s.id}
+            label={s.label}
+            unit={s.unit}
+            color={s.color}
+            data={series[s.id] ?? []}
+          />
+        ))}
+      </Box>
+    </Stack>
   )
 }
 
-interface ChartProps {
+interface MacroChartProps {
   label: string
   unit: string
   color: string
-  state: SeriesState
-  seriesId: string
+  data: FredObs[]
 }
 
-function MacroChart({ label, color, state, seriesId }: ChartProps) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!ref.current || state.loading || state.error || !state.data.length) return
-
-    import('plotly.js-dist-min').then(mod => {
-      const P = (mod as unknown as { default: typeof Plotly }).default ?? mod
-      if (!ref.current) return
-
-      const data = state.data
-
-      const trace: Partial<Plotly.PlotData> = {
+function MacroChart({ label, unit, color, data }: MacroChartProps) {
+  const traces = useMemo<PlotlyTrace[]>(() => {
+    if (!data.length) return []
+    return [
+      {
         type: 'scatter',
         mode: 'lines',
-        x: data.map(o => o.date),
-        y: data.map(o => o.value),
-        line: { color, width: 1.5, shape: 'spline' },
+        x: data.map((o) => o.date),
+        y: data.map((o) => o.value),
+        line: { color, width: 1.75, shape: 'spline' },
         fill: 'tozeroy',
         fillcolor: color + '18',
-        hovertemplate: '%{x}: %{y:.2f}<extra></extra>',
-      }
+        hovertemplate: `%{x}: %{y:.2f}${unit}<extra></extra>`,
+      },
+    ]
+  }, [data, color, unit])
 
-      const layout: Partial<Plotly.Layout> = {
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(0,0,0,0)',
-        font: { color: '#7d9bc0', family: 'Inter, sans-serif', size: 10 },
-        xaxis: {
-          color: '#7d9bc0', gridcolor: '#1e2d4a',
-          showgrid: false, zeroline: false,
-        },
-        yaxis: {
-          color: '#7d9bc0', gridcolor: '#162035',
-          showgrid: true, zeroline: true, zerolinecolor: '#1e2d4a',
-        },
-        margin: { l: 40, r: 8, t: 8, b: 28 },
-        hovermode: 'x unified',
-      }
+  const layout = useMemo(
+    () => ({
+      yaxis: {
+        color: palette.textSecondary,
+        gridcolor: '#162035',
+        showgrid: true,
+        zeroline: true,
+        zerolinecolor: palette.border,
+        ticksuffix: unit,
+      },
+      margin: { l: 48, r: 12, t: 8, b: 28 },
+    }),
+    [unit],
+  )
 
-      P.react(ref.current, [trace], layout, {
-        responsive: true,
-        displayModeBar: false,
-      })
-    })
-  }, [state, color, seriesId])
-
-  const latest = state.data[state.data.length - 1]
-  const displayVal = latest ? latest.value.toFixed(2) + '%' : null
+  const last = latest(data)
+  const trend = trendDirection(data, 6)
 
   return (
-    <div style={{
-      background: '#0f1729', border: '1px solid #1e2d4a', borderRadius: 10,
-      padding: '1rem', display: 'flex', flexDirection: 'column', gap: 8,
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div style={{ color: '#7d9bc0', fontSize: 12, fontWeight: 500 }}>{label.toUpperCase()}</div>
-        {displayVal && (
-          <div style={{ color, fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, fontSize: 18 }}>
-            {displayVal}
-          </div>
-        )}
-      </div>
-      <div style={{ flex: 1, minHeight: 160, position: 'relative' }}>
-        {state.loading && (
-          <div style={{ color: '#7d9bc0', fontSize: 12, paddingTop: 60, textAlign: 'center' }}>
-            Loading…
-          </div>
-        )}
-        {state.error && (
-          <div style={{ color: '#ef4444', fontSize: 12, paddingTop: 60, textAlign: 'center' }}>
-            {state.error}
-          </div>
-        )}
-        <div ref={ref} style={{ width: '100%', height: '100%', minHeight: 160 }} />
-      </div>
-    </div>
+    <PanelCard
+      dense
+      title={label}
+      subtitle={last ? `As of ${last.date}` : undefined}
+      action={
+        last && (
+          <KpiChip
+            label="Latest"
+            value={last.value.toFixed(2)}
+            unit={unit}
+            valueColor={color}
+            trend={trend}
+            size="md"
+            align="right"
+          />
+        )
+      }
+    >
+      {data.length === 0 ? (
+        <LoadingState message="No data" height={160} />
+      ) : (
+        <PlotlyChart traces={traces} layout={layout} minHeight={180} ariaLabel={`${label} chart`} />
+      )}
+    </PanelCard>
   )
 }

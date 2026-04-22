@@ -1,75 +1,174 @@
-import { useState } from 'react'
+import { lazy, Suspense } from 'react'
+import {
+  AppBar,
+  Box,
+  Chip,
+  Container,
+  Link,
+  Stack,
+  Tab,
+  Tabs,
+  Toolbar,
+  Tooltip,
+  Typography,
+  useMediaQuery,
+} from '@mui/material'
+import CircleIcon from '@mui/icons-material/Circle'
+import { useTheme } from '@mui/material/styles'
 import type { ActiveView } from './types'
-import { YieldCurve3D } from './components/YieldCurve3D'
-import { MacroPanel } from './components/MacroPanel'
-import { CpiBreakdown } from './components/CpiBreakdown'
-import { SpreadPanel } from './components/SpreadPanel'
-import { GroceryPanel } from './components/GroceryPanel'
+import { useFilters } from './state/filters'
+import { RangePicker } from './components/shared/RangePicker'
+import { LoadingState } from './components/shared/LoadingState'
+import { useHealth } from './hooks/useFredQueries'
+import { palette } from './theme'
 
-const TABS: [ActiveView, string][] = [
-  ['yield-curve', 'Yield Curve'],
-  ['macro', 'Macro Dashboard'],
-  ['cpi', 'CPI Breakdown'],
-  ['spreads', 'Spreads'],
-  ['grocery', 'CPI Grocery'],
+const YieldCurve3D = lazy(() =>
+  import('./components/YieldCurve3D').then((m) => ({ default: m.YieldCurve3D })),
+)
+const MacroPanel = lazy(() =>
+  import('./components/MacroPanel').then((m) => ({ default: m.MacroPanel })),
+)
+const CpiBreakdown = lazy(() =>
+  import('./components/CpiBreakdown').then((m) => ({ default: m.CpiBreakdown })),
+)
+const SpreadPanel = lazy(() =>
+  import('./components/SpreadPanel').then((m) => ({ default: m.SpreadPanel })),
+)
+const GroceryPanel = lazy(() =>
+  import('./components/GroceryPanel').then((m) => ({ default: m.GroceryPanel })),
+)
+
+const TABS: { value: ActiveView; label: string; description: string }[] = [
+  { value: 'yield-curve', label: 'Yield Curve', description: 'U.S. Treasury yield surface' },
+  { value: 'macro', label: 'Macro Dashboard', description: 'Rates, prices, labor, growth' },
+  { value: 'cpi', label: 'CPI Breakdown', description: 'Inflation by component' },
+  { value: 'spreads', label: 'Spreads', description: 'Yield curve spreads & policy' },
+  { value: 'grocery', label: 'Grocery', description: 'BLS average price inflation' },
 ]
 
 export default function App() {
-  const [view, setView] = useState<ActiveView>('yield-curve')
+  const theme = useTheme()
+  const isCompact = useMediaQuery(theme.breakpoints.down('md'))
+  const { filters, setView, setRange } = useFilters()
+  const health = useHealth()
+
+  const showRangePicker = filters.view === 'yield-curve'
 
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', height: '100vh',
-      background: '#070d1a', color: '#e8edf5',
-      fontFamily: "'Inter', sans-serif",
-    }}>
-      <header style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 1.5rem', height: 52,
-        borderBottom: '1px solid #1e2d4a', background: '#0a1220',
-        flexShrink: 0,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <span style={{ color: '#e8b84b', fontWeight: 700, fontSize: 16, letterSpacing: 2 }}>
-            ORATOR
-          </span>
-          <nav style={{ display: 'flex', gap: 4 }}>
-            {TABS.map(([v, label]) => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                style={{
-                  padding: '4px 14px', borderRadius: 6, border: 'none',
-                  background: view === v ? '#162035' : 'transparent',
-                  color: view === v ? '#e8edf5' : '#7d9bc0',
-                  fontWeight: 500, fontSize: 13, cursor: 'pointer',
-                  borderBottom: view === v ? '2px solid #e8b84b' : '2px solid transparent',
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </header>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'background.default' }}>
+      <AppBar position="sticky" color="default">
+        <Toolbar disableGutters sx={{ px: { xs: 2, md: 3 }, minHeight: 56, gap: 2 }}>
+          <Stack direction="row" alignItems="center" spacing={3} sx={{ minWidth: 0, flex: 1 }}>
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{
+                color: 'primary.main',
+                fontWeight: 700,
+                letterSpacing: 3,
+                fontSize: 16,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ORATOR
+            </Typography>
+            <Tabs
+              value={filters.view}
+              onChange={(_, v: ActiveView) => setView(v)}
+              variant={isCompact ? 'scrollable' : 'standard'}
+              scrollButtons={isCompact ? 'auto' : false}
+              allowScrollButtonsMobile
+              sx={{ minHeight: 44 }}
+              aria-label="Dashboard sections"
+            >
+              {TABS.map((t) => (
+                <Tab
+                  key={t.value}
+                  value={t.value}
+                  label={t.label}
+                  aria-label={`${t.label}: ${t.description}`}
+                />
+              ))}
+            </Tabs>
+          </Stack>
 
-      <main style={{ flex: 1, overflow: 'auto', padding: '1.25rem 1.5rem' }}>
-        {view === 'yield-curve' && <YieldCurve3D />}
-        {view === 'macro' && <MacroPanel />}
-        {view === 'cpi' && <CpiBreakdown />}
-        {view === 'spreads' && <SpreadPanel />}
-        {view === 'grocery' && <GroceryPanel />}
-      </main>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            {showRangePicker && (
+              <RangePicker value={filters.range} onChange={setRange} />
+            )}
+            <ApiStatus
+              healthy={health.data?.status === 'ok' && Boolean(health.data?.fred_key)}
+              loading={health.isLoading}
+              error={health.isError}
+            />
+          </Stack>
+        </Toolbar>
+      </AppBar>
 
-      <footer style={{
-        padding: '0.5rem 1.5rem', borderTop: '1px solid #1e2d4a',
-        color: '#3a5070', fontSize: 11, display: 'flex', justifyContent: 'space-between',
-      }}>
-        <span>Data: Federal Reserve Bank of St. Louis (FRED)</span>
+      <Container
+        component="main"
+        maxWidth={false}
+        sx={{ flex: 1, py: { xs: 2, md: 3 }, px: { xs: 2, md: 3 } }}
+      >
+        <Suspense fallback={<LoadingState message="Preparing view…" height={400} />}>
+          {filters.view === 'yield-curve' && <YieldCurve3D />}
+          {filters.view === 'macro' && <MacroPanel />}
+          {filters.view === 'cpi' && <CpiBreakdown />}
+          {filters.view === 'spreads' && <SpreadPanel />}
+          {filters.view === 'grocery' && <GroceryPanel />}
+        </Suspense>
+      </Container>
+
+      <Box
+        component="footer"
+        sx={{
+          px: { xs: 2, md: 3 },
+          py: 1.25,
+          borderTop: `1px solid ${palette.border}`,
+          color: 'text.disabled',
+          fontSize: 11,
+          display: 'flex',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 1,
+        }}
+      >
+        <span>Data: Federal Reserve Bank of St. Louis (FRED) · BLS</span>
         <span>
-          <a href="https://bpachter.github.io" style={{ color: '#3a5070' }}>← Portfolio</a>
+          <Link href="https://bpachter.github.io" color="inherit" underline="hover">
+            ← Portfolio
+          </Link>
         </span>
-      </footer>
-    </div>
+      </Box>
+    </Box>
+  )
+}
+
+function ApiStatus({
+  healthy,
+  loading,
+  error,
+}: {
+  healthy: boolean
+  loading: boolean
+  error: boolean
+}) {
+  const color = loading ? palette.textMuted : error || !healthy ? palette.negative : palette.positive
+  const label = loading ? 'Checking…' : error ? 'API offline' : healthy ? 'API live' : 'Degraded'
+  return (
+    <Tooltip title={`Backend status: ${label}`} arrow>
+      <Chip
+        size="small"
+        variant="outlined"
+        icon={<CircleIcon sx={{ fontSize: 10, color: `${color} !important` }} />}
+        label={label}
+        sx={{
+          borderColor: 'divider',
+          color: 'text.secondary',
+          fontSize: 11,
+          height: 24,
+        }}
+      />
+    </Tooltip>
   )
 }

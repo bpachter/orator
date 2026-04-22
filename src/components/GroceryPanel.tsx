@@ -1,151 +1,145 @@
-import { useEffect, useRef, useState } from 'react'
-import type Plotly from 'plotly.js'
-import type { FredObs } from '../types'
-import { fetchGrocery } from '../api/fred'
-
-interface GroceryItem {
-  id: string
-  label: string
-  unit: string
-  color: string
-}
-
-interface State {
-  items: GroceryItem[]
-  series: Record<string, FredObs[]>
-  loading: boolean
-  error: string
-}
+import { useMemo } from 'react'
+import { Box, Stack } from '@mui/material'
+import { useGrocery } from '../hooks/useFredQueries'
+import { PanelCard } from './shared/PanelCard'
+import { KpiChip } from './shared/KpiChip'
+import { LoadingState } from './shared/LoadingState'
+import { ErrorState } from './shared/ErrorState'
+import { SectionHeader } from './shared/SectionHeader'
+import { PlotlyChart, type PlotlyTrace } from './shared/PlotlyChart'
+import { latest, trendDirection } from '../utils/series'
+import { palette } from '../theme'
 
 export function GroceryPanel() {
-  const [state, setState] = useState<State>({ items: [], series: {}, loading: true, error: '' })
-  const chartRef = useRef<HTMLDivElement>(null)
+  const grocery = useGrocery()
 
-  useEffect(() => {
-    fetchGrocery()
-      .then(data => setState({ ...data, loading: false, error: '' }))
-      .catch(e => setState(s => ({ ...s, loading: false, error: String(e.message) })))
-  }, [])
+  const items = grocery.data?.items ?? []
+  const series = grocery.data?.series ?? {}
 
-  useEffect(() => {
-    if (!chartRef.current || state.loading || state.error || !state.items.length) return
+  const traces = useMemo<PlotlyTrace[]>(() => {
+    return items
+      .filter((item) => (series[item.id] ?? []).length > 0)
+      .map((item) => ({
+        type: 'scatter',
+        mode: 'lines',
+        name: item.label,
+        x: series[item.id].map((o) => o.date),
+        y: series[item.id].map((o) => o.value),
+        line: { color: item.color, width: 1.75 },
+        hovertemplate: `<b>${item.label}</b> ${item.unit}: %{y:.1f}%<extra></extra>`,
+      }))
+  }, [items, series])
 
-    import('plotly.js-dist-min').then(mod => {
-      const P = (mod as unknown as { default: typeof Plotly }).default ?? mod
-      if (!chartRef.current) return
-
-      const traces: Partial<Plotly.PlotData>[] = state.items
-        .filter(item => (state.series[item.id] ?? []).length > 0)
-        .map(item => ({
-          type: 'scatter',
-          mode: 'lines',
-          name: item.label,
-          x: state.series[item.id].map(o => o.date),
-          y: state.series[item.id].map(o => o.value),
-          line: { color: item.color, width: 1.75 },
-          hovertemplate: `<b>${item.label}</b> ${item.unit}: %{y:.1f}%<extra></extra>`,
-        }))
-
-      const layout: Partial<Plotly.Layout> = {
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(0,0,0,0)',
-        font: { color: '#7d9bc0', family: 'Inter, sans-serif', size: 11 },
-        xaxis: { color: '#7d9bc0', showgrid: false, zeroline: false },
-        yaxis: {
-          color: '#7d9bc0', gridcolor: '#162035', showgrid: true,
-          zeroline: true, zerolinecolor: '#3a5070', zerolinewidth: 1,
-          ticksuffix: '%',
+  const layout = useMemo(
+    () => ({
+      yaxis: {
+        color: palette.textSecondary,
+        gridcolor: '#162035',
+        showgrid: true,
+        zeroline: true,
+        zerolinecolor: palette.textMuted,
+        ticksuffix: '%',
+      },
+      legend: {
+        orientation: 'h' as const,
+        x: 0,
+        y: -0.18,
+        font: { color: palette.textSecondary, size: 11 },
+        bgcolor: 'rgba(0,0,0,0)',
+      },
+      margin: { l: 48, r: 16, t: 8, b: 80 },
+      shapes: [
+        {
+          type: 'line' as const,
+          xref: 'paper' as const,
+          yref: 'y' as const,
+          x0: 0,
+          x1: 1,
+          y0: 0,
+          y1: 0,
+          line: { color: palette.textMuted, width: 1, dash: 'dot' as const },
         },
-        legend: {
-          orientation: 'h',
-          x: 0, y: -0.12,
-          font: { color: '#7d9bc0', size: 11 },
-          bgcolor: 'rgba(0,0,0,0)',
-        },
-        margin: { l: 48, r: 12, t: 12, b: 80 },
-        hovermode: 'x',
-        shapes: [{
-          type: 'line', xref: 'paper', yref: 'y',
-          x0: 0, x1: 1, y0: 0, y1: 0,
-          line: { color: '#3a5070', width: 1, dash: 'dot' },
-        }],
-      }
+      ],
+    }),
+    [],
+  )
 
-      P.react(chartRef.current, traces, layout, { responsive: true, displayModeBar: false })
-    })
-  }, [state])
-
-  if (state.loading) {
+  if (grocery.isLoading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#7d9bc0' }}>
-        Loading grocery price data…
-      </div>
+      <PanelCard title="Grocery Inflation">
+        <LoadingState message="Loading BLS grocery prices…" />
+      </PanelCard>
     )
   }
-
-  if (state.error) {
+  if (grocery.isError) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#ef4444' }}>
-        {state.error}
-      </div>
+      <PanelCard title="Grocery Inflation">
+        <ErrorState message={(grocery.error as Error)?.message} onRetry={() => grocery.refetch()} />
+      </PanelCard>
     )
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{
-        background: '#0f1729', border: '1px solid #1e2d4a', borderRadius: 10, padding: '1rem',
-      }}>
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ color: '#e8edf5', fontSize: 14, fontWeight: 600 }}>
-            Grocery Price Inflation — Year-over-Year %
-          </div>
-          <div style={{ color: '#3a5070', fontSize: 11, marginTop: 3 }}>
-            BLS average prices, U.S. city average — monthly
-          </div>
-        </div>
-        <div ref={chartRef} style={{ width: '100%', minHeight: 440 }} />
-      </div>
+    <Stack spacing={2}>
+      <SectionHeader
+        eyebrow="Consumer prices"
+        title="Grocery Price Inflation"
+        subtitle={`BLS average prices, U.S. city average · year-over-year %${
+          grocery.data?.updated ? ` · updated ${grocery.data.updated}` : ''
+        }`}
+      />
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(5, 1fr)',
-        gap: 10,
-      }}>
-        {state.items.map(item => {
-          const data = state.series[item.id] ?? []
-          const latest = data[data.length - 1]
-          const isUp = latest && latest.value > 0
+      <PanelCard
+        title="All items overview"
+        subtitle="Compare grocery basket components on one chart"
+      >
+        <PlotlyChart
+          traces={traces}
+          layout={layout}
+          minHeight={420}
+          ariaLabel="Grocery price year-over-year inflation chart"
+        />
+      </PanelCard>
+
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: 'repeat(2, 1fr)',
+            sm: 'repeat(3, 1fr)',
+            md: 'repeat(5, 1fr)',
+          },
+          gap: 1.5,
+        }}
+      >
+        {items.map((item) => {
+          const data = series[item.id] ?? []
+          const last = latest(data)
+          const trend = trendDirection(data, 3)
+          const valueColor = last && last.value > 0 ? item.color : palette.positive
           return (
-            <div key={item.id} style={{
-              background: '#0f1729', border: '1px solid #1e2d4a', borderRadius: 8,
-              padding: '0.75rem', textAlign: 'center',
-            }}>
-              <div style={{ color: '#7d9bc0', fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>
-                {item.label}
-                <span style={{ color: '#3a5070', fontWeight: 400 }}> {item.unit}</span>
-              </div>
-              {latest ? (
-                <div style={{
-                  color: isUp ? item.color : '#22c55e',
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontWeight: 700,
-                  fontSize: 18,
-                }}>
-                  {isUp ? '+' : ''}{latest.value.toFixed(1)}%
-                </div>
-              ) : (
-                <div style={{ color: '#3a5070', fontSize: 13 }}>—</div>
-              )}
-              {latest && (
-                <div style={{ color: '#3a5070', fontSize: 10, marginTop: 2 }}>
-                  {latest.date}
-                </div>
-              )}
-            </div>
+            <PanelCard key={item.id} dense padding={1.5}>
+              <KpiChip
+                label={
+                  <Stack direction="row" spacing={0.5} alignItems="baseline">
+                    <span>{item.label}</span>
+                    <Box component="span" sx={{ color: 'text.disabled', fontWeight: 400 }}>
+                      {item.unit}
+                    </Box>
+                  </Stack>
+                }
+                value={last ? `${last.value > 0 ? '+' : ''}${last.value.toFixed(1)}` : '—'}
+                unit={last ? '%' : undefined}
+                valueColor={valueColor}
+                trend={trend}
+                size="md"
+                align="center"
+                caption={last?.date}
+              />
+            </PanelCard>
           )
         })}
-      </div>
-    </div>
+      </Box>
+    </Stack>
   )
 }
