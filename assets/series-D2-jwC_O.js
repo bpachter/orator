@@ -1,0 +1,1 @@
+function a(t){return t.length?t[t.length-1]:void 0}function o(t,n=6){if(t.length<n+1)return null;const l=t[t.length-1].value,u=t[t.length-1-n].value;return l===u?"flat":l>u?"up":"down"}export{a as l,o as t};
