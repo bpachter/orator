@@ -74,3 +74,29 @@ GROCERY_SERIES: list[SeriesDef] = [
     {"id": "APU0000711415", "label": "Bananas", "unit": "/lb", "color": "#eab308"},
     {"id": "APU0000712311", "label": "Tomatoes", "unit": "/lb", "color": "#22c55e"},
 ]
+
+LABOR_SERIES: list[SeriesDef] = [
+    {"id": "UNRATE", "label": "Unemployment Rate", "color": "#4a9eff", "unit": "%"},
+    {"id": "PAYEMS", "label": "Nonfarm Payrolls (YoY %)", "color": "#22c55e", "unit": "%", "yoy": True},
+    {"id": "CIVPART", "label": "Labor Force Participation", "color": "#e8b84b", "unit": "%"},
+    {"id": "ICSA", "label": "Initial Jobless Claims", "color": "#ef4444", "unit": "claims"},
+    {"id": "AHETPI", "label": "Avg Hourly Earnings (YoY %)", "color": "#a78bfa", "unit": "%", "yoy": True},
+    {"id": "JTSJOL", "label": "Job Openings", "color": "#06b6d4", "unit": "thousands"},
+]
+
+HOUSING_SERIES: list[SeriesDef] = [
+    {"id": "CSUSHPISA", "label": "Case-Shiller Home Price (YoY %)", "color": "#e8b84b", "unit": "%", "yoy": True},
+    {"id": "MORTGAGE30US", "label": "30Y Fixed Mortgage", "color": "#ef4444", "unit": "%"},
+    {"id": "HOUST", "label": "Housing Starts", "color": "#22c55e", "unit": "thousands"},
+    {"id": "PERMIT", "label": "Building Permits", "color": "#06b6d4", "unit": "thousands"},
+    {"id": "MSACSR", "label": "Months' Supply of Houses", "color": "#a78bfa", "unit": "months"},
+    {"id": "RRVRUSQ156N", "label": "Rental Vacancy Rate", "color": "#f97316", "unit": "%"},
+]
+
+# Inputs to the recession-signals composite
+RECESSION_INPUT_SERIES: list[SeriesDef] = [
+    {"id": "UNRATE", "label": "Unemployment Rate", "color": "#4a9eff"},
+    {"id": "T10Y2Y", "label": "10Y–2Y Spread", "color": "#22c55e"},
+    {"id": "T10Y3M", "label": "10Y–3M Spread", "color": "#e8b84b"},
+    {"id": "USREC", "label": "NBER Recession", "color": "#ef444440"},
+]

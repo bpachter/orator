@@ -19,6 +19,7 @@ import type { ActiveView } from './types'
 import { useFilters } from './state/filters'
 import { RangePicker } from './components/shared/RangePicker'
 import { LoadingState } from './components/shared/LoadingState'
+import { ErrorBoundary } from './components/shared/ErrorBoundary'
 import { useHealth } from './hooks/useFredQueries'
 import { palette } from './theme'
 
@@ -37,6 +38,17 @@ const SpreadPanel = lazy(() =>
 const GroceryPanel = lazy(() =>
   import('./components/GroceryPanel').then((m) => ({ default: m.GroceryPanel })),
 )
+const LaborPanel = lazy(() =>
+  import('./components/LaborPanel').then((m) => ({ default: m.LaborPanel })),
+)
+const HousingPanel = lazy(() =>
+  import('./components/HousingPanel').then((m) => ({ default: m.HousingPanel })),
+)
+const RecessionSignalsPanel = lazy(() =>
+  import('./components/RecessionSignalsPanel').then((m) => ({
+    default: m.RecessionSignalsPanel,
+  })),
+)
 
 const TABS: { value: ActiveView; label: string; description: string }[] = [
   { value: 'yield-curve', label: 'Yield Curve', description: 'U.S. Treasury yield surface' },
@@ -44,6 +56,9 @@ const TABS: { value: ActiveView; label: string; description: string }[] = [
   { value: 'cpi', label: 'CPI Breakdown', description: 'Inflation by component' },
   { value: 'spreads', label: 'Spreads', description: 'Yield curve spreads & policy' },
   { value: 'grocery', label: 'Grocery', description: 'BLS average price inflation' },
+  { value: 'labor', label: 'Labor', description: 'Employment, wages, participation' },
+  { value: 'housing', label: 'Housing', description: 'Home prices, mortgages, supply' },
+  { value: 'recession', label: 'Recession Signals', description: 'Composite leading indicators' },
 ]
 
 export default function App() {
@@ -110,13 +125,18 @@ export default function App() {
         maxWidth={false}
         sx={{ flex: 1, py: { xs: 2, md: 3 }, px: { xs: 2, md: 3 } }}
       >
-        <Suspense fallback={<LoadingState message="Preparing view…" height={400} />}>
-          {filters.view === 'yield-curve' && <YieldCurve3D />}
-          {filters.view === 'macro' && <MacroPanel />}
-          {filters.view === 'cpi' && <CpiBreakdown />}
-          {filters.view === 'spreads' && <SpreadPanel />}
-          {filters.view === 'grocery' && <GroceryPanel />}
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingState message="Preparing view…" height={400} />}>
+            {filters.view === 'yield-curve' && <YieldCurve3D />}
+            {filters.view === 'macro' && <MacroPanel />}
+            {filters.view === 'cpi' && <CpiBreakdown />}
+            {filters.view === 'spreads' && <SpreadPanel />}
+            {filters.view === 'grocery' && <GroceryPanel />}
+            {filters.view === 'labor' && <LaborPanel />}
+            {filters.view === 'housing' && <HousingPanel />}
+            {filters.view === 'recession' && <RecessionSignalsPanel />}
+          </Suspense>
+        </ErrorBoundary>
       </Container>
 
       <Box

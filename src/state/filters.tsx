@@ -19,7 +19,16 @@ export const DEFAULT_FILTERS: DashboardFilters = {
   range: '5Y',
 }
 
-const VALID_VIEWS: ActiveView[] = ['yield-curve', 'macro', 'cpi', 'spreads', 'grocery']
+const VALID_VIEWS: ActiveView[] = [
+  'yield-curve',
+  'macro',
+  'cpi',
+  'spreads',
+  'grocery',
+  'labor',
+  'housing',
+  'recession',
+]
 const VALID_RANGES: TimeRange[] = ['1Y', '2Y', '5Y', '10Y', 'MAX']
 
 function readFromUrl(): DashboardFilters {

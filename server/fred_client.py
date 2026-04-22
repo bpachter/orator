@@ -80,6 +80,13 @@ def fetch_series(series_id: str, start: str, end: str, **extra: Any) -> list[dic
             )
             time.sleep(wait)
 
+    try:
+        from . import observability
+
+        observability.increment("upstream_errors")
+    except Exception:
+        pass
+
     raise ApiError(
         502,
         "FRED_UNREACHABLE",

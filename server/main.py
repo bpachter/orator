@@ -4,288 +4,395 @@ FastAPI backend deployed on Railway. Proxies FRED, computes YoY transforms,
 and caches responses so the browser never needs an API key.
 """
 
+from __future__ import annotations
+
+import logging
 import os
 import time
-import logging
-from datetime import date, timedelta
-from typing import Any
 
-import requests
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-logging.basicConfig(level=logging.INFO)
+from . import cache, observability
+from .analytics import recession_composite, sahm_rule, yield_curve_inverted
+from .errors import ApiError, error_response
+from .fred_client import fetch_series, get_start_for_range, today_iso
+from .schemas import (
+    CpiBreakdownResponse,
+    GroceryResponse,
+    HealthResponse,
+    HousingResponse,
+    LaborResponse,
+    MacroResponse,
+    MetricsResponse,
+    RecessionSignal,
+    RecessionSignalsResponse,
+    SeriesMeta,
+    SpreadsResponse,
+    YieldCurveResponse,
+)
+from .series import (
+    CPI_COMPONENTS,
+    GROCERY_SERIES,
+    HOUSING_SERIES,
+    LABOR_SERIES,
+    MACRO_SERIES,
+    RECESSION_INPUT_SERIES,
+    SPREAD_SERIES,
+    YIELD_MATURITIES,
+)
+from .transforms import yoy
+
+observability.configure_logging()
 logger = logging.getLogger("orator")
 
-FRED_API_KEY = os.environ.get("FRED_API_KEY", "")
-FRED_BASE = "https://api.stlouisfed.org/fred/series/observations"
-CACHE_TTL = 4 * 3600  # 4 hours
+API_VERSION = "0.4.0"
 
-app = FastAPI(title="Orator FRED API", version="0.2.0")
+DEFAULT_ALLOWED_ORIGINS = [
+    "https://bpachter.github.io",
+    "http://localhost:5173",
+    "http://localhost:4173",
+]
+
+
+def _allowed_origins() -> list[str]:
+    raw = os.environ.get("ALLOWED_ORIGINS")
+    if not raw:
+        return DEFAULT_ALLOWED_ORIGINS
+    return [o.strip() for o in raw.split(",") if o.strip()]
+
+
+app = FastAPI(
+    title="Orator FRED API",
+    version=API_VERSION,
+    description="Macro-economic data proxy for the Orator dashboard.",
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://bpachter.github.io",
-        "http://localhost:5173",
-        "http://localhost:4173",
-    ],
+    allow_origins=_allowed_origins(),
     allow_methods=["GET"],
     allow_headers=["*"],
+    expose_headers=["X-Request-ID"],
 )
 
-# ---------------------------------------------------------------------------
-# Simple in-memory cache
-# ---------------------------------------------------------------------------
 
-_cache: dict[str, tuple[float, Any]] = {}
-
-
-def _cached(key: str) -> Any | None:
-    entry = _cache.get(key)
-    if entry and time.time() - entry[0] < CACHE_TTL:
-        return entry[1]
-    return None
-
-
-def _store(key: str, data: Any) -> Any:
-    _cache[key] = (time.time(), data)
-    return data
-
-
-# ---------------------------------------------------------------------------
-# FRED fetch helpers
-# ---------------------------------------------------------------------------
-
-def _get_start(range_str: str) -> str:
-    if range_str == "MAX":
-        return "1990-01-01"
-    years = {"1Y": 1, "2Y": 2, "5Y": 5, "10Y": 10}.get(range_str, 10)
-    return (date.today() - timedelta(days=365 * years)).isoformat()
-
-
-def _today() -> str:
-    return date.today().isoformat()
-
-
-def _fetch_fred(series_id: str, start: str, end: str, **extra) -> list[dict]:
-    if not FRED_API_KEY:
-        raise HTTPException(503, "FRED_API_KEY not configured")
-    params = {
-        "series_id": series_id,
-        "api_key": FRED_API_KEY,
-        "file_type": "json",
-        "observation_start": start,
-        "observation_end": end,
-        **extra,
-    }
-    r = requests.get(FRED_BASE, params=params, timeout=20)
-    r.raise_for_status()
-    data = r.json()
-    if "error_message" in data:
-        raise HTTPException(502, f"FRED: {data['error_message']}")
-    return [
-        {"date": o["date"], "value": float(o["value"])}
-        for o in data.get("observations", [])
-        if o["value"] != "."
-    ]
-
-
-def _yoy(series: list[dict]) -> list[dict]:
-    """Year-over-year % change for monthly series."""
-    out = []
-    for i in range(12, len(series)):
-        prev = series[i - 12]["value"]
-        curr = series[i]["value"]
-        if prev != 0:
-            out.append({"date": series[i]["date"], "value": round((curr - prev) / abs(prev) * 100, 3)})
-    return out
+@app.middleware("http")
+async def request_context(request: Request, call_next):
+    request_id = request.headers.get("x-request-id") or observability.new_request_id()
+    request.state.request_id = request_id
+    observability.increment("requests_total")
+    start = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception:
+        observability.increment("upstream_errors")
+        logger.exception(
+            "request_failed",
+            extra={"request_id": request_id, "method": request.method, "path": request.url.path},
+        )
+        raise
+    duration_ms = round((time.perf_counter() - start) * 1000, 2)
+    response.headers["X-Request-ID"] = request_id
+    logger.info(
+        "request",
+        extra={
+            "request_id": request_id,
+            "method": request.method,
+            "path": request.url.path,
+            "status": response.status_code,
+            "duration_ms": duration_ms,
+        },
+    )
+    return response
 
 
 # ---------------------------------------------------------------------------
-# Series definitions
+# Standardized error envelope handlers
 # ---------------------------------------------------------------------------
 
-YIELD_MATURITIES = [
-    {"id": "DGS3MO", "label": "3M",  "years": 0.25},
-    {"id": "DGS6MO", "label": "6M",  "years": 0.5},
-    {"id": "DGS1",   "label": "1Y",  "years": 1},
-    {"id": "DGS2",   "label": "2Y",  "years": 2},
-    {"id": "DGS3",   "label": "3Y",  "years": 3},
-    {"id": "DGS5",   "label": "5Y",  "years": 5},
-    {"id": "DGS7",   "label": "7Y",  "years": 7},
-    {"id": "DGS10",  "label": "10Y", "years": 10},
-    {"id": "DGS20",  "label": "20Y", "years": 20},
-    {"id": "DGS30",  "label": "30Y", "years": 30},
-]
 
-MACRO_SERIES = [
-    {"id": "FEDFUNDS",        "label": "Fed Funds Rate",       "color": "#e8b84b"},
-    {"id": "CPIAUCSL",        "label": "CPI (YoY %)",           "color": "#ef4444", "yoy": True},
-    {"id": "UNRATE",          "label": "Unemployment Rate",     "color": "#4a9eff"},
-    {"id": "A191RL1Q225SBEA", "label": "Real GDP Growth (YoY)", "color": "#22c55e"},
-]
+@app.exception_handler(ApiError)
+async def handle_api_error(_: Request, exc: ApiError):
+    return error_response(exc.status_code, exc.code, exc.message)
 
-CPI_COMPONENTS = [
-    {"id": "CPIAUCSL",  "label": "All Items",              "color": "#ef4444"},
-    {"id": "CPILFESL",  "label": "Core (ex Food & Energy)","color": "#f97316"},
-    {"id": "CPIENGSL",  "label": "Energy",                 "color": "#eab308"},
-    {"id": "CPIFABSL",  "label": "Food & Beverages",       "color": "#22c55e"},
-    {"id": "CPIHOSSL",  "label": "Shelter",                "color": "#06b6d4"},
-    {"id": "CPITRNSL",  "label": "Transportation",         "color": "#8b5cf6"},
-    {"id": "CPIMEDSL",  "label": "Medical Care",           "color": "#ec4899"},
-    {"id": "CPIRECSL",  "label": "Recreation",             "color": "#14b8a6"},
-    {"id": "CPIEDUSL",  "label": "Education & Comm.",      "color": "#f59e0b"},
-    {"id": "CPIAPPSL",  "label": "Apparel",                "color": "#a78bfa"},
-    {"id": "CPIOGSSL",  "label": "Other Goods & Services", "color": "#64748b"},
-]
 
-SPREAD_SERIES = [
-    {"id": "T10Y2Y",  "label": "10Y–2Y Spread",    "color": "#4a9eff"},
-    {"id": "T10Y3M",  "label": "10Y–3M Spread",    "color": "#22c55e"},
-    {"id": "FEDFUNDS","label": "Fed Funds Rate",   "color": "#e8b84b"},
-    {"id": "CPILFESL","label": "Core CPI (YoY %)", "color": "#ef4444", "yoy": True},
-    {"id": "USREC",   "label": "Recession",        "color": "#ef444440"},
-]
+@app.exception_handler(StarletteHTTPException)
+async def handle_http_exception(_: Request, exc: StarletteHTTPException):
+    detail = exc.detail
+    if isinstance(detail, dict) and "code" in detail and "message" in detail:
+        return error_response(exc.status_code, detail["code"], detail["message"])
+    return error_response(exc.status_code, "HTTP_ERROR", str(detail))
 
-# BLS Average Price series — actual dollars per unit, YoY % computed server-side
-GROCERY_SERIES = [
-    {"id": "APU0000708111", "label": "Eggs",          "unit": "/doz",  "color": "#f59e0b"},
-    {"id": "APU0000703112", "label": "Ground Beef",   "unit": "/lb",   "color": "#ef4444"},
-    {"id": "APU0000706111", "label": "Chicken",       "unit": "/lb",   "color": "#f97316"},
-    {"id": "APU0000709112", "label": "Whole Milk",    "unit": "/gal",  "color": "#06b6d4"},
-    {"id": "APU0000702111", "label": "White Bread",   "unit": "/lb",   "color": "#e8b84b"},
-    {"id": "APU0000704111", "label": "Bacon",         "unit": "/lb",   "color": "#ec4899"},
-    {"id": "APU0000719311", "label": "Orange Juice",  "unit": "/16oz", "color": "#fb923c"},
-    {"id": "APU0000717311", "label": "Coffee",        "unit": "/lb",   "color": "#a78bfa"},
-    {"id": "APU0000711415", "label": "Bananas",       "unit": "/lb",   "color": "#eab308"},
-    {"id": "APU0000712311", "label": "Tomatoes",      "unit": "/lb",   "color": "#22c55e"},
-]
+
+@app.exception_handler(RequestValidationError)
+async def handle_validation_error(_: Request, exc: RequestValidationError):
+    return error_response(422, "VALIDATION_ERROR", str(exc.errors()))
+
+
+@app.exception_handler(Exception)
+async def handle_unexpected(_: Request, exc: Exception):
+    logger.exception("Unhandled error: %s", exc)
+    return error_response(500, "INTERNAL_ERROR", "Unexpected server error")
 
 
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@app.get("/api/health")
-def health():
-    return {"status": "ok", "fred_key": bool(FRED_API_KEY)}
+
+@app.get("/api/health", response_model=HealthResponse, tags=["meta"])
+def health() -> HealthResponse:
+    return HealthResponse(
+        status="ok",
+        fred_key=bool(os.environ.get("FRED_API_KEY")),
+        version=API_VERSION,
+    )
 
 
-@app.get("/api/yield-curve")
-def yield_curve(range: str = "5Y"):
+@app.get(
+    "/api/yield-curve",
+    response_model=YieldCurveResponse,
+    tags=["rates"],
+    responses={502: {"description": "Upstream FRED error"}},
+)
+def yield_curve(range: str = "5Y") -> YieldCurveResponse:
     cache_key = f"yield:{range}"
-    if hit := _cached(cache_key):
+    hit = cache.get(cache_key)
+    if hit is not None:
         return hit
 
-    start = _get_start(range)
-    end = _today()
+    start = get_start_for_range(range)
+    end = today_iso()
     all_series = []
     for m in YIELD_MATURITIES:
-        obs = _fetch_fred(m["id"], start, end, frequency="w", aggregation_method="eop")
+        obs = fetch_series(m["id"], start, end, frequency="w", aggregation_method="eop")
         all_series.append(obs)
 
     date_sets = [set(o["date"] for o in s) for s in all_series]
     common_dates = sorted(
-        d for d in (o["date"] for o in all_series[0])
+        d
+        for d in (o["date"] for o in all_series[0])
         if all(d in ds for ds in date_sets)
     )
     maps = [{o["date"]: o["value"] for o in s} for s in all_series]
 
-    result = {
-        "updated": _today(),
-        "range": range,
-        "dates": common_dates,
-        "maturityLabels": [m["label"] for m in YIELD_MATURITIES],
-        "maturityYears": [m["years"] for m in YIELD_MATURITIES],
-        "z": [[mp.get(d, float("nan")) for mp in maps] for d in common_dates],
-    }
-    return _store(cache_key, result)
+    result = YieldCurveResponse(
+        updated=today_iso(),
+        range=range,
+        dates=common_dates,
+        maturityLabels=[m["label"] for m in YIELD_MATURITIES],
+        maturityYears=[m["years"] for m in YIELD_MATURITIES],
+        z=[[mp.get(d, float("nan")) for mp in maps] for d in common_dates],
+    )
+    cache.store(cache_key, result)
+    return result
 
 
-@app.get("/api/macro")
-def macro():
+@app.get("/api/macro", response_model=MacroResponse, tags=["macro"])
+def macro() -> MacroResponse:
     cache_key = "macro"
-    if hit := _cached(cache_key):
+    hit = cache.get(cache_key)
+    if hit is not None:
         return hit
 
-    start = _get_start("10Y")
-    end = _today()
-    series_out = {}
+    start = get_start_for_range("10Y")
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
     for s in MACRO_SERIES:
-        obs = _fetch_fred(s["id"], start, end)
-        series_out[s["id"]] = _yoy(obs) if s.get("yoy") else obs
+        obs = fetch_series(s["id"], start, end)
+        series_out[s["id"]] = yoy(obs) if s.get("yoy") else obs
 
-    result = {"updated": _today(), "series": series_out}
-    return _store(cache_key, result)
+    result = MacroResponse(updated=today_iso(), series=series_out)
+    cache.store(cache_key, result)
+    return result
 
 
-@app.get("/api/cpi-breakdown")
-def cpi_breakdown():
+@app.get("/api/cpi-breakdown", response_model=CpiBreakdownResponse, tags=["inflation"])
+def cpi_breakdown() -> CpiBreakdownResponse:
     cache_key = "cpi-breakdown"
-    if hit := _cached(cache_key):
+    hit = cache.get(cache_key)
+    if hit is not None:
         return hit
 
-    start = _get_start("10Y")
-    end = _today()
-    series_out = {}
+    start = get_start_for_range("10Y")
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
     for s in CPI_COMPONENTS:
-        obs = _fetch_fred(s["id"], start, end)
-        series_out[s["id"]] = _yoy(obs)
+        obs = fetch_series(s["id"], start, end)
+        series_out[s["id"]] = yoy(obs)
 
-    result = {
-        "updated": _today(),
-        "components": CPI_COMPONENTS,
-        "series": series_out,
-    }
-    return _store(cache_key, result)
+    result = CpiBreakdownResponse(
+        updated=today_iso(),
+        components=[SeriesMeta(**c) for c in CPI_COMPONENTS],  # type: ignore[arg-type]
+        series=series_out,
+    )
+    cache.store(cache_key, result)
+    return result
 
 
-@app.get("/api/spreads")
-def spreads():
+@app.get("/api/spreads", response_model=SpreadsResponse, tags=["rates"])
+def spreads() -> SpreadsResponse:
     cache_key = "spreads"
-    if hit := _cached(cache_key):
+    hit = cache.get(cache_key)
+    if hit is not None:
         return hit
 
-    start = _get_start("MAX")
-    end = _today()
-    series_out = {}
+    start = get_start_for_range("MAX")
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
     for s in SPREAD_SERIES:
-        obs = _fetch_fred(s["id"], start, end)
-        series_out[s["id"]] = _yoy(obs) if s.get("yoy") else obs
+        obs = fetch_series(s["id"], start, end)
+        series_out[s["id"]] = yoy(obs) if s.get("yoy") else obs
 
-    result = {
-        "updated": _today(),
-        "series": series_out,
-    }
-    return _store(cache_key, result)
+    result = SpreadsResponse(updated=today_iso(), series=series_out)
+    cache.store(cache_key, result)
+    return result
 
 
-@app.get("/api/grocery")
-def grocery():
+@app.get("/api/grocery", response_model=GroceryResponse, tags=["consumer"])
+def grocery() -> GroceryResponse:
     cache_key = "grocery"
-    if hit := _cached(cache_key):
+    hit = cache.get(cache_key)
+    if hit is not None:
         return hit
 
-    start = _get_start("10Y")
-    end = _today()
-    series_out = {}
+    start = get_start_for_range("10Y")
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
     for s in GROCERY_SERIES:
         try:
-            obs = _fetch_fred(s["id"], start, end)
-            series_out[s["id"]] = _yoy(obs)
-        except HTTPException as e:
+            obs = fetch_series(s["id"], start, end)
+            series_out[s["id"]] = yoy(obs)
+        except ApiError as e:
             if e.status_code == 503:
-                raise  # no API key — propagate
-            logger.warning("Skipping %s: %s", s["id"], e.detail)
+                raise
+            logger.warning("Skipping %s: %s", s["id"], e.message)
             series_out[s["id"]] = []
         except Exception as exc:
             logger.warning("Skipping %s: %s", s["id"], exc)
             series_out[s["id"]] = []
 
-    result = {
-        "updated": _today(),
-        "items": GROCERY_SERIES,
-        "series": series_out,
-    }
-    return _store(cache_key, result)
+    result = GroceryResponse(
+        updated=today_iso(),
+        items=[SeriesMeta(**i) for i in GROCERY_SERIES],  # type: ignore[arg-type]
+        series=series_out,
+    )
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/labor", response_model=LaborResponse, tags=["labor"])
+def labor() -> LaborResponse:
+    cache_key = "labor"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range("10Y")
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
+    for s in LABOR_SERIES:
+        obs = fetch_series(s["id"], start, end)
+        series_out[s["id"]] = yoy(obs) if s.get("yoy") else obs
+
+    result = LaborResponse(
+        updated=today_iso(),
+        series=series_out,
+        metadata=[SeriesMeta(**s) for s in LABOR_SERIES],  # type: ignore[arg-type]
+    )
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/housing", response_model=HousingResponse, tags=["housing"])
+def housing() -> HousingResponse:
+    cache_key = "housing"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range("10Y")
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
+    for s in HOUSING_SERIES:
+        obs = fetch_series(s["id"], start, end)
+        series_out[s["id"]] = yoy(obs) if s.get("yoy") else obs
+
+    result = HousingResponse(
+        updated=today_iso(),
+        series=series_out,
+        metadata=[SeriesMeta(**s) for s in HOUSING_SERIES],  # type: ignore[arg-type]
+    )
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get(
+    "/api/recession-signals",
+    response_model=RecessionSignalsResponse,
+    tags=["analytics"],
+)
+def recession_signals() -> RecessionSignalsResponse:
+    cache_key = "recession-signals"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range("10Y")
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
+    for s in RECESSION_INPUT_SERIES:
+        series_out[s["id"]] = fetch_series(s["id"], start, end)
+
+    sahm_value, sahm_trig = sahm_rule(series_out.get("UNRATE", []))
+    inv2y, inv2y_trig = yield_curve_inverted(series_out.get("T10Y2Y", []))
+    inv3m, inv3m_trig = yield_curve_inverted(series_out.get("T10Y3M", []))
+
+    signals = [
+        RecessionSignal(
+            id="sahm",
+            label="Sahm Rule",
+            value=sahm_value,
+            triggered=sahm_trig,
+            description="3M-avg unemployment ≥ 0.5pp above 12M low",
+        ),
+        RecessionSignal(
+            id="curve_2y",
+            label="10Y–2Y Inversion",
+            value=inv2y,
+            triggered=inv2y_trig,
+            description="10Y Treasury yield below 2Y",
+        ),
+        RecessionSignal(
+            id="curve_3m",
+            label="10Y–3M Inversion",
+            value=inv3m,
+            triggered=inv3m_trig,
+            description="10Y Treasury yield below 3M",
+        ),
+    ]
+    composite = recession_composite([s.model_dump() for s in signals])
+
+    result = RecessionSignalsResponse(
+        updated=today_iso(),
+        composite_score=composite,
+        signals=signals,
+        series=series_out,
+    )
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/metrics", response_model=MetricsResponse, tags=["meta"])
+def metrics() -> MetricsResponse:
+    snap = observability.snapshot()
+    return MetricsResponse(
+        requests_total=int(snap.get("requests_total", 0)),
+        cache_hits=int(snap.get("cache_hits", 0)),
+        cache_misses=int(snap.get("cache_misses", 0)),
+        upstream_errors=int(snap.get("upstream_errors", 0)),
+        uptime_seconds=float(snap.get("uptime_seconds", 0.0)),
+    )

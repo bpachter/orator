@@ -1,5 +1,5 @@
 import { ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material'
-import type { TimeRange } from '../types'
+import type { TimeRange } from '../../types'
 
 interface RangePickerProps {
   value: TimeRange

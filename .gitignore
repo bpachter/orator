@@ -2,3 +2,14 @@ node_modules
 dist
 .env
 *.local
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Build / coverage
+coverage/
+*.tsbuildinfo

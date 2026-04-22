@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from pydantic import BaseModel, Field
-
 
 # ---------------------------------------------------------------------------
 # Primitive shapes
@@ -21,7 +18,7 @@ class SeriesMeta(BaseModel):
     id: str
     label: str
     color: str
-    unit: Optional[str] = None
+    unit: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -78,3 +75,38 @@ class GroceryResponse(BaseModel):
     updated: str
     items: list[SeriesMeta]
     series: dict[str, list[Observation]]
+
+
+class LaborResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]
+
+
+class HousingResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]
+
+
+class RecessionSignal(BaseModel):
+    id: str
+    label: str
+    value: float | None
+    triggered: bool
+    description: str
+
+
+class RecessionSignalsResponse(BaseModel):
+    updated: str
+    composite_score: float = Field(..., description="0-1 weighted recession risk")
+    signals: list[RecessionSignal]
+    series: dict[str, list[Observation]]
+
+
+class MetricsResponse(BaseModel):
+    requests_total: int
+    cache_hits: int
+    cache_misses: int
+    upstream_errors: int
+    uptime_seconds: float

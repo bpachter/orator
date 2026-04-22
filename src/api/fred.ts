@@ -70,6 +70,48 @@ export interface HealthResponse {
   version?: string
 }
 
+export interface SeriesMetadata {
+  id: string
+  label: string
+  color: string
+  unit?: string | null
+}
+
+export interface LaborResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
+export interface HousingResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
+export interface RecessionSignal {
+  id: string
+  label: string
+  value: number | null
+  triggered: boolean
+  description: string
+}
+
+export interface RecessionSignalsResponse {
+  updated: string
+  composite_score: number
+  signals: RecessionSignal[]
+  series: Record<string, FredObs[]>
+}
+
+export interface MetricsResponse {
+  requests_total: number
+  cache_hits: number
+  cache_misses: number
+  upstream_errors: number
+  uptime_seconds: number
+}
+
 export function fetchYieldSurface(
   range: TimeRange,
 ): Promise<YieldSurface & { updated?: string }> {
@@ -94,4 +136,20 @@ export function fetchGrocery(): Promise<GroceryResponse> {
 
 export function fetchHealth(): Promise<HealthResponse> {
   return request('/api/health')
+}
+
+export function fetchLabor(): Promise<LaborResponse> {
+  return request('/api/labor')
+}
+
+export function fetchHousing(): Promise<HousingResponse> {
+  return request('/api/housing')
+}
+
+export function fetchRecessionSignals(): Promise<RecessionSignalsResponse> {
+  return request('/api/recession-signals')
+}
+
+export function fetchMetrics(): Promise<MetricsResponse> {
+  return request('/api/metrics')
 }

@@ -4,12 +4,18 @@ import {
   fetchCpiBreakdown,
   fetchGrocery,
   fetchHealth,
+  fetchHousing,
+  fetchLabor,
+  fetchRecessionSignals,
   fetchSpreads,
   fetchYieldSurface,
   type CpiBreakdownResponse,
   type GroceryResponse,
   type HealthResponse,
+  type HousingResponse,
+  type LaborResponse,
   type MacroResponse,
+  type RecessionSignalsResponse,
   type SpreadResponse,
 } from '../api/fred'
 import type { TimeRange, YieldSurface } from '../types'
@@ -48,5 +54,21 @@ export function useHealth(): UseQueryResult<HealthResponse> {
     queryFn: fetchHealth,
     staleTime: 30 * 1000,
     refetchInterval: 60 * 1000,
+  })
+}
+
+export function useLabor(): UseQueryResult<LaborResponse> {
+  return useQuery({ queryKey: ['labor'], queryFn: fetchLabor, staleTime: FIVE_MIN })
+}
+
+export function useHousing(): UseQueryResult<HousingResponse> {
+  return useQuery({ queryKey: ['housing'], queryFn: fetchHousing, staleTime: FIVE_MIN })
+}
+
+export function useRecessionSignals(): UseQueryResult<RecessionSignalsResponse> {
+  return useQuery({
+    queryKey: ['recession-signals'],
+    queryFn: fetchRecessionSignals,
+    staleTime: FIVE_MIN,
   })
 }

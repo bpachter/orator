@@ -12,7 +12,10 @@ import '@fontsource/jetbrains-mono/500.css'
 import App from './App'
 import { theme } from './theme'
 import { FilterProvider } from './state/filters'
+import { initTelemetry } from './utils/telemetry'
 import './index.css'
+
+initTelemetry()
 
 const queryClient = new QueryClient({
   defaultOptions: {
