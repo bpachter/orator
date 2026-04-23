@@ -59,7 +59,7 @@ export function RecessionSignalsPanel() {
         hovertemplate: '%{x}: %{y:.2f}%<extra></extra>',
       },
     ],
-    [unrate],
+    [unrate, palette.series.blue],
   )
 
   const spreadTrace = useMemo<PlotlyTrace[]>(
@@ -73,7 +73,7 @@ export function RecessionSignalsPanel() {
         hovertemplate: '%{x}: %{y:.2f}<extra></extra>',
       },
     ],
-    [t10y2y],
+    [t10y2y, palette.series.green],
   )
 
   return (
