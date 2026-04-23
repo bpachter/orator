@@ -21,9 +21,12 @@ from .errors import ApiError, error_response
 from .fred_client import fetch_series, get_start_for_range, today_iso
 from .schemas import (
     CpiBreakdownResponse,
+    CreditConditionsResponse,
     GroceryResponse,
     HealthResponse,
     HousingResponse,
+    InflationResponse,
+    ISMPMIResponse,
     LaborResponse,
     MacroResponse,
     MetricsResponse,
@@ -35,8 +38,11 @@ from .schemas import (
 )
 from .series import (
     CPI_COMPONENTS,
+    CREDIT_CONDITIONS_SERIES,
     GROCERY_SERIES,
     HOUSING_SERIES,
+    INFLATION_SERIES,
+    ISM_PMI_SERIES,
     LABOR_SERIES,
     MACRO_SERIES,
     RECESSION_INPUT_SERIES,
@@ -396,3 +402,75 @@ def metrics() -> MetricsResponse:
         upstream_errors=int(snap.get("upstream_errors", 0)),
         uptime_seconds=float(snap.get("uptime_seconds", 0.0)),
     )
+
+
+@app.get("/api/inflation", response_model=InflationResponse, tags=["inflation"])
+def inflation() -> InflationResponse:
+    cache_key = "inflation"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range("10Y")
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
+    for s in INFLATION_SERIES:
+        obs = fetch_series(s["id"], start, end)
+        series_out[s["id"]] = yoy(obs) if s.get("yoy") else obs
+
+    metadata = [
+        SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
+        for s in INFLATION_SERIES
+    ]
+
+    result = InflationResponse(updated=today_iso(), series=series_out, metadata=metadata)
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/credit-conditions", response_model=CreditConditionsResponse, tags=["credit"])
+def credit_conditions() -> CreditConditionsResponse:
+    cache_key = "credit-conditions"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range("10Y")
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
+    for s in CREDIT_CONDITIONS_SERIES:
+        obs = fetch_series(s["id"], start, end)
+        series_out[s["id"]] = obs
+
+    metadata = [
+        SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
+        for s in CREDIT_CONDITIONS_SERIES
+    ]
+
+    result = CreditConditionsResponse(updated=today_iso(), series=series_out, metadata=metadata)
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/ism-pmi", response_model=ISMPMIResponse, tags=["business"])
+def ism_pmi() -> ISMPMIResponse:
+    cache_key = "ism-pmi"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range("10Y")
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
+    for s in ISM_PMI_SERIES:
+        obs = fetch_series(s["id"], start, end)
+        series_out[s["id"]] = obs
+
+    metadata = [
+        SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
+        for s in ISM_PMI_SERIES
+    ]
+
+    result = ISMPMIResponse(updated=today_iso(), series=series_out, metadata=metadata)
+    cache.store(cache_key, result)
+    return result

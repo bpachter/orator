@@ -28,6 +28,9 @@ const VALID_VIEWS: ActiveView[] = [
   'labor',
   'housing',
   'recession',
+  'inflation',
+  'credit',
+  'ism',
 ]
 const VALID_RANGES: TimeRange[] = ['1Y', '2Y', '5Y', '10Y', 'MAX']
 

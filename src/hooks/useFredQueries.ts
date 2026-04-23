@@ -2,17 +2,23 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 import {
   fetchAllMacro,
   fetchCpiBreakdown,
+  fetchCreditConditions,
   fetchGrocery,
   fetchHealth,
   fetchHousing,
+  fetchInflation,
+  fetchISMPMI,
   fetchLabor,
   fetchRecessionSignals,
   fetchSpreads,
   fetchYieldSurface,
   type CpiBreakdownResponse,
+  type CreditConditionsResponse,
   type GroceryResponse,
   type HealthResponse,
   type HousingResponse,
+  type InflationResponse,
+  type ISMPMIResponse,
   type LaborResponse,
   type MacroResponse,
   type RecessionSignalsResponse,
@@ -71,4 +77,16 @@ export function useRecessionSignals(): UseQueryResult<RecessionSignalsResponse> 
     queryFn: fetchRecessionSignals,
     staleTime: FIVE_MIN,
   })
+}
+
+export function useInflation(): UseQueryResult<InflationResponse> {
+  return useQuery({ queryKey: ['inflation'], queryFn: fetchInflation, staleTime: FIVE_MIN })
+}
+
+export function useCreditConditions(): UseQueryResult<CreditConditionsResponse> {
+  return useQuery({ queryKey: ['credit-conditions'], queryFn: fetchCreditConditions, staleTime: FIVE_MIN })
+}
+
+export function useISMPMI(): UseQueryResult<ISMPMIResponse> {
+  return useQuery({ queryKey: ['ism-pmi'], queryFn: fetchISMPMI, staleTime: FIVE_MIN })
 }

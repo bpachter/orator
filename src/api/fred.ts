@@ -89,6 +89,24 @@ export interface HousingResponse {
   metadata: SeriesMetadata[]
 }
 
+export interface InflationResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
+export interface CreditConditionsResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
+export interface ISMPMIResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
 export interface RecessionSignal {
   id: string
   label: string
@@ -148,6 +166,18 @@ export function fetchHousing(): Promise<HousingResponse> {
 
 export function fetchRecessionSignals(): Promise<RecessionSignalsResponse> {
   return request('/api/recession-signals')
+}
+
+export function fetchInflation(): Promise<InflationResponse> {
+  return request('/api/inflation')
+}
+
+export function fetchCreditConditions(): Promise<CreditConditionsResponse> {
+  return request('/api/credit-conditions')
+}
+
+export function fetchISMPMI(): Promise<ISMPMIResponse> {
+  return request('/api/ism-pmi')
 }
 
 export function fetchMetrics(): Promise<MetricsResponse> {

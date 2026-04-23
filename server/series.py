@@ -100,3 +100,23 @@ RECESSION_INPUT_SERIES: list[SeriesDef] = [
     {"id": "T10Y3M", "label": "10Y–3M Spread", "color": "#e8b84b"},
     {"id": "USREC", "label": "NBER Recession", "color": "#ef444440"},
 ]
+
+INFLATION_SERIES: list[SeriesDef] = [
+    {"id": "CPIAUCSL", "label": "CPI (All Items, YoY %)", "color": "#ef4444", "unit": "%", "yoy": True},
+    {"id": "CPILFESL", "label": "Core CPI (ex Food & Energy, YoY %)", "color": "#f97316", "unit": "%", "yoy": True},
+    {"id": "PPIACO", "label": "PPI (All Commodities, YoY %)", "color": "#e8b84b", "unit": "%", "yoy": True},
+    {"id": "PCEPI", "label": "PCE (Headline, YoY %)", "color": "#06b6d4", "unit": "%", "yoy": True},
+    {"id": "PCEPILFE", "label": "PCE Core (ex Food & Energy, YoY %)", "color": "#8b5cf6", "unit": "%", "yoy": True},
+]
+
+CREDIT_CONDITIONS_SERIES: list[SeriesDef] = [
+    {"id": "BAMLH0A0HYM2", "label": "High-Yield Spread (ICE BofA)", "color": "#ef4444", "unit": "bps"},
+    {"id": "PRIME", "label": "Prime Lending Rate", "color": "#4a9eff", "unit": "%"},
+    {"id": "TERMCBCCALLNS", "label": "Credit Card Charge-Off Rate", "color": "#f97316", "unit": "%"},
+    {"id": "FEDFUNDS", "label": "Fed Funds Rate", "color": "#e8b84b", "unit": "%"},
+]
+
+ISM_PMI_SERIES: list[SeriesDef] = [
+    {"id": "MMNRNJ", "label": "ISM Manufacturing PMI", "color": "#4a9eff", "unit": "index"},
+    {"id": "NPMIDX", "label": "ISM Services PMI", "color": "#22c55e", "unit": "index"},
+]

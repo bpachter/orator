@@ -110,3 +110,21 @@ class MetricsResponse(BaseModel):
     cache_misses: int
     upstream_errors: int
     uptime_seconds: float
+
+
+class InflationResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]
+
+
+class CreditConditionsResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]
+
+
+class ISMPMIResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]

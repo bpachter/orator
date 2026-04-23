@@ -49,6 +49,17 @@ const RecessionSignalsPanel = lazy(() =>
     default: m.RecessionSignalsPanel,
   })),
 )
+const InflationPanel = lazy(() =>
+  import('./components/InflationPanel').then((m) => ({ default: m.InflationPanel })),
+)
+const CreditConditionsPanel = lazy(() =>
+  import('./components/CreditConditionsPanel').then((m) => ({
+    default: m.CreditConditionsPanel,
+  })),
+)
+const ISMPMIPanel = lazy(() =>
+  import('./components/ISMPMIPanel').then((m) => ({ default: m.ISMPMIPanel })),
+)
 
 const TABS: { value: ActiveView; label: string; description: string }[] = [
   { value: 'yield-curve', label: 'Yield Curve', description: 'U.S. Treasury yield surface' },
@@ -56,6 +67,9 @@ const TABS: { value: ActiveView; label: string; description: string }[] = [
   { value: 'cpi', label: 'CPI Breakdown', description: 'Inflation by component' },
   { value: 'spreads', label: 'Spreads', description: 'Yield curve spreads & policy' },
   { value: 'grocery', label: 'Grocery', description: 'BLS average price inflation' },
+  { value: 'inflation', label: 'Inflation', description: 'Core & PCE price indices' },
+  { value: 'credit', label: 'Credit', description: 'High-yield spreads & rates' },
+  { value: 'ism', label: 'ISM PMI', description: 'Manufacturing & services activity' },
   { value: 'labor', label: 'Labor', description: 'Employment, wages, participation' },
   { value: 'housing', label: 'Housing', description: 'Home prices, mortgages, supply' },
   { value: 'recession', label: 'Recession Signals', description: 'Composite leading indicators' },
@@ -132,6 +146,9 @@ export default function App() {
             {filters.view === 'cpi' && <CpiBreakdown />}
             {filters.view === 'spreads' && <SpreadPanel />}
             {filters.view === 'grocery' && <GroceryPanel />}
+            {filters.view === 'inflation' && <InflationPanel />}
+            {filters.view === 'credit' && <CreditConditionsPanel />}
+            {filters.view === 'ism' && <ISMPMIPanel />}
             {filters.view === 'labor' && <LaborPanel />}
             {filters.view === 'housing' && <HousingPanel />}
             {filters.view === 'recession' && <RecessionSignalsPanel />}
