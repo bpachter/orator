@@ -45,6 +45,9 @@ export function RecessionSignalsPanel() {
 
   const unrate = data.series['UNRATE'] ?? []
   const t10y2y = data.series['T10Y2Y'] ?? []
+  
+  const blueColor = palette.series.blue
+  const greenColor = palette.series.green
 
   const unrateTrace = useMemo<PlotlyTrace[]>(
     () => [
@@ -53,13 +56,13 @@ export function RecessionSignalsPanel() {
         mode: 'lines',
         x: unrate.map((o) => o.date),
         y: unrate.map((o) => o.value),
-        line: { color: palette.series.blue, width: 1.75, shape: 'spline' },
+        line: { color: blueColor, width: 1.75, shape: 'spline' },
         fill: 'tozeroy',
-        fillcolor: palette.series.blue + '18',
+        fillcolor: blueColor + '18',
         hovertemplate: '%{x}: %{y:.2f}%<extra></extra>',
       },
     ],
-    [unrate, palette.series.blue],
+    [unrate, blueColor],
   )
 
   const spreadTrace = useMemo<PlotlyTrace[]>(
@@ -69,11 +72,11 @@ export function RecessionSignalsPanel() {
         mode: 'lines',
         x: t10y2y.map((o) => o.date),
         y: t10y2y.map((o) => o.value),
-        line: { color: palette.series.green, width: 1.75, shape: 'spline' },
+        line: { color: greenColor, width: 1.75, shape: 'spline' },
         hovertemplate: '%{x}: %{y:.2f}<extra></extra>',
       },
     ],
-    [t10y2y, palette.series.green],
+    [t10y2y, greenColor],
   )
 
   return (
