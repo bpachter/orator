@@ -8,6 +8,7 @@ import { KpiChip } from './shared/KpiChip'
 import { LoadingState } from './shared/LoadingState'
 import { ErrorState } from './shared/ErrorState'
 import { SectionHeader } from './shared/SectionHeader'
+import { DownloadMultiButton } from './shared/DownloadButton'
 import { PlotlyChart, type PlotlyTrace } from './shared/PlotlyChart'
 import { latest, trendDirection } from '../utils/series'
 import { palette } from '../theme'
@@ -41,7 +42,9 @@ export function CpiBreakdown() {
       <SectionHeader
         eyebrow="Inflation"
         title="CPI Breakdown"
-        subtitle={`Year-over-year % change by component${cpi.data?.updated ? ` · updated ${cpi.data.updated}` : ''}`}
+        subtitle="Year-over-year % change by component"
+        updated={cpi.data?.updated}
+        action={<DownloadMultiButton series={series} filename="cpi-breakdown" />}
       />
 
       <Box

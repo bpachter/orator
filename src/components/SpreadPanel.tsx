@@ -10,6 +10,7 @@ import { LoadingState } from './shared/LoadingState'
 import { ErrorState } from './shared/ErrorState'
 import { SectionHeader } from './shared/SectionHeader'
 import { PlotlyChart, type PlotlyTrace } from './shared/PlotlyChart'
+import { DownloadMultiButton } from './shared/DownloadButton'
 import { latest } from '../utils/series'
 import { palette } from '../theme'
 
@@ -81,6 +82,7 @@ export function SpreadPanel() {
         eyebrow="Rates"
         title="Yield Spreads & Policy Stance"
         subtitle="Curve inversions and the real policy rate vs. core inflation"
+        action={<DownloadMultiButton series={series} filename="yield-spreads" />}
       />
       <Box
         sx={{

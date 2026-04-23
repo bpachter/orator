@@ -9,6 +9,7 @@ import { KpiChip } from './shared/KpiChip'
 import { LoadingState } from './shared/LoadingState'
 import { ErrorState } from './shared/ErrorState'
 import { SectionHeader } from './shared/SectionHeader'
+import { DownloadMultiButton } from './shared/DownloadButton'
 import { PlotlyChart, type PlotlyTrace } from './shared/PlotlyChart'
 import { latest, trendDirection } from '../utils/series'
 import { palette } from '../theme'
@@ -43,7 +44,9 @@ export function LaborPanel() {
       <SectionHeader
         eyebrow="Workforce"
         title="Labor Market"
-        subtitle={`Employment, wages, and labor supply${labor.data?.updated ? ` · updated ${labor.data.updated}` : ''}`}
+        subtitle="Employment, wages, and labor supply"
+        updated={labor.data?.updated}
+        action={<DownloadMultiButton series={series} filename="labor-market" />}
       />
       <Box
         sx={{

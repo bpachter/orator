@@ -7,6 +7,7 @@ import { KpiChip } from './shared/KpiChip'
 import { LoadingState } from './shared/LoadingState'
 import { ErrorState } from './shared/ErrorState'
 import { SectionHeader } from './shared/SectionHeader'
+import { DownloadMultiButton } from './shared/DownloadButton'
 import { PlotlyChart, type PlotlyTrace } from './shared/PlotlyChart'
 import { latest, trendDirection } from '../utils/series'
 import { palette } from '../theme'
@@ -86,9 +87,9 @@ export function GroceryPanel() {
       <SectionHeader
         eyebrow="Consumer prices"
         title="Grocery Price Inflation"
-        subtitle={`BLS average prices, U.S. city average · year-over-year %${
-          grocery.data?.updated ? ` · updated ${grocery.data.updated}` : ''
-        }`}
+        subtitle="BLS average prices, U.S. city average · year-over-year %"
+        updated={grocery.data?.updated}
+        action={<DownloadMultiButton series={series} filename="grocery-prices" />}
       />
 
       <PanelCard

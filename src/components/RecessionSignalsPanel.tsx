@@ -6,6 +6,7 @@ import { KpiChip } from './shared/KpiChip'
 import { LoadingState } from './shared/LoadingState'
 import { ErrorState } from './shared/ErrorState'
 import { SectionHeader } from './shared/SectionHeader'
+import { DownloadMultiButton } from './shared/DownloadButton'
 import { PlotlyChart, type PlotlyTrace } from './shared/PlotlyChart'
 import { palette } from '../theme'
 
@@ -76,7 +77,9 @@ export function RecessionSignalsPanel() {
       <SectionHeader
         eyebrow="Analytics"
         title="Recession Signals"
-        subtitle={`Composite leading indicator${data.updated ? ` · updated ${data.updated}` : ''}`}
+        subtitle="Composite leading indicator"
+        updated={data.updated}
+        action={<DownloadMultiButton series={data.series} filename="recession-signals" />}
       />
 
       <PanelCard>

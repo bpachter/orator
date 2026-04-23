@@ -67,9 +67,14 @@ const SERIES_INDEX: Array<{
   { id: 'UMCSENT', name: 'Consumer Sentiment', view: 'consumer', keywords: ['confidence', 'households'] },
 ]
 
-export function SeriesSearch() {
+export function SeriesSearch({ open: controlledOpen, onOpenChange }: { open?: boolean; onOpenChange?: (open: boolean) => void } = {}) {
   const { filters, setFilters } = useFilters()
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen ?? internalOpen
+  const setOpen = (next: boolean) => {
+    if (onOpenChange) onOpenChange(next)
+    if (controlledOpen === undefined) setInternalOpen(next)
+  }
   const [query, setQuery] = useState('')
 
   const results = useMemo(() => {

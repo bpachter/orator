@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import type Plotly from 'plotly.js'
 import { Box } from '@mui/material'
 import { palette } from '../../theme'
+import { useOratorPalette } from '../../state/themeMode'
 
 export type PlotlyTrace = Partial<Plotly.PlotData>
 export type PlotlyLayout = Partial<Plotly.Layout>
@@ -16,6 +17,7 @@ interface PlotlyChartProps {
   shapes?: Partial<Plotly.Shape>[]
 }
 
+/** Static dark-tuned default layout retained for backwards compatibility. */
 export const baseLayout: PlotlyLayout = {
   paper_bgcolor: 'rgba(0,0,0,0)',
   plot_bgcolor: 'rgba(0,0,0,0)',
@@ -28,8 +30,22 @@ export const baseLayout: PlotlyLayout = {
 
 export const baseConfig: PlotlyConfig = {
   responsive: true,
-  displayModeBar: false,
+  displayModeBar: 'hover',
   displaylogo: false,
+  modeBarButtonsToRemove: [
+    'sendDataToCloud',
+    'select2d',
+    'lasso2d',
+    'autoScale2d',
+    'hoverClosestCartesian',
+    'hoverCompareCartesian',
+    'toggleSpikelines',
+  ],
+  toImageButtonOptions: {
+    format: 'png',
+    filename: 'orator-chart',
+    scale: 2,
+  },
 }
 
 /**
@@ -45,6 +61,17 @@ export function PlotlyChart({
   shapes,
 }: PlotlyChartProps) {
   const ref = useRef<HTMLDivElement | null>(null)
+  const themePalette = useOratorPalette()
+
+  const themedBaseLayout = useMemo<PlotlyLayout>(() => ({
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: themePalette.textSecondary, family: 'Inter, sans-serif', size: 11 },
+    xaxis: { color: themePalette.textSecondary, gridcolor: themePalette.border, showgrid: false, zeroline: false },
+    yaxis: { color: themePalette.textSecondary, gridcolor: themePalette.border, showgrid: true, zeroline: false },
+    margin: { l: 44, r: 12, t: 8, b: 30 },
+    hovermode: 'x unified',
+  }), [themePalette])
 
   useEffect(() => {
     let disposed = false
@@ -59,7 +86,7 @@ export function PlotlyChart({
       P.react(
         ref.current,
         traces,
-        { ...baseLayout, ...layout, shapes },
+        { ...themedBaseLayout, ...layout, shapes },
         { ...baseConfig, ...config },
       )
     })
@@ -74,7 +101,7 @@ export function PlotlyChart({
         }
       }
     }
-  }, [traces, layout, config, shapes])
+  }, [traces, layout, config, shapes, themedBaseLayout])
 
   return (
     <Box

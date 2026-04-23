@@ -10,6 +10,7 @@ import { LoadingState } from './shared/LoadingState'
 import { ErrorState } from './shared/ErrorState'
 import { SectionHeader } from './shared/SectionHeader'
 import { PlotlyChart, type PlotlyTrace } from './shared/PlotlyChart'
+import { DownloadMultiButton } from './shared/DownloadButton'
 import { latest, trendDirection } from '../utils/series'
 import { getRecessionShapes } from '../utils/recessions'
 import { palette } from '../theme'
@@ -40,7 +41,9 @@ export function MacroPanel() {
       <SectionHeader
         eyebrow="Overview"
         title="Macro Dashboard"
-        subtitle={`Core U.S. indicators${macro.data?.updated ? ` · updated ${macro.data.updated}` : ''}`}
+        subtitle="Core U.S. indicators"
+        updated={macro.data?.updated}
+        action={<DownloadMultiButton series={series} filename="macro-dashboard" />}
       />
       <Box
         sx={{

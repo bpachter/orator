@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import type { ReactElement } from 'react'
 import {
   AppBar,
@@ -36,10 +36,17 @@ import HomeWorkIcon from '@mui/icons-material/HomeWork'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import TimelineIcon from '@mui/icons-material/Timeline'
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import LightModeIcon from '@mui/icons-material/LightMode'
+import KeyboardIcon from '@mui/icons-material/Keyboard'
 import { useTheme } from '@mui/material/styles'
 import type { ActiveView } from './types'
 import { useFilters } from './state/filters'
+import { useThemeMode } from './state/themeMode'
+import { useKeyboardShortcuts, type KeyboardShortcut } from './hooks/useKeyboardShortcuts'
+import { KeyboardShortcutsDialog, type ShortcutEntry } from './components/shared/KeyboardShortcutsDialog'
 import { RangePicker } from './components/shared/RangePicker'
+import { SavedViewsMenu } from './components/shared/SavedViewsMenu'
 import { SeriesSearch } from './components/shared/SeriesSearch'
 import { LoadingState } from './components/shared/LoadingState'
 import { ErrorBoundary } from './components/shared/ErrorBoundary'
@@ -125,8 +132,11 @@ export default function App() {
   const theme = useTheme()
   const isCompact = useMediaQuery(theme.breakpoints.down('md'))
   const { filters, setView, setRange } = useFilters()
+  const { toggleMode } = useThemeMode()
   const health = useHealth()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
 
   const showRangePicker = true
   const currentItem = ALL_NAV_ITEMS.find((i) => i.value === filters.view)
@@ -136,6 +146,40 @@ export default function App() {
     setView(view)
     if (isCompact) setMobileOpen(false)
   }
+
+  // Build keyboard shortcuts: Alt+1..9 jump to first 9 dashboards; common power-user combos
+  const shortcuts = useMemo<KeyboardShortcut[]>(() => {
+    const list: KeyboardShortcut[] = ALL_NAV_ITEMS.slice(0, 9).map((item, idx) => ({
+      combo: `Alt+${idx + 1}`,
+      description: `Open ${item.label}`,
+      handler: () => setView(item.value),
+    }))
+    list.push(
+      { combo: 'Mod+K', description: 'Search indicators', handler: () => setSearchOpen(true), allowInInputs: true },
+      { combo: '/', description: 'Search indicators', handler: () => setSearchOpen(true) },
+      { combo: 'Mod+J', description: 'Toggle theme', handler: () => toggleMode() },
+      { combo: '?', description: 'Show keyboard shortcuts', handler: () => setShortcutsOpen(true) },
+      { combo: 'Escape', description: 'Close dialogs', handler: () => { setSearchOpen(false); setShortcutsOpen(false) }, allowInInputs: true },
+    )
+    return list
+  }, [setView, toggleMode])
+
+  useKeyboardShortcuts(shortcuts)
+
+  const shortcutEntries = useMemo<ShortcutEntry[]>(() => {
+    const navEntries: ShortcutEntry[] = ALL_NAV_ITEMS.slice(0, 9).map((item, idx) => ({
+      combo: `Alt+${idx + 1}`,
+      description: item.label,
+      group: 'Navigation',
+    }))
+    return [
+      ...navEntries,
+      { combo: 'Mod+K', description: 'Search indicators', group: 'General' },
+      { combo: '/', description: 'Search indicators', group: 'General' },
+      { combo: 'Mod+J', description: 'Toggle dark/light theme', group: 'General' },
+      { combo: '?', description: 'Show this help', group: 'General' },
+    ]
+  }, [])
 
   const sidebar = <SidebarContent currentView={filters.view} onNavigate={handleNavigate} />
 
@@ -178,7 +222,14 @@ export default function App() {
             </Stack>
             <Stack direction="row" alignItems="center" spacing={1.5}>
               {showRangePicker && <RangePicker value={filters.range} onChange={setRange} />}
-              <SeriesSearch />
+              <SeriesSearch open={searchOpen} onOpenChange={setSearchOpen} />
+              <SavedViewsMenu />
+              <Tooltip title="Keyboard shortcuts (?)" arrow>
+                <IconButton size="small" onClick={() => setShortcutsOpen(true)} aria-label="Show keyboard shortcuts" sx={{ color: 'text.secondary' }}>
+                  <KeyboardIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <ThemeToggle />
               <ApiStatus
                 healthy={health.data?.status === 'ok' && Boolean(health.data?.fred_key)}
                 loading={health.isLoading}
@@ -215,6 +266,12 @@ export default function App() {
           </span>
         </Box>
       </Box>
+
+      <KeyboardShortcutsDialog
+        open={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
+        shortcuts={shortcutEntries}
+      />
     </Box>
   )
 }
@@ -301,6 +358,18 @@ function ApiStatus({ healthy, loading, error }: { healthy: boolean; loading: boo
         label={label}
         sx={{ borderColor: 'divider', color: 'text.secondary', fontSize: 11, height: 24 }}
       />
+    </Tooltip>
+  )
+}
+
+function ThemeToggle() {
+  const { mode, toggleMode } = useThemeMode()
+  const isDark = mode === 'dark'
+  return (
+    <Tooltip title={`Switch to ${isDark ? 'light' : 'dark'} mode`} arrow>
+      <IconButton size="small" onClick={toggleMode} aria-label="Toggle color mode" sx={{ color: 'text.secondary' }}>
+        {isDark ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+      </IconButton>
     </Tooltip>
   )
 }

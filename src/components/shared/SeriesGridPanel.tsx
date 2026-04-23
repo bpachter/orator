@@ -6,6 +6,7 @@ import { LoadingState } from './LoadingState'
 import { ErrorState } from './ErrorState'
 import { SectionHeader } from './SectionHeader'
 import { PlotlyChart, type PlotlyTrace } from './PlotlyChart'
+import { DownloadButton, DownloadMultiButton } from './DownloadButton'
 
 export interface SeriesMetadata {
   id: string
@@ -66,13 +67,9 @@ export function SeriesGridPanel({
       <SectionHeader
         eyebrow={eyebrow}
         title={title}
-        subtitle={
-          subtitle
-            ? `${subtitle}${data.updated ? ` · updated ${data.updated}` : ''}`
-            : data.updated
-              ? `Updated ${data.updated}`
-              : undefined
-        }
+        subtitle={subtitle}
+        updated={data.updated}
+        action={<DownloadMultiButton series={data.series} filename={title.toLowerCase().replace(/\s+/g, '-')} />}
       />
 
       <Box
@@ -103,6 +100,7 @@ export function SeriesGridPanel({
               dense
               title={meta.label}
               subtitle={meta.unit ?? undefined}
+              action={<DownloadButton data={obs} filename={meta.id.toLowerCase()} seriesName={meta.label} />}
             >
               <PlotlyChart traces={trace} minHeight={200} ariaLabel={meta.label} />
             </PanelCard>

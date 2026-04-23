@@ -9,6 +9,7 @@ import { KpiChip } from './shared/KpiChip'
 import { LoadingState } from './shared/LoadingState'
 import { ErrorState } from './shared/ErrorState'
 import { SectionHeader } from './shared/SectionHeader'
+import { DownloadMultiButton } from './shared/DownloadButton'
 import { PlotlyChart, type PlotlyTrace } from './shared/PlotlyChart'
 import { latest, trendDirection } from '../utils/series'
 import { palette } from '../theme'
@@ -43,7 +44,9 @@ export function HousingPanel() {
       <SectionHeader
         eyebrow="Real Estate"
         title="Housing Market"
-        subtitle={`Prices, mortgages, supply${housing.data?.updated ? ` · updated ${housing.data.updated}` : ''}`}
+        subtitle="Prices, mortgages, supply"
+        updated={housing.data?.updated}
+        action={<DownloadMultiButton series={series} filename="housing-market" />}
       />
       <Box
         sx={{
