@@ -39,6 +39,13 @@ import TimelineIcon from '@mui/icons-material/Timeline'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import KeyboardIcon from '@mui/icons-material/Keyboard'
+import GridViewIcon from '@mui/icons-material/GridView'
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows'
+import GridOnIcon from '@mui/icons-material/GridOn'
+import EventNoteIcon from '@mui/icons-material/EventNote'
+import HistoryIcon from '@mui/icons-material/History'
+import BuildIcon from '@mui/icons-material/Build'
+import TerminalIcon from '@mui/icons-material/Terminal'
 import { useTheme } from '@mui/material/styles'
 import type { ActiveView } from './types'
 import { useFilters } from './state/filters'
@@ -66,6 +73,14 @@ const CreditConditionsPanel = lazy(() => import('./components/CreditConditionsPa
 const ActivityPanel = lazy(() => import('./components/ActivityPanel').then((m) => ({ default: m.ActivityPanel })))
 const MarketsPanel = lazy(() => import('./components/MarketsPanel').then((m) => ({ default: m.MarketsPanel })))
 const ConsumerPanel = lazy(() => import('./components/ConsumerPanel').then((m) => ({ default: m.ConsumerPanel })))
+const HeatmapPanel = lazy(() => import('./components/HeatmapPanel').then((m) => ({ default: m.HeatmapPanel })))
+const ComparePanel = lazy(() => import('./components/ComparePanel').then((m) => ({ default: m.ComparePanel })))
+const CorrelationPanel = lazy(() => import('./components/CorrelationPanel').then((m) => ({ default: m.CorrelationPanel })))
+const CalendarPanel = lazy(() => import('./components/CalendarPanel').then((m) => ({ default: m.CalendarPanel })))
+const CrisisComparePanel = lazy(() => import('./components/CrisisComparePanel').then((m) => ({ default: m.CrisisComparePanel })))
+const CustomDashboardPanel = lazy(() => import('./components/CustomDashboardPanel').then((m) => ({ default: m.CustomDashboardPanel })))
+
+import { CommandBar } from './components/shared/CommandBar'
 
 interface NavItem {
   value: ActiveView
@@ -123,6 +138,18 @@ const NAV_GROUPS: NavGroup[] = [
       { value: 'housing', label: 'Housing', icon: <HomeWorkIcon fontSize="small" /> },
     ],
   },
+  {
+    id: 'analytics',
+    label: 'Analytics',
+    items: [
+      { value: 'heatmap', label: 'Macro Heatmap', icon: <GridViewIcon fontSize="small" /> },
+      { value: 'compare', label: 'Series Compare', icon: <CompareArrowsIcon fontSize="small" /> },
+      { value: 'correlation', label: 'Correlation Matrix', icon: <GridOnIcon fontSize="small" /> },
+      { value: 'calendar', label: 'Economic Calendar', icon: <EventNoteIcon fontSize="small" /> },
+      { value: 'crisis', label: 'Crisis Comparison', icon: <HistoryIcon fontSize="small" /> },
+      { value: 'custom', label: 'Custom Dashboards', icon: <BuildIcon fontSize="small" /> },
+    ],
+  },
 ]
 
 const ALL_NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((g) => g.items)
@@ -137,6 +164,7 @@ export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const [commandOpen, setCommandOpen] = useState(false)
 
   const showRangePicker = true
   const currentItem = ALL_NAV_ITEMS.find((i) => i.value === filters.view)
@@ -156,6 +184,7 @@ export default function App() {
     }))
     list.push(
       { combo: 'Mod+K', description: 'Search indicators', handler: () => setSearchOpen(true), allowInInputs: true },
+      { combo: 'Mod+T', description: 'Open Terminal Command Bar', handler: () => setCommandOpen(true), allowInInputs: true },
       { combo: '/', description: 'Search indicators', handler: () => setSearchOpen(true) },
       { combo: 'Mod+J', description: 'Toggle theme', handler: () => toggleMode() },
       { combo: '?', description: 'Show keyboard shortcuts', handler: () => setShortcutsOpen(true) },
@@ -175,6 +204,7 @@ export default function App() {
     return [
       ...navEntries,
       { combo: 'Mod+K', description: 'Search indicators', group: 'General' },
+      { combo: 'Mod+T', description: 'Open command bar (slash commands)', group: 'General' },
       { combo: '/', description: 'Search indicators', group: 'General' },
       { combo: 'Mod+J', description: 'Toggle dark/light theme', group: 'General' },
       { combo: '?', description: 'Show this help', group: 'General' },
@@ -224,6 +254,11 @@ export default function App() {
               {showRangePicker && <RangePicker value={filters.range} onChange={setRange} />}
               <SeriesSearch open={searchOpen} onOpenChange={setSearchOpen} />
               <SavedViewsMenu />
+              <Tooltip title="Command bar (Ctrl+T)" arrow>
+                <IconButton size="small" onClick={() => setCommandOpen(true)} aria-label="Open command bar" sx={{ color: 'text.secondary' }}>
+                  <TerminalIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
               <Tooltip title="Keyboard shortcuts (?)" arrow>
                 <IconButton size="small" onClick={() => setShortcutsOpen(true)} aria-label="Show keyboard shortcuts" sx={{ color: 'text.secondary' }}>
                   <KeyboardIcon fontSize="small" />
@@ -255,6 +290,12 @@ export default function App() {
               {filters.view === 'labor' && <LaborPanel />}
               {filters.view === 'housing' && <HousingPanel />}
               {filters.view === 'recession' && <RecessionSignalsPanel />}
+              {filters.view === 'heatmap' && <HeatmapPanel />}
+              {filters.view === 'compare' && <ComparePanel />}
+              {filters.view === 'correlation' && <CorrelationPanel />}
+              {filters.view === 'calendar' && <CalendarPanel />}
+              {filters.view === 'crisis' && <CrisisComparePanel />}
+              {filters.view === 'custom' && <CustomDashboardPanel />}
             </Suspense>
           </ErrorBoundary>
         </Box>
@@ -272,6 +313,7 @@ export default function App() {
         onClose={() => setShortcutsOpen(false)}
         shortcuts={shortcutEntries}
       />
+      <CommandBar open={commandOpen} onClose={() => setCommandOpen(false)} />
     </Box>
   )
 }

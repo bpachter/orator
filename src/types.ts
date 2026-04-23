@@ -19,6 +19,12 @@ export type ActiveView =
   | 'activity'
   | 'markets'
   | 'consumer'
+  | 'heatmap'
+  | 'compare'
+  | 'correlation'
+  | 'calendar'
+  | 'crisis'
+  | 'custom'
 
 export interface YieldSurface {
   dates: string[]

@@ -11,6 +11,8 @@ import App from './App'
 import { ThemeModeProvider } from './state/themeMode'
 import { FilterProvider } from './state/filters'
 import { SavedViewsProvider } from './state/savedViews'
+import { CompareListProvider } from './state/compareList'
+import { CustomDashboardsProvider } from './state/customDashboards'
 import { initTelemetry } from './utils/telemetry'
 import './index.css'
 
@@ -32,7 +34,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <QueryClientProvider client={queryClient}>
         <FilterProvider>
           <SavedViewsProvider>
-            <App />
+            <CompareListProvider>
+              <CustomDashboardsProvider>
+                <App />
+              </CustomDashboardsProvider>
+            </CompareListProvider>
           </SavedViewsProvider>
         </FilterProvider>
       </QueryClientProvider>
