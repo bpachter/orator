@@ -34,7 +34,7 @@ const VALID_VIEWS: ActiveView[] = [
   'markets',
   'consumer',
 ]
-const VALID_RANGES: TimeRange[] = ['1Y', '2Y', '5Y', '10Y', 'MAX']
+const VALID_RANGES: TimeRange[] = ['6M', '1Y', '3Y', '5Y', '10Y', '20Y', '30Y', 'MAX']
 
 function readFromUrl(): DashboardFilters {
   if (typeof window === 'undefined') return DEFAULT_FILTERS

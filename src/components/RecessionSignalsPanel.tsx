@@ -1,5 +1,6 @@
 import { Box, Chip, LinearProgress, Stack, Typography } from '@mui/material'
 import { useRecessionSignals } from '../hooks/useFredQueries'
+import { useFilters } from '../state/filters'
 import { PanelCard } from './shared/PanelCard'
 import { KpiChip } from './shared/KpiChip'
 import { LoadingState } from './shared/LoadingState'
@@ -21,24 +22,25 @@ function riskLabel(score: number): string {
 }
 
 export function RecessionSignalsPanel() {
-  const q = useRecessionSignals()
+  const { filters } = useFilters()
+  const rs = useRecessionSignals(filters.range)
 
-  if (q.isLoading) {
+  if (rs.isLoading) {
     return (
       <PanelCard title="Recession Signals" subtitle="Crunching leading indicators…">
         <LoadingState />
       </PanelCard>
     )
   }
-  if (q.isError) {
+  if (rs.isError) {
     return (
       <PanelCard title="Recession Signals">
-        <ErrorState message={(q.error as Error)?.message} onRetry={() => q.refetch()} />
+        <ErrorState message={(rs.error as Error)?.message} onRetry={() => rs.refetch()} />
       </PanelCard>
     )
   }
 
-  const data = q.data!
+  const data = rs.data!
   const score = data.composite_score
   const color = riskColor(score)
 

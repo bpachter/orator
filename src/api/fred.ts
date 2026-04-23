@@ -148,56 +148,56 @@ export function fetchYieldSurface(
   return request(`/api/yield-curve?range=${range}`)
 }
 
-export function fetchAllMacro(): Promise<MacroResponse> {
-  return request('/api/macro')
+export function fetchAllMacro(range: TimeRange = '10Y'): Promise<MacroResponse> {
+  return request(`/api/macro?range=${range}`)
 }
 
-export function fetchCpiBreakdown(): Promise<CpiBreakdownResponse> {
-  return request('/api/cpi-breakdown')
+export function fetchCpiBreakdown(range: TimeRange = '10Y'): Promise<CpiBreakdownResponse> {
+  return request(`/api/cpi-breakdown?range=${range}`)
 }
 
-export function fetchSpreads(): Promise<SpreadResponse> {
-  return request('/api/spreads')
+export function fetchSpreads(range: TimeRange = '10Y'): Promise<SpreadResponse> {
+  return request(`/api/spreads?range=${range}`)
 }
 
-export function fetchGrocery(): Promise<GroceryResponse> {
-  return request('/api/grocery')
+export function fetchGrocery(range: TimeRange = '10Y'): Promise<GroceryResponse> {
+  return request(`/api/grocery?range=${range}`)
 }
 
 export function fetchHealth(): Promise<HealthResponse> {
   return request('/api/health')
 }
 
-export function fetchLabor(): Promise<LaborResponse> {
-  return request('/api/labor')
+export function fetchLabor(range: TimeRange = '10Y'): Promise<LaborResponse> {
+  return request(`/api/labor?range=${range}`)
 }
 
-export function fetchHousing(): Promise<HousingResponse> {
-  return request('/api/housing')
+export function fetchHousing(range: TimeRange = '10Y'): Promise<HousingResponse> {
+  return request(`/api/housing?range=${range}`)
 }
 
-export function fetchRecessionSignals(): Promise<RecessionSignalsResponse> {
-  return request('/api/recession-signals')
+export function fetchRecessionSignals(range: TimeRange = '10Y'): Promise<RecessionSignalsResponse> {
+  return request(`/api/recession-signals?range=${range}`)
 }
 
-export function fetchInflation(): Promise<InflationResponse> {
-  return request('/api/inflation')
+export function fetchInflation(range: TimeRange = '10Y'): Promise<InflationResponse> {
+  return request(`/api/inflation?range=${range}`)
 }
 
-export function fetchCreditConditions(): Promise<CreditConditionsResponse> {
-  return request('/api/credit-conditions')
+export function fetchCreditConditions(range: TimeRange = '10Y'): Promise<CreditConditionsResponse> {
+  return request(`/api/credit-conditions?range=${range}`)
 }
 
-export function fetchActivity(): Promise<ActivityResponse> {
-  return request('/api/activity')
+export function fetchActivity(range: TimeRange = '10Y'): Promise<ActivityResponse> {
+  return request(`/api/activity?range=${range}`)
 }
 
-export function fetchMarkets(): Promise<MarketsResponse> {
-  return request('/api/markets')
+export function fetchMarkets(range: TimeRange = '10Y'): Promise<MarketsResponse> {
+  return request(`/api/markets?range=${range}`)
 }
 
-export function fetchConsumer(): Promise<ConsumerResponse> {
-  return request('/api/consumer')
+export function fetchConsumer(range: TimeRange = '10Y'): Promise<ConsumerResponse> {
+  return request(`/api/consumer?range=${range}`)
 }
 
 export function fetchMetrics(): Promise<MetricsResponse> {

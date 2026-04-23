@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Box, Stack } from '@mui/material'
 import { useGrocery } from '../hooks/useFredQueries'
+import { useFilters } from '../state/filters'
 import { PanelCard } from './shared/PanelCard'
 import { KpiChip } from './shared/KpiChip'
 import { LoadingState } from './shared/LoadingState'
@@ -11,7 +12,8 @@ import { latest, trendDirection } from '../utils/series'
 import { palette } from '../theme'
 
 export function GroceryPanel() {
-  const grocery = useGrocery()
+  const { filters } = useFilters()
+  const grocery = useGrocery(filters.range)
 
   const items = grocery.data?.items ?? []
   const series = grocery.data?.series ?? {}

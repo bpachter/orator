@@ -1,10 +1,13 @@
 import type { FredObs, TimeRange } from '../types'
 
 const RANGE_YEARS: Record<Exclude<TimeRange, 'MAX'>, number> = {
+  '6M': 0.5,
   '1Y': 1,
-  '2Y': 2,
+  '3Y': 3,
   '5Y': 5,
   '10Y': 10,
+  '20Y': 20,
+  '30Y': 30,
 }
 
 export function rangeStartDate(range: TimeRange, today: Date = new Date()): Date {

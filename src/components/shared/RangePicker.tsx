@@ -8,13 +8,16 @@ interface RangePickerProps {
   size?: 'small' | 'medium'
 }
 
-const ALL_RANGES: TimeRange[] = ['1Y', '2Y', '5Y', '10Y', 'MAX']
+const ALL_RANGES: TimeRange[] = ['6M', '1Y', '3Y', '5Y', '10Y', '20Y', '30Y', 'MAX']
 
 const HELP: Record<TimeRange, string> = {
+  '6M': 'Past 6 months',
   '1Y': 'Past 1 year',
-  '2Y': 'Past 2 years',
+  '3Y': 'Past 3 years',
   '5Y': 'Past 5 years',
   '10Y': 'Past 10 years',
+  '20Y': 'Past 20 years',
+  '30Y': 'Past 30 years',
   MAX: 'Maximum available history',
 }
 

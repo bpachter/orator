@@ -1,8 +1,10 @@
 import { useActivity } from '../hooks/useFredQueries'
+import { useFilters } from '../state/filters'
 import { SeriesGridPanel } from './shared/SeriesGridPanel'
 
 export function ActivityPanel() {
-  const q = useActivity()
+  const { filters } = useFilters()
+  const q = useActivity(filters.range)
   return (
     <SeriesGridPanel
       query={q}

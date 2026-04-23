@@ -42,20 +42,20 @@ export function useYieldSurface(
   })
 }
 
-export function useMacro(): UseQueryResult<MacroResponse> {
-  return useQuery({ queryKey: ['macro'], queryFn: fetchAllMacro, staleTime: FIVE_MIN })
+export function useMacro(range: TimeRange = '10Y'): UseQueryResult<MacroResponse> {
+  return useQuery({ queryKey: ['macro', range], queryFn: () => fetchAllMacro(range), staleTime: FIVE_MIN })
 }
 
-export function useCpiBreakdown(): UseQueryResult<CpiBreakdownResponse> {
-  return useQuery({ queryKey: ['cpi-breakdown'], queryFn: fetchCpiBreakdown, staleTime: FIVE_MIN })
+export function useCpiBreakdown(range: TimeRange = '10Y'): UseQueryResult<CpiBreakdownResponse> {
+  return useQuery({ queryKey: ['cpi-breakdown', range], queryFn: () => fetchCpiBreakdown(range), staleTime: FIVE_MIN })
 }
 
-export function useSpreads(): UseQueryResult<SpreadResponse> {
-  return useQuery({ queryKey: ['spreads'], queryFn: fetchSpreads, staleTime: FIVE_MIN })
+export function useSpreads(range: TimeRange = '10Y'): UseQueryResult<SpreadResponse> {
+  return useQuery({ queryKey: ['spreads', range], queryFn: () => fetchSpreads(range), staleTime: FIVE_MIN })
 }
 
-export function useGrocery(): UseQueryResult<GroceryResponse> {
-  return useQuery({ queryKey: ['grocery'], queryFn: fetchGrocery, staleTime: FIVE_MIN })
+export function useGrocery(range: TimeRange = '10Y'): UseQueryResult<GroceryResponse> {
+  return useQuery({ queryKey: ['grocery', range], queryFn: () => fetchGrocery(range), staleTime: FIVE_MIN })
 }
 
 export function useHealth(): UseQueryResult<HealthResponse> {
@@ -67,38 +67,38 @@ export function useHealth(): UseQueryResult<HealthResponse> {
   })
 }
 
-export function useLabor(): UseQueryResult<LaborResponse> {
-  return useQuery({ queryKey: ['labor'], queryFn: fetchLabor, staleTime: FIVE_MIN })
+export function useLabor(range: TimeRange = '10Y'): UseQueryResult<LaborResponse> {
+  return useQuery({ queryKey: ['labor', range], queryFn: () => fetchLabor(range), staleTime: FIVE_MIN })
 }
 
-export function useHousing(): UseQueryResult<HousingResponse> {
-  return useQuery({ queryKey: ['housing'], queryFn: fetchHousing, staleTime: FIVE_MIN })
+export function useHousing(range: TimeRange = '10Y'): UseQueryResult<HousingResponse> {
+  return useQuery({ queryKey: ['housing', range], queryFn: () => fetchHousing(range), staleTime: FIVE_MIN })
 }
 
-export function useRecessionSignals(): UseQueryResult<RecessionSignalsResponse> {
+export function useRecessionSignals(range: TimeRange = '10Y'): UseQueryResult<RecessionSignalsResponse> {
   return useQuery({
-    queryKey: ['recession-signals'],
-    queryFn: fetchRecessionSignals,
+    queryKey: ['recession-signals', range],
+    queryFn: () => fetchRecessionSignals(range),
     staleTime: FIVE_MIN,
   })
 }
 
-export function useInflation(): UseQueryResult<InflationResponse> {
-  return useQuery({ queryKey: ['inflation'], queryFn: fetchInflation, staleTime: FIVE_MIN })
+export function useInflation(range: TimeRange = '10Y'): UseQueryResult<InflationResponse> {
+  return useQuery({ queryKey: ['inflation', range], queryFn: () => fetchInflation(range), staleTime: FIVE_MIN })
 }
 
-export function useCreditConditions(): UseQueryResult<CreditConditionsResponse> {
-  return useQuery({ queryKey: ['credit-conditions'], queryFn: fetchCreditConditions, staleTime: FIVE_MIN })
+export function useCreditConditions(range: TimeRange = '10Y'): UseQueryResult<CreditConditionsResponse> {
+  return useQuery({ queryKey: ['credit-conditions', range], queryFn: () => fetchCreditConditions(range), staleTime: FIVE_MIN })
 }
 
-export function useActivity(): UseQueryResult<ActivityResponse> {
-  return useQuery({ queryKey: ['activity'], queryFn: fetchActivity, staleTime: FIVE_MIN })
+export function useActivity(range: TimeRange = '10Y'): UseQueryResult<ActivityResponse> {
+  return useQuery({ queryKey: ['activity', range], queryFn: () => fetchActivity(range), staleTime: FIVE_MIN })
 }
 
-export function useMarkets(): UseQueryResult<MarketsResponse> {
-  return useQuery({ queryKey: ['markets'], queryFn: fetchMarkets, staleTime: FIVE_MIN })
+export function useMarkets(range: TimeRange = '10Y'): UseQueryResult<MarketsResponse> {
+  return useQuery({ queryKey: ['markets', range], queryFn: () => fetchMarkets(range), staleTime: FIVE_MIN })
 }
 
-export function useConsumer(): UseQueryResult<ConsumerResponse> {
-  return useQuery({ queryKey: ['consumer'], queryFn: fetchConsumer, staleTime: FIVE_MIN })
+export function useConsumer(range: TimeRange = '10Y'): UseQueryResult<ConsumerResponse> {
+  return useQuery({ queryKey: ['consumer', range], queryFn: () => fetchConsumer(range), staleTime: FIVE_MIN })
 }

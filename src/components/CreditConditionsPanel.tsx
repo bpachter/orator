@@ -1,8 +1,10 @@
 import { useCreditConditions } from '../hooks/useFredQueries'
+import { useFilters } from '../state/filters'
 import { SeriesGridPanel } from './shared/SeriesGridPanel'
 
 export function CreditConditionsPanel() {
-  const q = useCreditConditions()
+  const { filters } = useFilters()
+  const q = useCreditConditions(filters.range)
   return (
     <SeriesGridPanel
       query={q}

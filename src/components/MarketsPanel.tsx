@@ -1,8 +1,10 @@
 import { useMarkets } from '../hooks/useFredQueries'
+import { useFilters } from '../state/filters'
 import { SeriesGridPanel } from './shared/SeriesGridPanel'
 
 export function MarketsPanel() {
-  const q = useMarkets()
+  const { filters } = useFilters()
+  const q = useMarkets(filters.range)
   return (
     <SeriesGridPanel
       query={q}

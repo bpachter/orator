@@ -30,8 +30,18 @@ def get_api_key() -> str:
 def get_start_for_range(range_str: str) -> str:
     if range_str == "MAX":
         return "1990-01-01"
-    years = {"1Y": 1, "2Y": 2, "5Y": 5, "10Y": 10}.get(range_str, 10)
-    return (date.today() - timedelta(days=365 * years)).isoformat()
+    # Map of range string to months (for flexibility with non-year boundaries)
+    range_map = {
+        "6M": 6,
+        "1Y": 12,
+        "3Y": 36,
+        "5Y": 60,
+        "10Y": 120,
+        "20Y": 240,
+        "30Y": 360,
+    }
+    months = range_map.get(range_str, 120)  # default to 10Y
+    return (date.today() - timedelta(days=int(months * 30.44))).isoformat()
 
 
 def today_iso() -> str:

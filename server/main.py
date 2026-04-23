@@ -202,13 +202,13 @@ def yield_curve(range: str = "5Y") -> YieldCurveResponse:
 
 
 @app.get("/api/macro", response_model=MacroResponse, tags=["macro"])
-def macro() -> MacroResponse:
-    cache_key = "macro"
+def macro(range: str = "10Y") -> MacroResponse:
+    cache_key = f"macro:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
-    start = get_start_for_range("10Y")
+    start = get_start_for_range(range)
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
     for s in MACRO_SERIES:
@@ -221,13 +221,13 @@ def macro() -> MacroResponse:
 
 
 @app.get("/api/cpi-breakdown", response_model=CpiBreakdownResponse, tags=["inflation"])
-def cpi_breakdown() -> CpiBreakdownResponse:
-    cache_key = "cpi-breakdown"
+def cpi_breakdown(range: str = "10Y") -> CpiBreakdownResponse:
+    cache_key = f"cpi-breakdown:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
-    start = get_start_for_range("10Y")
+    start = get_start_for_range(range)
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
     for s in CPI_COMPONENTS:
@@ -244,13 +244,13 @@ def cpi_breakdown() -> CpiBreakdownResponse:
 
 
 @app.get("/api/spreads", response_model=SpreadsResponse, tags=["rates"])
-def spreads() -> SpreadsResponse:
-    cache_key = "spreads"
+def spreads(range: str = "10Y") -> SpreadsResponse:
+    cache_key = f"spreads:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
-    start = get_start_for_range("MAX")
+    start = get_start_for_range(range)
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
     for s in SPREAD_SERIES:
@@ -263,13 +263,13 @@ def spreads() -> SpreadsResponse:
 
 
 @app.get("/api/grocery", response_model=GroceryResponse, tags=["consumer"])
-def grocery() -> GroceryResponse:
-    cache_key = "grocery"
+def grocery(range: str = "10Y") -> GroceryResponse:
+    cache_key = f"grocery:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
-    start = get_start_for_range("10Y")
+    start = get_start_for_range(range)
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
     for s in GROCERY_SERIES:
@@ -295,13 +295,13 @@ def grocery() -> GroceryResponse:
 
 
 @app.get("/api/labor", response_model=LaborResponse, tags=["labor"])
-def labor() -> LaborResponse:
-    cache_key = "labor"
+def labor(range: str = "10Y") -> LaborResponse:
+    cache_key = f"labor:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
-    start = get_start_for_range("10Y")
+    start = get_start_for_range(range)
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
     for s in LABOR_SERIES:
@@ -318,13 +318,13 @@ def labor() -> LaborResponse:
 
 
 @app.get("/api/housing", response_model=HousingResponse, tags=["housing"])
-def housing() -> HousingResponse:
-    cache_key = "housing"
+def housing(range: str = "10Y") -> HousingResponse:
+    cache_key = f"housing:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
-    start = get_start_for_range("10Y")
+    start = get_start_for_range(range)
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
     for s in HOUSING_SERIES:
@@ -345,13 +345,13 @@ def housing() -> HousingResponse:
     response_model=RecessionSignalsResponse,
     tags=["analytics"],
 )
-def recession_signals() -> RecessionSignalsResponse:
-    cache_key = "recession-signals"
+def recession_signals(range: str = "MAX") -> RecessionSignalsResponse:
+    cache_key = f"recession-signals:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
-    start = get_start_for_range("10Y")
+    start = get_start_for_range(range)
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
     for s in RECESSION_INPUT_SERIES:
@@ -409,13 +409,13 @@ def metrics() -> MetricsResponse:
 
 
 @app.get("/api/inflation", response_model=InflationResponse, tags=["inflation"])
-def inflation() -> InflationResponse:
-    cache_key = "inflation"
+def inflation(range: str = "10Y") -> InflationResponse:
+    cache_key = f"inflation:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
-    start = get_start_for_range("10Y")
+    start = get_start_for_range(range)
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
     for s in INFLATION_SERIES:
@@ -433,13 +433,13 @@ def inflation() -> InflationResponse:
 
 
 @app.get("/api/credit-conditions", response_model=CreditConditionsResponse, tags=["credit"])
-def credit_conditions() -> CreditConditionsResponse:
-    cache_key = "credit-conditions"
+def credit_conditions(range: str = "10Y") -> CreditConditionsResponse:
+    cache_key = f"credit-conditions:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
-    start = get_start_for_range("10Y")
+    start = get_start_for_range(range)
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
     for s in CREDIT_CONDITIONS_SERIES:
@@ -457,13 +457,13 @@ def credit_conditions() -> CreditConditionsResponse:
 
 
 @app.get("/api/activity", response_model=ActivityResponse, tags=["business"])
-def activity() -> ActivityResponse:
-    cache_key = "activity"
+def activity(range: str = "10Y") -> ActivityResponse:
+    cache_key = f"activity:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
-    start = get_start_for_range("10Y")
+    start = get_start_for_range(range)
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
     for s in ACTIVITY_SERIES:
@@ -481,13 +481,13 @@ def activity() -> ActivityResponse:
 
 
 @app.get("/api/markets", response_model=MarketsResponse, tags=["markets"])
-def markets() -> MarketsResponse:
-    cache_key = "markets"
+def markets(range: str = "10Y") -> MarketsResponse:
+    cache_key = f"markets:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
-    start = get_start_for_range("10Y")
+    start = get_start_for_range(range)
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
     for s in MARKETS_SERIES:
@@ -505,13 +505,13 @@ def markets() -> MarketsResponse:
 
 
 @app.get("/api/consumer", response_model=ConsumerResponse, tags=["consumer"])
-def consumer() -> ConsumerResponse:
-    cache_key = "consumer"
+def consumer(range: str = "10Y") -> ConsumerResponse:
+    cache_key = f"consumer:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
-    start = get_start_for_range("10Y")
+    start = get_start_for_range(range)
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
     for s in CONSUMER_SERIES:

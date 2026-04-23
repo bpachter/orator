@@ -127,7 +127,7 @@ export default function App() {
   const health = useHealth()
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  const showRangePicker = filters.view === 'yield-curve'
+  const showRangePicker = true
   const currentItem = ALL_NAV_ITEMS.find((i) => i.value === filters.view)
   const currentGroup = NAV_GROUPS.find((g) => g.items.some((i) => i.value === filters.view))
 
@@ -224,9 +224,18 @@ function SidebarContent({ currentView, onNavigate }: { currentView: ActiveView; 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Box sx={{ px: 2.5, py: 2, display: 'flex', alignItems: 'center', gap: 1.25, minHeight: 56 }}>
-        <Box sx={{ width: 28, height: 28, borderRadius: 1, bgcolor: 'primary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'background.default', fontWeight: 800, fontSize: 14 }}>
-          O
-        </Box>
+        <svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+          <defs>
+            <linearGradient id="orator-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#3b82f6" />
+              <stop offset="100%" stopColor="#1e40af" />
+            </linearGradient>
+          </defs>
+          <circle cx="14" cy="14" r="13" fill="url(#orator-grad)" />
+          <circle cx="14" cy="14" r="11" fill="white" opacity="0.12" />
+          <polyline points="6,17 10,13 14,15 18,9 22,11" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="14" cy="15" r="0.9" fill="white" opacity="0.8" />
+        </svg>
         <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: 3, fontSize: 15 }}>
           ORATOR
         </Typography>

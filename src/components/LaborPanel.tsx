@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Box, Stack } from '@mui/material'
 import type { FredObs } from '../types'
 import { useLabor } from '../hooks/useFredQueries'
+import { useFilters } from '../state/filters'
 import type { SeriesMetadata } from '../api/fred'
 import { PanelCard } from './shared/PanelCard'
 import { KpiChip } from './shared/KpiChip'
@@ -13,7 +14,8 @@ import { latest, trendDirection } from '../utils/series'
 import { palette } from '../theme'
 
 export function LaborPanel() {
-  const labor = useLabor()
+  const { filters } = useFilters()
+  const labor = useLabor(filters.range)
 
   if (labor.isLoading) {
     return (

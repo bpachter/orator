@@ -3,6 +3,7 @@ import { Box, Stack } from '@mui/material'
 import type Plotly from 'plotly.js'
 import type { FredObs } from '../types'
 import { useSpreads } from '../hooks/useFredQueries'
+import { useFilters } from '../state/filters'
 import { PanelCard } from './shared/PanelCard'
 import { KpiChip } from './shared/KpiChip'
 import { LoadingState } from './shared/LoadingState'
@@ -50,7 +51,8 @@ function recessionShapes(usrec: FredObs[]): Partial<Plotly.Shape>[] {
 }
 
 export function SpreadPanel() {
-  const spreads = useSpreads()
+  const { filters } = useFilters()
+  const spreads = useSpreads(filters.range)
 
   if (spreads.isLoading) {
     return (
