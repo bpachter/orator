@@ -124,7 +124,19 @@ class CreditConditionsResponse(BaseModel):
     metadata: list[SeriesMeta]
 
 
-class ISMPMIResponse(BaseModel):
+class ActivityResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]
+
+
+class MarketsResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]
+
+
+class ConsumerResponse(BaseModel):
     updated: str
     series: dict[str, list[Observation]]
     metadata: list[SeriesMeta]

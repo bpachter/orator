@@ -20,15 +20,17 @@ from .analytics import recession_composite, sahm_rule, yield_curve_inverted
 from .errors import ApiError, error_response
 from .fred_client import fetch_series, get_start_for_range, today_iso
 from .schemas import (
+    ActivityResponse,
+    ConsumerResponse,
     CpiBreakdownResponse,
     CreditConditionsResponse,
     GroceryResponse,
     HealthResponse,
     HousingResponse,
     InflationResponse,
-    ISMPMIResponse,
     LaborResponse,
     MacroResponse,
+    MarketsResponse,
     MetricsResponse,
     RecessionSignal,
     RecessionSignalsResponse,
@@ -37,14 +39,16 @@ from .schemas import (
     YieldCurveResponse,
 )
 from .series import (
+    ACTIVITY_SERIES,
+    CONSUMER_SERIES,
     CPI_COMPONENTS,
     CREDIT_CONDITIONS_SERIES,
     GROCERY_SERIES,
     HOUSING_SERIES,
     INFLATION_SERIES,
-    ISM_PMI_SERIES,
     LABOR_SERIES,
     MACRO_SERIES,
+    MARKETS_SERIES,
     RECESSION_INPUT_SERIES,
     SPREAD_SERIES,
     YIELD_MATURITIES,
@@ -452,9 +456,9 @@ def credit_conditions() -> CreditConditionsResponse:
     return result
 
 
-@app.get("/api/ism-pmi", response_model=ISMPMIResponse, tags=["business"])
-def ism_pmi() -> ISMPMIResponse:
-    cache_key = "ism-pmi"
+@app.get("/api/activity", response_model=ActivityResponse, tags=["business"])
+def activity() -> ActivityResponse:
+    cache_key = "activity"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
@@ -462,15 +466,63 @@ def ism_pmi() -> ISMPMIResponse:
     start = get_start_for_range("10Y")
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
-    for s in ISM_PMI_SERIES:
+    for s in ACTIVITY_SERIES:
         obs = fetch_series(s["id"], start, end)
         series_out[s["id"]] = obs
 
     metadata = [
         SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
-        for s in ISM_PMI_SERIES
+        for s in ACTIVITY_SERIES
     ]
 
-    result = ISMPMIResponse(updated=today_iso(), series=series_out, metadata=metadata)
+    result = ActivityResponse(updated=today_iso(), series=series_out, metadata=metadata)
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/markets", response_model=MarketsResponse, tags=["markets"])
+def markets() -> MarketsResponse:
+    cache_key = "markets"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range("10Y")
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
+    for s in MARKETS_SERIES:
+        obs = fetch_series(s["id"], start, end)
+        series_out[s["id"]] = obs
+
+    metadata = [
+        SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
+        for s in MARKETS_SERIES
+    ]
+
+    result = MarketsResponse(updated=today_iso(), series=series_out, metadata=metadata)
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/consumer", response_model=ConsumerResponse, tags=["consumer"])
+def consumer() -> ConsumerResponse:
+    cache_key = "consumer"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range("10Y")
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
+    for s in CONSUMER_SERIES:
+        obs = fetch_series(s["id"], start, end)
+        series_out[s["id"]] = yoy(obs) if s.get("yoy") else obs
+
+    metadata = [
+        SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
+        for s in CONSUMER_SERIES
+    ]
+
+    result = ConsumerResponse(updated=today_iso(), series=series_out, metadata=metadata)
     cache.store(cache_key, result)
     return result

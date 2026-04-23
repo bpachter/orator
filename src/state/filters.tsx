@@ -30,7 +30,9 @@ const VALID_VIEWS: ActiveView[] = [
   'recession',
   'inflation',
   'credit',
-  'ism',
+  'activity',
+  'markets',
+  'consumer',
 ]
 const VALID_RANGES: TimeRange[] = ['1Y', '2Y', '5Y', '10Y', 'MAX']
 

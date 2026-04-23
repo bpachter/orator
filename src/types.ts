@@ -16,7 +16,9 @@ export type ActiveView =
   | 'recession'
   | 'inflation'
   | 'credit'
-  | 'ism'
+  | 'activity'
+  | 'markets'
+  | 'consumer'
 
 export interface YieldSurface {
   dates: string[]

@@ -1,26 +1,30 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 import {
+  fetchActivity,
   fetchAllMacro,
+  fetchConsumer,
   fetchCpiBreakdown,
   fetchCreditConditions,
   fetchGrocery,
   fetchHealth,
   fetchHousing,
   fetchInflation,
-  fetchISMPMI,
   fetchLabor,
+  fetchMarkets,
   fetchRecessionSignals,
   fetchSpreads,
   fetchYieldSurface,
+  type ActivityResponse,
+  type ConsumerResponse,
   type CpiBreakdownResponse,
   type CreditConditionsResponse,
   type GroceryResponse,
   type HealthResponse,
   type HousingResponse,
   type InflationResponse,
-  type ISMPMIResponse,
   type LaborResponse,
   type MacroResponse,
+  type MarketsResponse,
   type RecessionSignalsResponse,
   type SpreadResponse,
 } from '../api/fred'
@@ -87,6 +91,14 @@ export function useCreditConditions(): UseQueryResult<CreditConditionsResponse> 
   return useQuery({ queryKey: ['credit-conditions'], queryFn: fetchCreditConditions, staleTime: FIVE_MIN })
 }
 
-export function useISMPMI(): UseQueryResult<ISMPMIResponse> {
-  return useQuery({ queryKey: ['ism-pmi'], queryFn: fetchISMPMI, staleTime: FIVE_MIN })
+export function useActivity(): UseQueryResult<ActivityResponse> {
+  return useQuery({ queryKey: ['activity'], queryFn: fetchActivity, staleTime: FIVE_MIN })
+}
+
+export function useMarkets(): UseQueryResult<MarketsResponse> {
+  return useQuery({ queryKey: ['markets'], queryFn: fetchMarkets, staleTime: FIVE_MIN })
+}
+
+export function useConsumer(): UseQueryResult<ConsumerResponse> {
+  return useQuery({ queryKey: ['consumer'], queryFn: fetchConsumer, staleTime: FIVE_MIN })
 }

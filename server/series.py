@@ -107,6 +107,8 @@ INFLATION_SERIES: list[SeriesDef] = [
     {"id": "PPIACO", "label": "PPI (All Commodities, YoY %)", "color": "#e8b84b", "unit": "%", "yoy": True},
     {"id": "PCEPI", "label": "PCE (Headline, YoY %)", "color": "#06b6d4", "unit": "%", "yoy": True},
     {"id": "PCEPILFE", "label": "PCE Core (ex Food & Energy, YoY %)", "color": "#8b5cf6", "unit": "%", "yoy": True},
+    {"id": "IR", "label": "Import Price Index (YoY %)", "color": "#22c55e", "unit": "%", "yoy": True},
+    {"id": "IQ", "label": "Export Price Index (YoY %)", "color": "#a78bfa", "unit": "%", "yoy": True},
 ]
 
 CREDIT_CONDITIONS_SERIES: list[SeriesDef] = [
@@ -116,7 +118,29 @@ CREDIT_CONDITIONS_SERIES: list[SeriesDef] = [
     {"id": "FEDFUNDS", "label": "Fed Funds Rate", "color": "#e8b84b", "unit": "%"},
 ]
 
-ISM_PMI_SERIES: list[SeriesDef] = [
-    {"id": "MMNRNJ", "label": "ISM Manufacturing PMI", "color": "#4a9eff", "unit": "index"},
-    {"id": "NPMIDX", "label": "ISM Services PMI", "color": "#22c55e", "unit": "index"},
+ACTIVITY_SERIES: list[SeriesDef] = [
+    {"id": "INDPRO", "label": "Industrial Production Index", "color": "#4a9eff", "unit": "index"},
+    {"id": "IPMAN", "label": "Industrial Production: Manufacturing", "color": "#22c55e", "unit": "index"},
+    {"id": "TCU", "label": "Capacity Utilization", "color": "#e8b84b", "unit": "%"},
+    {"id": "NEWORDER", "label": "New Orders: Nondefense Capital Goods (ex Aircraft)", "color": "#f97316", "unit": "$M"},
+    {"id": "DGORDER", "label": "Durable Goods: New Orders", "color": "#a78bfa", "unit": "$M"},
+    {"id": "AWHNONAG", "label": "Avg Weekly Hours: Production & Nonsupervisory", "color": "#06b6d4", "unit": "hours"},
+]
+
+MARKETS_SERIES: list[SeriesDef] = [
+    {"id": "SP500", "label": "S&P 500 Index", "color": "#22c55e", "unit": "index"},
+    {"id": "VIXCLS", "label": "VIX Volatility Index", "color": "#ef4444", "unit": "index"},
+    {"id": "DCOILWTICO", "label": "Crude Oil (WTI)", "color": "#e8b84b", "unit": "$/bbl"},
+    {"id": "GOLDAMGBD228NLBM", "label": "Gold Fixing Price (London AM)", "color": "#f59e0b", "unit": "$/oz"},
+    {"id": "DEXUSEU", "label": "USD / EUR Exchange Rate", "color": "#4a9eff", "unit": "USD"},
+    {"id": "DTWEXBGS", "label": "Trade-Weighted USD (Broad)", "color": "#a78bfa", "unit": "index"},
+]
+
+CONSUMER_SERIES: list[SeriesDef] = [
+    {"id": "RSXFS", "label": "Retail Sales (ex Food Services, YoY %)", "color": "#22c55e", "unit": "%", "yoy": True},
+    {"id": "UMCSENT", "label": "U. Michigan Consumer Sentiment", "color": "#4a9eff", "unit": "index"},
+    {"id": "PSAVERT", "label": "Personal Saving Rate", "color": "#e8b84b", "unit": "%"},
+    {"id": "PCE", "label": "Personal Consumption Expenditures (YoY %)", "color": "#f97316", "unit": "%", "yoy": True},
+    {"id": "DSPIC96", "label": "Real Disposable Personal Income (YoY %)", "color": "#a78bfa", "unit": "%", "yoy": True},
+    {"id": "TOTALSL", "label": "Total Consumer Credit Outstanding (YoY %)", "color": "#06b6d4", "unit": "%", "yoy": True},
 ]

@@ -101,7 +101,19 @@ export interface CreditConditionsResponse {
   metadata: SeriesMetadata[]
 }
 
-export interface ISMPMIResponse {
+export interface ActivityResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
+export interface MarketsResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
+export interface ConsumerResponse {
   updated: string
   series: Record<string, FredObs[]>
   metadata: SeriesMetadata[]
@@ -176,8 +188,16 @@ export function fetchCreditConditions(): Promise<CreditConditionsResponse> {
   return request('/api/credit-conditions')
 }
 
-export function fetchISMPMI(): Promise<ISMPMIResponse> {
-  return request('/api/ism-pmi')
+export function fetchActivity(): Promise<ActivityResponse> {
+  return request('/api/activity')
+}
+
+export function fetchMarkets(): Promise<MarketsResponse> {
+  return request('/api/markets')
+}
+
+export function fetchConsumer(): Promise<ConsumerResponse> {
+  return request('/api/consumer')
 }
 
 export function fetchMetrics(): Promise<MetricsResponse> {
