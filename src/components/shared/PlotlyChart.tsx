@@ -13,6 +13,7 @@ interface PlotlyChartProps {
   config?: PlotlyConfig
   minHeight?: number | string
   ariaLabel?: string
+  shapes?: Partial<Plotly.Shape>[]
 }
 
 export const baseLayout: PlotlyLayout = {
@@ -41,6 +42,7 @@ export function PlotlyChart({
   config,
   minHeight = 220,
   ariaLabel,
+  shapes,
 }: PlotlyChartProps) {
   const ref = useRef<HTMLDivElement | null>(null)
 
@@ -57,7 +59,7 @@ export function PlotlyChart({
       P.react(
         ref.current,
         traces,
-        { ...baseLayout, ...layout },
+        { ...baseLayout, ...layout, shapes },
         { ...baseConfig, ...config },
       )
     })
@@ -72,7 +74,7 @@ export function PlotlyChart({
         }
       }
     }
-  }, [traces, layout, config])
+  }, [traces, layout, config, shapes])
 
   return (
     <Box

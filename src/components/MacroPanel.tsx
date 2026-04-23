@@ -11,6 +11,7 @@ import { ErrorState } from './shared/ErrorState'
 import { SectionHeader } from './shared/SectionHeader'
 import { PlotlyChart, type PlotlyTrace } from './shared/PlotlyChart'
 import { latest, trendDirection } from '../utils/series'
+import { getRecessionShapes } from '../utils/recessions'
 import { palette } from '../theme'
 
 export function MacroPanel() {
@@ -86,6 +87,12 @@ function MacroChart({ label, unit, color, data }: MacroChartProps) {
     ]
   }, [data, color, unit])
 
+  const shapes = useMemo(() => {
+    if (!data.length) return []
+    const dates = data.map((o) => o.date).sort()
+    return getRecessionShapes(dates[0], dates[dates.length - 1])
+  }, [data])
+
   const layout = useMemo(
     () => ({
       yaxis: {
@@ -126,7 +133,7 @@ function MacroChart({ label, unit, color, data }: MacroChartProps) {
       {data.length === 0 ? (
         <LoadingState message="No data" height={160} />
       ) : (
-        <PlotlyChart traces={traces} layout={layout} minHeight={180} ariaLabel={`${label} chart`} />
+        <PlotlyChart traces={traces} layout={layout} shapes={shapes} minHeight={180} ariaLabel={`${label} chart`} />
       )}
     </PanelCard>
   )

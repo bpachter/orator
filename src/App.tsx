@@ -40,6 +40,7 @@ import { useTheme } from '@mui/material/styles'
 import type { ActiveView } from './types'
 import { useFilters } from './state/filters'
 import { RangePicker } from './components/shared/RangePicker'
+import { SeriesSearch } from './components/shared/SeriesSearch'
 import { LoadingState } from './components/shared/LoadingState'
 import { ErrorBoundary } from './components/shared/ErrorBoundary'
 import { useHealth } from './hooks/useFredQueries'
@@ -177,6 +178,7 @@ export default function App() {
             </Stack>
             <Stack direction="row" alignItems="center" spacing={1.5}>
               {showRangePicker && <RangePicker value={filters.range} onChange={setRange} />}
+              <SeriesSearch />
               <ApiStatus
                 healthy={health.data?.status === 'ok' && Boolean(health.data?.fred_key)}
                 loading={health.isLoading}
