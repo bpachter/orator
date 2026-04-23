@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { Box, Chip, LinearProgress, Stack, Typography } from '@mui/material'
 import { useRecessionSignals } from '../hooks/useFredQueries'
 import { PanelCard } from './shared/PanelCard'
@@ -45,39 +44,30 @@ export function RecessionSignalsPanel() {
 
   const unrate = data.series['UNRATE'] ?? []
   const t10y2y = data.series['T10Y2Y'] ?? []
-  
-  const blueColor = palette.series.blue
-  const greenColor = palette.series.green
 
-  const unrateTrace = useMemo<PlotlyTrace[]>(
-    () => [
-      {
-        type: 'scatter',
-        mode: 'lines',
-        x: unrate.map((o) => o.date),
-        y: unrate.map((o) => o.value),
-        line: { color: blueColor, width: 1.75, shape: 'spline' },
-        fill: 'tozeroy',
-        fillcolor: blueColor + '18',
-        hovertemplate: '%{x}: %{y:.2f}%<extra></extra>',
-      },
-    ],
-    [unrate, blueColor],
-  )
+  const unrateTrace: PlotlyTrace[] = [
+    {
+      type: 'scatter',
+      mode: 'lines',
+      x: unrate.map((o) => o.date),
+      y: unrate.map((o) => o.value),
+      line: { color: palette.series.blue, width: 1.75, shape: 'spline' },
+      fill: 'tozeroy',
+      fillcolor: palette.series.blue + '18',
+      hovertemplate: '%{x}: %{y:.2f}%<extra></extra>',
+    },
+  ]
 
-  const spreadTrace = useMemo<PlotlyTrace[]>(
-    () => [
-      {
-        type: 'scatter',
-        mode: 'lines',
-        x: t10y2y.map((o) => o.date),
-        y: t10y2y.map((o) => o.value),
-        line: { color: greenColor, width: 1.75, shape: 'spline' },
-        hovertemplate: '%{x}: %{y:.2f}<extra></extra>',
-      },
-    ],
-    [t10y2y, greenColor],
-  )
+  const spreadTrace: PlotlyTrace[] = [
+    {
+      type: 'scatter',
+      mode: 'lines',
+      x: t10y2y.map((o) => o.date),
+      y: t10y2y.map((o) => o.value),
+      line: { color: palette.series.green, width: 1.75, shape: 'spline' },
+      hovertemplate: '%{x}: %{y:.2f}<extra></extra>',
+    },
+  ]
 
   return (
     <Stack spacing={2}>
