@@ -1,0 +1,1 @@
+import{F as t,j as e}from"./index-B-NwH7L0.js";import{S as n}from"./SeriesGridPanel-BxJliaGR.js";import"./SectionHeader-99Uix-yi.js";import"./PlotlyChart-CfRNEFyl.js";function a(){const i=t();return e.jsx(n,{query:i,eyebrow:"Financial Conditions",title:"Credit Conditions",subtitle:"High-yield spreads, lending rates, and policy rate"})}export{a as CreditConditionsPanel};

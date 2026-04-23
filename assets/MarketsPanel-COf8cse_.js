@@ -1,0 +1,1 @@
+import{H as e,j as i}from"./index-B-NwH7L0.js";import{S as r}from"./SeriesGridPanel-BxJliaGR.js";import"./SectionHeader-99Uix-yi.js";import"./PlotlyChart-CfRNEFyl.js";function l(){const t=e();return i.jsx(r,{query:t,eyebrow:"Financial Markets",title:"Markets & Commodities",subtitle:"Equities, volatility, oil, gold, and FX"})}export{l as MarketsPanel};

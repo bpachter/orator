@@ -1,0 +1,1 @@
+import{E as t,j as e}from"./index-B-NwH7L0.js";import{S as o}from"./SeriesGridPanel-BxJliaGR.js";import"./SectionHeader-99Uix-yi.js";import"./PlotlyChart-CfRNEFyl.js";function l(){const r=t();return e.jsx(o,{query:r,eyebrow:"Prices",title:"Inflation Indicators",subtitle:"Year-over-year growth across CPI, PCE, PPI, and trade prices"})}export{l as InflationPanel};
