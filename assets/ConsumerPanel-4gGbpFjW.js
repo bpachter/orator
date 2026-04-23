@@ -1,1 +1,0 @@
-import{I as s,j as n}from"./index-B-NwH7L0.js";import{S as t}from"./SeriesGridPanel-BxJliaGR.js";import"./SectionHeader-99Uix-yi.js";import"./PlotlyChart-CfRNEFyl.js";function a(){const e=s();return n.jsx(t,{query:e,eyebrow:"Households",title:"Consumer Spending & Sentiment",subtitle:"Retail sales, sentiment, savings, and personal income"})}export{a as ConsumerPanel};

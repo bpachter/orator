@@ -1,1 +1,0 @@
-import{G as i,j as r}from"./index-B-NwH7L0.js";import{S as s}from"./SeriesGridPanel-BxJliaGR.js";import"./SectionHeader-99Uix-yi.js";import"./PlotlyChart-CfRNEFyl.js";function u(){const t=i();return r.jsx(s,{query:t,eyebrow:"Business Activity",title:"Industrial & Business Activity",subtitle:"Production, capacity, durable goods, and capex orders"})}export{u as ActivityPanel};
