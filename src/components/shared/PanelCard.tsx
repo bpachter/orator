@@ -24,7 +24,9 @@ export function PanelCard({
   fullHeight = false,
   padding,
 }: PanelCardProps) {
-  const pad = padding ?? (dense ? 2 : 2.5)
+  // When no explicit padding is provided, use responsive defaults:
+  // 12px (1.5 × 8) on mobile → 16/20px on desktop for space efficiency.
+  const pad = padding ?? (dense ? { xs: 1.5, sm: 2 } : { xs: 1.5, sm: 2.5 })
   return (
     <Paper
       sx={{
@@ -32,7 +34,7 @@ export function PanelCard({
         display: 'flex',
         flexDirection: 'column',
         height: fullHeight ? '100%' : 'auto',
-        gap: dense ? 1 : 1.5,
+        gap: dense ? 1 : { xs: 1, sm: 1.5 },
       }}
     >
       {(title || action) && (

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import type Plotly from 'plotly.js'
-import { Box } from '@mui/material'
+import { Box, useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { palette } from '../../theme'
 import { useOratorPalette } from '../../state/themeMode'
 
@@ -62,6 +63,8 @@ export function PlotlyChart({
 }: PlotlyChartProps) {
   const ref = useRef<HTMLDivElement | null>(null)
   const themePalette = useOratorPalette()
+  const muiTheme = useTheme()
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'))
 
   const themedBaseLayout = useMemo<PlotlyLayout>(() => ({
     paper_bgcolor: 'rgba(0,0,0,0)',
@@ -73,6 +76,22 @@ export function PlotlyChart({
     hovermode: 'x unified',
   }), [themePalette])
 
+  /** On small screens: tighten margins, reduce font, hide the modebar to
+   *  maximise the plot area and prevent toolbar overflow. */
+  const mobileLayoutOverrides = useMemo<PlotlyLayout>(() => {
+    if (!isMobile) return {}
+    return {
+      font: { size: 9 },
+      margin: { l: 32, r: 6, t: 6, b: 24 },
+    }
+  }, [isMobile])
+
+  const mobileConfigOverrides = useMemo<PlotlyConfig>(() => {
+    if (!isMobile) return {}
+    // Always hide modebar on touch devices — it clutters the plot area
+    return { displayModeBar: false }
+  }, [isMobile])
+
   useEffect(() => {
     let disposed = false
     let plotlyMod: typeof Plotly | null = null
@@ -83,11 +102,24 @@ export function PlotlyChart({
       if (disposed || !ref.current) return
       const P = (mod as unknown as { default: typeof Plotly }).default ?? (mod as unknown as typeof Plotly)
       plotlyMod = P
+      // Build mobile-aware layout: mobile overrides win over themedBase,
+      // but explicit per-panel layout props still take final precedence.
+      const mergedLayout = { ...themedBaseLayout, ...mobileLayoutOverrides, ...layout, shapes }
+      if (isMobile && mergedLayout.margin) {
+        // Clamp any per-panel margin values to mobile-friendly maximums
+        const m = mergedLayout.margin as { l?: number; r?: number; t?: number; b?: number }
+        mergedLayout.margin = {
+          l: Math.min(m.l ?? 44, 36),
+          r: Math.min(m.r ?? 12, 8),
+          t: Math.min(m.t ?? 8, 8),
+          b: Math.min(m.b ?? 30, 32),
+        }
+      }
       P.react(
         ref.current,
         traces,
-        { ...themedBaseLayout, ...layout, shapes },
-        { ...baseConfig, ...config },
+        mergedLayout,
+        { ...baseConfig, ...mobileConfigOverrides, ...config },
       )
     })
 
@@ -101,7 +133,7 @@ export function PlotlyChart({
         }
       }
     }
-  }, [traces, layout, config, shapes, themedBaseLayout])
+  }, [traces, layout, config, shapes, themedBaseLayout, mobileLayoutOverrides, mobileConfigOverrides, isMobile])
 
   return (
     <Box

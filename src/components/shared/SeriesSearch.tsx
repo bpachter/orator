@@ -11,7 +11,9 @@ import {
   Chip,
   IconButton,
   InputAdornment,
+  useMediaQuery,
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import SearchIcon from '@mui/icons-material/Search'
 import { useFilters } from '../../state/filters'
 import type { ActiveView } from '../../types'
@@ -76,6 +78,8 @@ export function SeriesSearch({ open: controlledOpen, onOpenChange }: { open?: bo
     if (controlledOpen === undefined) setInternalOpen(next)
   }
   const [query, setQuery] = useState('')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const results = useMemo(() => {
     if (!query.trim()) return []
@@ -105,7 +109,7 @@ export function SeriesSearch({ open: controlledOpen, onOpenChange }: { open?: bo
         <SearchIcon fontSize="small" />
       </IconButton>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth fullScreen={isMobile}>
         <DialogTitle>Search Indicators</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -117,6 +121,8 @@ export function SeriesSearch({ open: controlledOpen, onOpenChange }: { open?: bo
               fullWidth
               size="small"
               variant="outlined"
+              // inputProps fontSize=16 prevents iOS from auto-zooming the viewport on focus
+              inputProps={{ style: { fontSize: 16 } }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">

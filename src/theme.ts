@@ -232,6 +232,34 @@ export function createOratorTheme(mode: ThemeMode) {
           },
         },
       },
+      MuiIconButton: {
+        styleOverrides: {
+          root: {
+            // Remove webkit tap highlight — MUI ripple handles visual feedback
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation',
+          },
+          sizeSmall: {
+            // On touch-primary devices enforce 44×44px minimum touch target
+            // (WCAG 2.5.5 / Apple HIG) without changing the visual icon size
+            '@media (hover: none) and (pointer: coarse)': {
+              padding: 10,
+            },
+          },
+        },
+      },
+      MuiListItemButton: {
+        styleOverrides: {
+          root: {
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation',
+            // Slightly taller list rows on touch devices for easier tapping
+            '@media (hover: none) and (pointer: coarse)': {
+              minHeight: 44,
+            },
+          },
+        },
+      },
     },
   })
 }

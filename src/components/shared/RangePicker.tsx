@@ -39,7 +39,17 @@ export function RangePicker({
     >
       {options.map((r) => (
         <Tooltip key={r} title={HELP[r]} arrow>
-          <ToggleButton value={r} aria-label={HELP[r]} sx={{ px: 1.5, py: 0.4 }}>
+          <ToggleButton
+            value={r}
+            aria-label={HELP[r]}
+            sx={{
+              px: 1.5,
+              py: { xs: 0.75, sm: 0.4 },
+              // Minimum 36px height on touch devices for comfortable tapping
+              minHeight: { xs: 36, sm: 'auto' },
+              touchAction: 'manipulation',
+            }}
+          >
             {r}
           </ToggleButton>
         </Tooltip>

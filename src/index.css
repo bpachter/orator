@@ -10,3 +10,39 @@ body,
 a {
   color: inherit;
 }
+
+/* ─── Touch & Mobile Enhancements ─── */
+
+/* Remove webkit tap highlight globally — MUI ripple handles visual feedback */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent page bounce / overscroll on mobile */
+body {
+  overscroll-behavior-y: contain;
+}
+
+/* Force touch-action: manipulation on all interactive elements to
+   eliminate the 300ms double-tap delay and prevent accidental zoom */
+button,
+[role="button"],
+a,
+select,
+label {
+  touch-action: manipulation;
+}
+
+/* Momentum scrolling on iOS for scrollable containers */
+.MuiDrawer-paper,
+.MuiList-root,
+.MuiDialogContent-root {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Improve legibility on small OLED/LCD displays */
+@media (max-width: 599px) {
+  .MuiTypography-h3 {
+    font-size: 1.125rem !important;
+  }
+}

@@ -6,7 +6,7 @@ import {
   Chip,
   Collapse,
   Divider,
-  Drawer,
+  SwipeableDrawer,
   IconButton,
   Link,
   List,
@@ -219,15 +219,18 @@ export default function App() {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
       {isCompact ? (
-        <Drawer
+        <SwipeableDrawer
           variant="temporary"
           open={mobileOpen}
+          onOpen={() => setMobileOpen(true)}
           onClose={() => setMobileOpen(false)}
           ModalProps={{ keepMounted: true }}
+          disableSwipeToOpen={false}
+          swipeAreaWidth={16}
           sx={{ '& .MuiDrawer-paper': { width: SIDEBAR_WIDTH, bgcolor: 'background.paper', borderRight: `1px solid ${palette.border}` } }}
         >
           {sidebar}
-        </Drawer>
+        </SwipeableDrawer>
       ) : (
         <Box
           component="nav"
@@ -241,7 +244,17 @@ export default function App() {
         <AppBar position="sticky" color="default" elevation={0} sx={{ borderBottom: `1px solid ${palette.border}` }}>
           <Toolbar disableGutters sx={{ px: { xs: 2, md: 3 }, minHeight: 56, gap: 2 }}>
             {isCompact && (
-              <IconButton edge="start" onClick={() => setMobileOpen(true)} aria-label="Open navigation" sx={{ mr: 1 }}>
+              <IconButton
+                edge="start"
+                onClick={() => setMobileOpen(true)}
+                aria-label="Open navigation"
+                sx={{
+                  mr: 1,
+                  // Ensure 44×44px minimum touch target on mobile
+                  minWidth: 44,
+                  minHeight: 44,
+                }}
+              >
                 <MenuIcon />
               </IconButton>
             )}
@@ -249,7 +262,20 @@ export default function App() {
               <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', lineHeight: 1.2 }}>
                 {currentGroup?.label ?? 'Dashboard'}
               </Typography>
-              <Typography variant="h6" component="h1" sx={{ fontWeight: 600, fontSize: 17, lineHeight: 1.3, color: 'text.primary' }}>
+              <Typography
+                variant="h6"
+                component="h1"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: { xs: 15, md: 17 },
+                  lineHeight: 1.3,
+                  color: 'text.primary',
+                  // Prevent long titles from pushing action buttons off-screen
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {currentItem?.label ?? 'Orator'}
               </Typography>
             </Stack>
@@ -425,7 +451,18 @@ function ApiStatus({ healthy, loading, error }: { healthy: boolean; loading: boo
         variant="outlined"
         icon={<CircleIcon sx={{ fontSize: 10, color: `${color} !important` }} />}
         label={label}
-        sx={{ borderColor: 'divider', color: 'text.secondary', fontSize: 11, height: 24 }}
+        sx={{
+          borderColor: 'divider',
+          color: 'text.secondary',
+          fontSize: 11,
+          height: 24,
+          // On xs screens hide the text label — the colour-coded dot is sufficient
+          '& .MuiChip-label': { display: { xs: 'none', sm: 'block' } },
+          // Collapse horizontal padding when label is hidden so chip stays compact
+          '& .MuiChip-icon': { ml: { xs: 0.5, sm: undefined }, mr: { xs: 0.5, sm: undefined } },
+          pl: { xs: 0, sm: undefined },
+          pr: { xs: 0, sm: undefined },
+        }}
       />
     </Tooltip>
   )

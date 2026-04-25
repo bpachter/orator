@@ -36,6 +36,7 @@ interface CommandResult {
 
 const VIEW_LABELS: Record<ActiveView, string> = {
   'yield-curve': 'Yield Curve 3D',
+  'fed-futures-proxy': 'Fed Futures Proxy',
   macro: 'Macro Dashboard',
   cpi: 'CPI Breakdown',
   spreads: 'Spreads',
