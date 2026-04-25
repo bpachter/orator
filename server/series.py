@@ -33,128 +33,129 @@ YIELD_MATURITIES: list[MaturityDef] = [
 ]
 
 MACRO_SERIES: list[SeriesDef] = [
-    {"id": "FEDFUNDS", "label": "Fed Funds Rate", "color": "#e8b84b"},
-    {"id": "CPIAUCSL", "label": "CPI (YoY %)", "color": "#ef4444", "yoy": True},
-    {"id": "UNRATE", "label": "Unemployment Rate", "color": "#4a9eff"},
-    {"id": "A191RL1Q225SBEA", "label": "Real GDP Growth (YoY)", "color": "#22c55e"},
+    {"id": "FEDFUNDS", "label": "Fed Funds Rate", "color": "#d7b46a"},
+    {"id": "CPIAUCSL", "label": "CPI (YoY %)", "color": "#c98f5a", "yoy": True},
+    {"id": "UNRATE", "label": "Unemployment Rate", "color": "#6d91c9"},
+    {"id": "A191RL1Q225SBEA", "label": "Real GDP Growth (YoY)", "color": "#6fa49a"},
 ]
 
 CPI_COMPONENTS: list[SeriesDef] = [
-    {"id": "CPIAUCSL", "label": "All Items", "color": "#ef4444"},
-    {"id": "CPILFESL", "label": "Core (ex Food & Energy)", "color": "#f97316"},
-    {"id": "CPIENGSL", "label": "Energy", "color": "#eab308"},
-    {"id": "CPIFABSL", "label": "Food & Beverages", "color": "#22c55e"},
-    {"id": "CPIHOSSL", "label": "Shelter", "color": "#06b6d4"},
-    {"id": "CPITRNSL", "label": "Transportation", "color": "#8b5cf6"},
-    {"id": "CPIMEDSL", "label": "Medical Care", "color": "#ec4899"},
-    {"id": "CPIRECSL", "label": "Recreation", "color": "#14b8a6"},
-    {"id": "CPIEDUSL", "label": "Education & Comm.", "color": "#f59e0b"},
-    {"id": "CPIAPPSL", "label": "Apparel", "color": "#a78bfa"},
-    {"id": "CPIOGSSL", "label": "Other Goods & Services", "color": "#64748b"},
+    {"id": "CPIAUCSL", "label": "All Items", "color": "#c98f5a"},
+    {"id": "CPILFESL", "label": "Core (ex Food & Energy)", "color": "#b7834c"},
+    {"id": "CPIENGSL", "label": "Energy", "color": "#d7b46a"},
+    {"id": "CPIFABSL", "label": "Food & Beverages", "color": "#6fa49a"},
+    {"id": "CPIHOSSL", "label": "Shelter", "color": "#82aec2"},
+    {"id": "CPITRNSL", "label": "Transportation", "color": "#7b89b4"},
+    {"id": "CPIMEDSL", "label": "Medical Care", "color": "#a7a9bc"},
+    {"id": "CPIRECSL", "label": "Recreation", "color": "#5f8f97"},
+    {"id": "CPIEDUSL", "label": "Education & Comm.", "color": "#cfa75a"},
+    {"id": "CPIAPPSL", "label": "Apparel", "color": "#b0b9d4"},
+    {"id": "CPIOGSSL", "label": "Other Goods & Services", "color": "#74869b"},
 ]
 
 SPREAD_SERIES: list[SeriesDef] = [
-    {"id": "T10Y2Y", "label": "10Y–2Y Spread", "color": "#4a9eff"},
-    {"id": "T10Y3M", "label": "10Y–3M Spread", "color": "#22c55e"},
-    {"id": "FEDFUNDS", "label": "Fed Funds Rate", "color": "#e8b84b"},
-    {"id": "CPILFESL", "label": "Core CPI (YoY %)", "color": "#ef4444", "yoy": True},
-    {"id": "USREC", "label": "Recession", "color": "#ef444440"},
+    {"id": "T10Y2Y", "label": "10Y–2Y Spread", "color": "#6d91c9"},
+    {"id": "T10Y3M", "label": "10Y–3M Spread", "color": "#6fa49a"},
+    {"id": "FEDFUNDS", "label": "Fed Funds Rate", "color": "#d7b46a"},
+    {"id": "CPILFESL", "label": "Core CPI (YoY %)", "color": "#c98f5a", "yoy": True},
+    {"id": "USREC", "label": "Recession", "color": "#c98f5a40"},
 ]
 
 # BLS Average Price series — actual dollars per unit, YoY % computed server-side
 GROCERY_SERIES: list[SeriesDef] = [
-    {"id": "APU0000708111", "label": "Eggs", "unit": "/doz", "color": "#f59e0b"},
-    {"id": "APU0000703112", "label": "Ground Beef", "unit": "/lb", "color": "#ef4444"},
-    {"id": "APU0000706111", "label": "Chicken", "unit": "/lb", "color": "#f97316"},
-    {"id": "APU0000709112", "label": "Whole Milk", "unit": "/gal", "color": "#06b6d4"},
-    {"id": "APU0000702111", "label": "White Bread", "unit": "/lb", "color": "#e8b84b"},
-    {"id": "APU0000704111", "label": "Bacon", "unit": "/lb", "color": "#ec4899"},
+    {"id": "APU0000708111", "label": "Eggs", "unit": "/doz", "color": "#cfa75a"},
+    {"id": "APU0000703112", "label": "Ground Beef", "unit": "/lb", "color": "#c98f5a"},
+    {"id": "APU0000706111", "label": "Chicken", "unit": "/lb", "color": "#b7834c"},
+    {"id": "APU0000709112", "label": "Whole Milk", "unit": "/gal", "color": "#82aec2"},
+    {"id": "APU0000702111", "label": "White Bread", "unit": "/lb", "color": "#d7b46a"},
+    {"id": "APU0000704111", "label": "Bacon", "unit": "/lb", "color": "#a7a9bc"},
     {"id": "APU0000719311", "label": "Orange Juice", "unit": "/16oz", "color": "#fb923c"},
-    {"id": "APU0000717311", "label": "Coffee", "unit": "/lb", "color": "#a78bfa"},
-    {"id": "APU0000711415", "label": "Bananas", "unit": "/lb", "color": "#eab308"},
-    {"id": "APU0000712311", "label": "Tomatoes", "unit": "/lb", "color": "#22c55e"},
+    {"id": "APU0000717311", "label": "Coffee", "unit": "/lb", "color": "#b0b9d4"},
+    {"id": "APU0000711415", "label": "Bananas", "unit": "/lb", "color": "#d7b46a"},
+    {"id": "APU0000712311", "label": "Tomatoes", "unit": "/lb", "color": "#6fa49a"},
 ]
 
 LABOR_SERIES: list[SeriesDef] = [
-    {"id": "UNRATE", "label": "Unemployment Rate", "color": "#4a9eff", "unit": "%"},
-    {"id": "PAYEMS", "label": "Nonfarm Payrolls (YoY %)", "color": "#22c55e", "unit": "%", "yoy": True},
-    {"id": "CIVPART", "label": "Labor Force Participation", "color": "#e8b84b", "unit": "%"},
-    {"id": "ICSA", "label": "Initial Jobless Claims", "color": "#ef4444", "unit": "claims"},
-    {"id": "AHETPI", "label": "Avg Hourly Earnings (YoY %)", "color": "#a78bfa", "unit": "%", "yoy": True},
-    {"id": "JTSJOL", "label": "Job Openings", "color": "#06b6d4", "unit": "thousands"},
+    {"id": "UNRATE", "label": "Unemployment Rate", "color": "#6d91c9", "unit": "%"},
+    {"id": "PAYEMS", "label": "Nonfarm Payrolls (YoY %)", "color": "#6fa49a", "unit": "%", "yoy": True},
+    {"id": "CIVPART", "label": "Labor Force Participation", "color": "#d7b46a", "unit": "%"},
+    {"id": "ICSA", "label": "Initial Jobless Claims", "color": "#c98f5a", "unit": "claims"},
+    {"id": "AHETPI", "label": "Avg Hourly Earnings (YoY %)", "color": "#b0b9d4", "unit": "%", "yoy": True},
+    {"id": "JTSJOL", "label": "Job Openings", "color": "#82aec2", "unit": "thousands"},
 ]
 
 HOUSING_SERIES: list[SeriesDef] = [
-    {"id": "CSUSHPISA", "label": "Case-Shiller Home Price (YoY %)", "color": "#e8b84b", "unit": "%", "yoy": True},
-    {"id": "MORTGAGE30US", "label": "30Y Fixed Mortgage", "color": "#ef4444", "unit": "%"},
-    {"id": "HOUST", "label": "Housing Starts", "color": "#22c55e", "unit": "thousands"},
-    {"id": "PERMIT", "label": "Building Permits", "color": "#06b6d4", "unit": "thousands"},
-    {"id": "MSACSR", "label": "Months' Supply of Houses", "color": "#a78bfa", "unit": "months"},
-    {"id": "RRVRUSQ156N", "label": "Rental Vacancy Rate", "color": "#f97316", "unit": "%"},
-    {"id": "HSN1F", "label": "New Home Sales", "color": "#14b8a6", "unit": "thousands"},
+    {"id": "CSUSHPISA", "label": "Case-Shiller Home Price (YoY %)", "color": "#d7b46a", "unit": "%", "yoy": True},
+    {"id": "MORTGAGE30US", "label": "30Y Fixed Mortgage", "color": "#c98f5a", "unit": "%"},
+    {"id": "HOUST", "label": "Housing Starts", "color": "#6fa49a", "unit": "thousands"},
+    {"id": "PERMIT", "label": "Building Permits", "color": "#82aec2", "unit": "thousands"},
+    {"id": "MSACSR", "label": "Months' Supply of Houses", "color": "#b0b9d4", "unit": "months"},
+    {"id": "RRVRUSQ156N", "label": "Rental Vacancy Rate", "color": "#b7834c", "unit": "%"},
+    {"id": "HSN1F", "label": "New Home Sales", "color": "#5f8f97", "unit": "thousands"},
 ]
 
 # Inputs to the recession-signals composite
 RECESSION_INPUT_SERIES: list[SeriesDef] = [
     # Yield curve & spreads
-    {"id": "UNRATE",         "label": "Unemployment Rate",               "color": "#4a9eff"},
-    {"id": "T10Y2Y",         "label": "10Y–2Y Spread",                   "color": "#22c55e"},
-    {"id": "T10Y3M",         "label": "10Y–3M Spread",                   "color": "#e8b84b"},
-    {"id": "USREC",          "label": "NBER Recession",                  "color": "#ef444440"},
+    {"id": "UNRATE",         "label": "Unemployment Rate",               "color": "#6d91c9"},
+    {"id": "T10Y2Y",         "label": "10Y–2Y Spread",                   "color": "#6fa49a"},
+    {"id": "T10Y3M",         "label": "10Y–3M Spread",                   "color": "#d7b46a"},
+    {"id": "USREC",          "label": "NBER Recession",                  "color": "#c98f5a40"},
     # Credit / financial conditions
-    {"id": "BAMLH0A0HYM2",   "label": "High-Yield Spread (ICE BofA)",    "color": "#ef4444"},
-    {"id": "DRCCLACBS",      "label": "Credit Card Delinquency Rate",    "color": "#f97316"},
+    {"id": "BAMLH0A0HYM2",   "label": "High-Yield Spread (ICE BofA)",    "color": "#c98f5a"},
+    {"id": "DRCCLACBS",      "label": "Credit Card Delinquency Rate",    "color": "#b7834c"},
     # Business cycle proxies (legacy series were discontinued)
-    {"id": "IPMAN",          "label": "Manufacturing Output (IPMAN)",     "color": "#8b5cf6"},
-    {"id": "USALOLITONOSTSAM","label": "US Leading Index (OECD CLI)",     "color": "#06b6d4"},
-    {"id": "A191RL1Q225SBEA","label": "Real GDP Growth (QoQ ann.)",      "color": "#22c55e"},
+    {"id": "IPMAN",          "label": "Manufacturing Output (IPMAN)",     "color": "#7b89b4"},
+    {"id": "USALOLITONOSTSAM","label": "US Leading Index (OECD CLI)",     "color": "#82aec2"},
+    {"id": "A191RL1Q225SBEA","label": "Real GDP Growth (QoQ ann.)",      "color": "#6fa49a"},
     # Labor
-    {"id": "IC4WSA",         "label": "Initial Claims 4W MA",            "color": "#ec4899"},
+    {"id": "IC4WSA",         "label": "Initial Claims 4W MA",            "color": "#a7a9bc"},
     # Inflation / stagflation inputs (raw levels — YoY computed server-side)
-    {"id": "CPIAUCSL",       "label": "CPI All Items",                   "color": "#ef4444"},
-    {"id": "AHETPI",         "label": "Avg Hourly Earnings",             "color": "#a78bfa"},
+    {"id": "CPIAUCSL",       "label": "CPI All Items",                   "color": "#c98f5a"},
+    {"id": "AHETPI",         "label": "Avg Hourly Earnings",             "color": "#b0b9d4"},
 ]
 
 INFLATION_SERIES: list[SeriesDef] = [
-    {"id": "CPIAUCSL", "label": "CPI (All Items, YoY %)", "color": "#ef4444", "unit": "%", "yoy": True},
-    {"id": "CPILFESL", "label": "Core CPI (ex Food & Energy, YoY %)", "color": "#f97316", "unit": "%", "yoy": True},
-    {"id": "PPIACO", "label": "PPI (All Commodities, YoY %)", "color": "#e8b84b", "unit": "%", "yoy": True},
-    {"id": "PCEPI", "label": "PCE (Headline, YoY %)", "color": "#06b6d4", "unit": "%", "yoy": True},
-    {"id": "PCEPILFE", "label": "PCE Core (ex Food & Energy, YoY %)", "color": "#8b5cf6", "unit": "%", "yoy": True},
-    {"id": "IR", "label": "Import Price Index (YoY %)", "color": "#22c55e", "unit": "%", "yoy": True},
-    {"id": "IQ", "label": "Export Price Index (YoY %)", "color": "#a78bfa", "unit": "%", "yoy": True},
+    {"id": "CPIAUCSL", "label": "CPI (All Items, YoY %)", "color": "#c98f5a", "unit": "%", "yoy": True},
+    {"id": "CPILFESL", "label": "Core CPI (ex Food & Energy, YoY %)", "color": "#b7834c", "unit": "%", "yoy": True},
+    {"id": "PPIACO", "label": "PPI (All Commodities, YoY %)", "color": "#d7b46a", "unit": "%", "yoy": True},
+    {"id": "PCEPI", "label": "PCE (Headline, YoY %)", "color": "#82aec2", "unit": "%", "yoy": True},
+    {"id": "PCEPILFE", "label": "PCE Core (ex Food & Energy, YoY %)", "color": "#7b89b4", "unit": "%", "yoy": True},
+    {"id": "IR", "label": "Import Price Index (YoY %)", "color": "#6fa49a", "unit": "%", "yoy": True},
+    {"id": "IQ", "label": "Export Price Index (YoY %)", "color": "#b0b9d4", "unit": "%", "yoy": True},
 ]
 
 CREDIT_CONDITIONS_SERIES: list[SeriesDef] = [
-    {"id": "BAMLH0A0HYM2", "label": "High-Yield Spread (ICE BofA)", "color": "#ef4444", "unit": "bps"},
-    {"id": "PRIME", "label": "Prime Lending Rate", "color": "#4a9eff", "unit": "%"},
-    {"id": "TERMCBCCALLNS", "label": "Credit Card Charge-Off Rate", "color": "#f97316", "unit": "%"},
-    {"id": "FEDFUNDS", "label": "Fed Funds Rate", "color": "#e8b84b", "unit": "%"},
+    {"id": "BAMLH0A0HYM2", "label": "High-Yield Spread (ICE BofA)", "color": "#c98f5a", "unit": "bps"},
+    {"id": "PRIME", "label": "Prime Lending Rate", "color": "#6d91c9", "unit": "%"},
+    {"id": "TERMCBCCALLNS", "label": "Credit Card Charge-Off Rate", "color": "#b7834c", "unit": "%"},
+    {"id": "FEDFUNDS", "label": "Fed Funds Rate", "color": "#d7b46a", "unit": "%"},
 ]
 
 ACTIVITY_SERIES: list[SeriesDef] = [
-    {"id": "INDPRO", "label": "Industrial Production Index", "color": "#4a9eff", "unit": "index"},
-    {"id": "IPMAN", "label": "Industrial Production: Manufacturing", "color": "#22c55e", "unit": "index"},
-    {"id": "TCU", "label": "Capacity Utilization", "color": "#e8b84b", "unit": "%"},
-    {"id": "NEWORDER", "label": "New Orders: Nondefense Capital Goods (ex Aircraft)", "color": "#f97316", "unit": "$M"},
-    {"id": "DGORDER", "label": "Durable Goods: New Orders", "color": "#a78bfa", "unit": "$M"},
-    {"id": "AWHNONAG", "label": "Avg Weekly Hours: Production & Nonsupervisory", "color": "#06b6d4", "unit": "hours"},
+    {"id": "INDPRO", "label": "Industrial Production Index", "color": "#6d91c9", "unit": "index"},
+    {"id": "IPMAN", "label": "Industrial Production: Manufacturing", "color": "#6fa49a", "unit": "index"},
+    {"id": "TCU", "label": "Capacity Utilization", "color": "#d7b46a", "unit": "%"},
+    {"id": "NEWORDER", "label": "New Orders: Nondefense Capital Goods (ex Aircraft)", "color": "#b7834c", "unit": "$M"},
+    {"id": "DGORDER", "label": "Durable Goods: New Orders", "color": "#b0b9d4", "unit": "$M"},
+    {"id": "AWHNONAG", "label": "Avg Weekly Hours: Production & Nonsupervisory", "color": "#82aec2", "unit": "hours"},
 ]
 
 MARKETS_SERIES: list[SeriesDef] = [
-    {"id": "SP500", "label": "S&P 500 Index", "color": "#22c55e", "unit": "index"},
-    {"id": "VIXCLS", "label": "VIX Volatility Index", "color": "#ef4444", "unit": "index"},
-    {"id": "DCOILWTICO", "label": "Crude Oil (WTI)", "color": "#e8b84b", "unit": "$/bbl"},
-    {"id": "GOLDS", "label": "Gold Spot Price ($/oz)", "color": "#f59e0b", "unit": "$/oz"},
-    {"id": "DEXUSEU", "label": "USD / EUR Exchange Rate", "color": "#4a9eff", "unit": "USD"},
-    {"id": "DTWEXBGS", "label": "Trade-Weighted USD (Broad)", "color": "#a78bfa", "unit": "index"},
+    {"id": "SP500", "label": "S&P 500 Index", "color": "#6fa49a", "unit": "index"},
+    {"id": "VIXCLS", "label": "VIX Volatility Index", "color": "#c98f5a", "unit": "index"},
+    {"id": "DCOILWTICO", "label": "Crude Oil (WTI)", "color": "#d7b46a", "unit": "$/bbl"},
+    {"id": "GOLDS", "label": "Gold Spot Price ($/oz)", "color": "#cfa75a", "unit": "$/oz"},
+    {"id": "DEXUSEU", "label": "USD / EUR Exchange Rate", "color": "#6d91c9", "unit": "USD"},
+    {"id": "DTWEXBGS", "label": "Trade-Weighted USD (Broad)", "color": "#b0b9d4", "unit": "index"},
 ]
 
 CONSUMER_SERIES: list[SeriesDef] = [
-    {"id": "RSXFS", "label": "Retail Sales (ex Food Services, YoY %)", "color": "#22c55e", "unit": "%", "yoy": True},
-    {"id": "UMCSENT", "label": "U. Michigan Consumer Sentiment", "color": "#4a9eff", "unit": "index"},
-    {"id": "PSAVERT", "label": "Personal Saving Rate", "color": "#e8b84b", "unit": "%"},
-    {"id": "PCE", "label": "Personal Consumption Expenditures (YoY %)", "color": "#f97316", "unit": "%", "yoy": True},
-    {"id": "DSPIC96", "label": "Real Disposable Personal Income (YoY %)", "color": "#a78bfa", "unit": "%", "yoy": True},
-    {"id": "TOTALSL", "label": "Total Consumer Credit Outstanding (YoY %)", "color": "#06b6d4", "unit": "%", "yoy": True},
+    {"id": "RSXFS", "label": "Retail Sales (ex Food Services, YoY %)", "color": "#6fa49a", "unit": "%", "yoy": True},
+    {"id": "UMCSENT", "label": "U. Michigan Consumer Sentiment", "color": "#6d91c9", "unit": "index"},
+    {"id": "PSAVERT", "label": "Personal Saving Rate", "color": "#d7b46a", "unit": "%"},
+    {"id": "PCE", "label": "Personal Consumption Expenditures (YoY %)", "color": "#b7834c", "unit": "%", "yoy": True},
+    {"id": "DSPIC96", "label": "Real Disposable Personal Income (YoY %)", "color": "#b0b9d4", "unit": "%", "yoy": True},
+    {"id": "TOTALSL", "label": "Total Consumer Credit Outstanding (YoY %)", "color": "#82aec2", "unit": "%", "yoy": True},
 ]
+

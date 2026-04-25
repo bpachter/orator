@@ -29,7 +29,7 @@ function recessionShapes(usrec: FredObs[]): Partial<Plotly.Shape>[] {
         x1: obs.date,
         y0: 0,
         y1: 1,
-        fillcolor: '#ef444418',
+        fillcolor: palette.negative + '18',
         line: { width: 0 },
       })
       start = null
@@ -44,7 +44,7 @@ function recessionShapes(usrec: FredObs[]): Partial<Plotly.Shape>[] {
       x1: usrec[usrec.length - 1].date,
       y0: 0,
       y1: 1,
-      fillcolor: '#ef444418',
+      fillcolor: palette.negative + '18',
       line: { width: 0 },
     })
   }
@@ -149,7 +149,7 @@ function SpreadChart({ title, subtitle, data, color, usrec }: SpreadChartProps) 
     () => ({
       yaxis: {
         color: palette.textSecondary,
-        gridcolor: '#162035',
+        gridcolor: palette.border,
         showgrid: true,
         zeroline: false,
         ticksuffix: '%',
@@ -235,7 +235,7 @@ function FedVsCpiChart({
     () => ({
       yaxis: {
         color: palette.textSecondary,
-        gridcolor: '#162035',
+        gridcolor: palette.border,
         showgrid: true,
         zeroline: false,
         ticksuffix: '%',

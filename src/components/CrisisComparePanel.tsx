@@ -128,7 +128,7 @@ export function CrisisComparePanel() {
                     }
                     sx={{
                       bgcolor: on ? c.color : 'transparent',
-                      color: on ? '#0f172a' : 'text.primary',
+                      color: on ? palette.bg : 'text.primary',
                       borderColor: c.color,
                       cursor: 'pointer',
                     }}

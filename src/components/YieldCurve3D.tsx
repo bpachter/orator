@@ -32,12 +32,12 @@ export function YieldCurve3D() {
         y: surface.dates,
         z: surface.z,
         colorscale: [
-          [0, '#1d4ed8'],
-          [0.15, '#0891b2'],
-          [0.35, '#10b981'],
-          [0.55, '#f59e0b'],
-          [0.75, '#f97316'],
-          [1, '#dc2626'],
+          [0, palette.series.blue],
+          [0.2, palette.series.cyan],
+          [0.4, palette.series.teal],
+          [0.65, palette.series.amber],
+          [0.82, palette.series.orange],
+          [1, palette.series.red],
         ] as [number, string][],
         showscale: true,
         colorbar: {
@@ -53,7 +53,7 @@ export function YieldCurve3D() {
           '<b>Date:</b> %{y}<br>' +
           '<b>Yield:</b> %{z:.2f}%<extra></extra>',
         contours: {
-          z: { show: true, usecolormap: true, highlightcolor: '#ffffff55', project: { z: false } },
+          z: { show: true, usecolormap: true, highlightcolor: `${palette.textPrimary}55`, project: { z: false } },
         },
       } as unknown as Partial<Plotly.PlotData>
 
@@ -69,14 +69,14 @@ export function YieldCurve3D() {
             tickvals: surface.maturityYears,
             ticktext: surface.maturityLabels,
             showbackground: true,
-            backgroundcolor: '#0a1220',
+            backgroundcolor: palette.surface,
           } as unknown as Plotly.LayoutAxis,
           yaxis: {
             title: { text: 'Date', font: { color: palette.textSecondary } } as Plotly.LayoutAxis['title'],
             color: palette.textSecondary,
             gridcolor: palette.border,
             showbackground: true,
-            backgroundcolor: '#0a1220',
+            backgroundcolor: palette.surface,
             tickfont: { size: 9 },
           } as unknown as Plotly.LayoutAxis,
           zaxis: {
@@ -84,7 +84,7 @@ export function YieldCurve3D() {
             color: palette.textSecondary,
             gridcolor: palette.border,
             showbackground: true,
-            backgroundcolor: '#0a1220',
+            backgroundcolor: palette.surface,
           } as unknown as Plotly.LayoutAxis,
           camera: { eye: { x: 1.6, y: -1.9, z: 0.7 } },
           aspectmode: 'manual',

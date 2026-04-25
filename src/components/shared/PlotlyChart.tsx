@@ -23,7 +23,7 @@ export const baseLayout: PlotlyLayout = {
   plot_bgcolor: 'rgba(0,0,0,0)',
   font: { color: palette.textSecondary, family: 'Inter, sans-serif', size: 11 },
   xaxis: { color: palette.textSecondary, gridcolor: palette.border, showgrid: false, zeroline: false },
-  yaxis: { color: palette.textSecondary, gridcolor: '#162035', showgrid: true, zeroline: false },
+  yaxis: { color: palette.textSecondary, gridcolor: palette.border, showgrid: true, zeroline: false },
   margin: { l: 44, r: 12, t: 8, b: 30 },
   hovermode: 'x unified',
 }

@@ -36,10 +36,10 @@ export const YIELD_MATURITIES = [
 ] as const
 
 export const MACRO_SERIES = [
-  { id: 'FEDFUNDS', label: 'Fed Funds Rate', unit: '%', color: '#e8b84b' },
-  { id: 'CPIAUCSL', label: 'CPI (YoY %)', unit: '%', color: '#ef4444' },
-  { id: 'UNRATE', label: 'Unemployment Rate', unit: '%', color: '#4a9eff' },
-  { id: 'A191RL1Q225SBEA', label: 'Real GDP Growth (YoY)', unit: '%', color: '#22c55e' },
+  { id: 'FEDFUNDS', label: 'Fed Funds Rate', unit: '%', color: '#d7b46a' },
+  { id: 'CPIAUCSL', label: 'CPI (YoY %)', unit: '%', color: '#c98f5a' },
+  { id: 'UNRATE', label: 'Unemployment Rate', unit: '%', color: '#6d91c9' },
+  { id: 'A191RL1Q225SBEA', label: 'Real GDP Growth (YoY)', unit: '%', color: '#6fa49a' },
 ] as const
 
 export interface MacroResponse {

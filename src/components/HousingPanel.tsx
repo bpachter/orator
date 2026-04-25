@@ -90,7 +90,7 @@ function HousingChart({ meta, data }: HousingChartProps) {
     () => ({
       yaxis: {
         color: palette.textSecondary,
-        gridcolor: '#162035',
+        gridcolor: palette.border,
         showgrid: true,
         zeroline: false,
       },

@@ -106,7 +106,7 @@ function CpiChart({ component, data, minHeight, prominent }: CpiChartProps) {
     () => ({
       yaxis: {
         color: palette.textSecondary,
-        gridcolor: '#162035',
+        gridcolor: palette.border,
         showgrid: true,
         zeroline: true,
         zerolinecolor: palette.border,

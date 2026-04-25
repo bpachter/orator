@@ -23,7 +23,7 @@ export const CRISIS_PERIODS: CrisisPeriod[] = [
     start: '1973-11-01',
     end: '1975-03-31',
     description: 'OPEC oil embargo and stagflation',
-    color: '#ef4444',
+    color: '#c98f5a',
   },
   {
     id: 'volcker-1980',
@@ -32,7 +32,7 @@ export const CRISIS_PERIODS: CrisisPeriod[] = [
     start: '1980-01-01',
     end: '1980-07-31',
     description: 'Short, Fed-induced recession to break inflation',
-    color: '#f97316',
+    color: '#b7834c',
   },
   {
     id: 'doubledip-1981',
@@ -41,7 +41,7 @@ export const CRISIS_PERIODS: CrisisPeriod[] = [
     start: '1981-07-01',
     end: '1982-11-30',
     description: 'Severe recession from continued tight monetary policy',
-    color: '#f59e0b',
+    color: '#cfa75a',
   },
   {
     id: 'gulfwar-1990',
@@ -50,7 +50,7 @@ export const CRISIS_PERIODS: CrisisPeriod[] = [
     start: '1990-07-01',
     end: '1991-03-31',
     description: 'Oil price spike and S&L crisis fallout',
-    color: '#eab308',
+    color: '#d7b46a',
   },
   {
     id: 'dotcom-2001',
@@ -59,7 +59,7 @@ export const CRISIS_PERIODS: CrisisPeriod[] = [
     start: '2001-03-01',
     end: '2001-11-30',
     description: 'Tech bubble burst',
-    color: '#22c55e',
+    color: '#6fa49a',
   },
   {
     id: 'gfc-2008',
@@ -68,7 +68,7 @@ export const CRISIS_PERIODS: CrisisPeriod[] = [
     start: '2007-12-01',
     end: '2009-06-30',
     description: 'Subprime mortgage collapse and financial crisis',
-    color: '#06b6d4',
+    color: '#82aec2',
   },
   {
     id: 'covid-2020',
@@ -77,7 +77,7 @@ export const CRISIS_PERIODS: CrisisPeriod[] = [
     start: '2020-02-01',
     end: '2020-04-30',
     description: 'Pandemic-induced shutdown',
-    color: '#8b5cf6',
+    color: '#7b89b4',
   },
 ]
 

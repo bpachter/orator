@@ -90,7 +90,7 @@ function LaborChart({ meta, data }: LaborChartProps) {
     () => ({
       yaxis: {
         color: palette.textSecondary,
-        gridcolor: '#162035',
+        gridcolor: palette.border,
         showgrid: true,
         zeroline: false,
       },

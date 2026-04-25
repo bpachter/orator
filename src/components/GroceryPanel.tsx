@@ -37,7 +37,7 @@ export function GroceryPanel() {
     () => ({
       yaxis: {
         color: palette.textSecondary,
-        gridcolor: '#162035',
+        gridcolor: palette.border,
         showgrid: true,
         zeroline: true,
         zerolinecolor: palette.textMuted,

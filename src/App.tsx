@@ -332,8 +332,8 @@ function SidebarContent({ currentView, onNavigate }: { currentView: ActiveView; 
         <svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
           <defs>
             <linearGradient id="orator-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#3b82f6" />
-              <stop offset="100%" stopColor="#1e40af" />
+              <stop offset="0%" stopColor={palette.info} />
+              <stop offset="100%" stopColor={palette.brand} />
             </linearGradient>
           </defs>
           <circle cx="14" cy="14" r="13" fill="url(#orator-grad)" />
