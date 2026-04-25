@@ -330,6 +330,15 @@ export function RecessionSignalsPanel() {
         />
       </Box>
 
+      {/* Recession risk history trend */}
+      <MiniChart
+        title="Recession Risk Model"
+        subtitle={`Weighted composite (monthly, up to 5Y) · 3M ${formatDeltaPoints(risk3mDelta)} · 12M ${formatDeltaPoints(risk12mDelta)}`}
+        data={recessionRiskData}
+        color={palette.series.red}
+        threshold={40}
+      />
+
       {/* Signal cards sorted by severity */}
       <Box>
         <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
@@ -365,13 +374,6 @@ export function RecessionSignalsPanel() {
             gap: 2,
           }}
         >
-          <MiniChart
-            title="Recession Risk Model"
-            subtitle={`Weighted composite (monthly, up to 5Y) · 3M ${formatDeltaPoints(risk3mDelta)} · 12M ${formatDeltaPoints(risk12mDelta)}`}
-            data={recessionRiskData}
-            color={palette.series.red}
-            threshold={40}
-          />
           <MiniChart
             title="Sahm Rule Score"
             subtitle="Triggers at 0.5 — 3M avg unemployment rise above 12M low"
