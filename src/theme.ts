@@ -6,37 +6,37 @@ export type ThemeMode = 'dark' | 'light'
 // Series colors — universal across both modes (work on dark + light backgrounds)
 // ---------------------------------------------------------------------------
 const seriesColors = {
-  yellow: '#e8b84b',
-  blue: '#4a9eff',
-  green: '#22c55e',
-  red: '#ef4444',
-  cyan: '#06b6d4',
-  purple: '#8b5cf6',
-  orange: '#f97316',
-  pink: '#ec4899',
-  teal: '#14b8a6',
-  amber: '#f59e0b',
-  violet: '#a78bfa',
-  slate: '#64748b',
+  yellow: '#d7b46a',
+  blue: '#6d91c9',
+  green: '#6fa49a',
+  red: '#c98f5a',
+  cyan: '#82aec2',
+  purple: '#7b89b4',
+  orange: '#b7834c',
+  pink: '#a7a9bc',
+  teal: '#5f8f97',
+  amber: '#cfa75a',
+  violet: '#b0b9d4',
+  slate: '#74869b',
 } as const
 
 // ---------------------------------------------------------------------------
 // Dark palette (default Orator macro theme)
 // ---------------------------------------------------------------------------
 export const darkPalette = {
-  bg: '#070d1a',
-  surface: '#0f1729',
-  surfaceAlt: '#162035',
-  border: '#1e2d4a',
-  borderStrong: '#2a3f5f',
-  textPrimary: '#e8edf5',
-  textSecondary: '#7d9bc0',
-  textMuted: '#3a5070',
-  brand: '#e8b84b',
-  positive: '#22c55e',
-  negative: '#ef4444',
-  info: '#4a9eff',
-  warning: '#f59e0b',
+  bg: '#08111d',
+  surface: '#101a29',
+  surfaceAlt: '#172336',
+  border: '#253650',
+  borderStrong: '#334a68',
+  textPrimary: '#f3f6fb',
+  textSecondary: '#a8b8cb',
+  textMuted: '#70839a',
+  brand: '#d4ad63',
+  positive: '#6aa58d',
+  negative: '#c76f5d',
+  info: '#7d9dcd',
+  warning: '#cfa75a',
   series: seriesColors,
 } as const
 
@@ -44,19 +44,19 @@ export const darkPalette = {
 // Light palette — soft neutral background, deep navy text
 // ---------------------------------------------------------------------------
 export const lightPalette = {
-  bg: '#f6f7fb',
+  bg: '#f4f6f9',
   surface: '#ffffff',
-  surfaceAlt: '#eef1f7',
-  border: '#dbe1ec',
-  borderStrong: '#b8c2d4',
-  textPrimary: '#0f1729',
-  textSecondary: '#4b5b75',
-  textMuted: '#8896ad',
-  brand: '#b88a1f',
-  positive: '#16a34a',
-  negative: '#dc2626',
-  info: '#2563eb',
-  warning: '#d97706',
+  surfaceAlt: '#ebeff5',
+  border: '#d5dde8',
+  borderStrong: '#b7c3d2',
+  textPrimary: '#152335',
+  textSecondary: '#56697f',
+  textMuted: '#8795a7',
+  brand: '#b5914c',
+  positive: '#4f8e76',
+  negative: '#bb6256',
+  info: '#5f7fac',
+  warning: '#bc9550',
   series: seriesColors,
 } as const
 
@@ -143,6 +143,10 @@ export function createOratorTheme(mode: ThemeMode) {
           'html, body, #root': { height: '100%', margin: 0, padding: 0 },
           body: {
             backgroundColor: p.bg,
+            backgroundImage:
+              mode === 'light'
+                ? 'radial-gradient(circle at top left, rgba(212,173,99,0.08), transparent 28%), linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0))'
+                : 'radial-gradient(circle at top left, rgba(212,173,99,0.10), transparent 24%), linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0))',
             color: p.textPrimary,
             WebkitFontSmoothing: 'antialiased',
           },
@@ -156,7 +160,10 @@ export function createOratorTheme(mode: ThemeMode) {
         defaultProps: { elevation: 0 },
         styleOverrides: {
           root: {
-            backgroundImage: 'none',
+            backgroundImage:
+              mode === 'light'
+                ? 'linear-gradient(180deg, rgba(255,255,255,0.98), rgba(244,246,249,0.92))'
+                : 'linear-gradient(180deg, rgba(23,35,54,0.82), rgba(16,26,41,0.96))',
             border: `1px solid ${p.border}`,
             backgroundColor: p.surface,
           },
@@ -172,6 +179,7 @@ export function createOratorTheme(mode: ThemeMode) {
             textTransform: 'none',
             color: p.textSecondary,
             borderColor: p.border,
+            backgroundColor: alpha(p.surfaceAlt, mode === 'light' ? 0.6 : 0.32),
             '&.Mui-selected': {
               backgroundColor: p.brand,
               color: mode === 'light' ? '#ffffff' : p.bg,
@@ -198,14 +206,21 @@ export function createOratorTheme(mode: ThemeMode) {
         defaultProps: { elevation: 0 },
         styleOverrides: {
           root: {
-            backgroundColor: mode === 'light' ? p.surface : '#0a1220',
+            backgroundColor: mode === 'light' ? alpha(p.surface, 0.92) : alpha('#0d1726', 0.94),
             borderBottom: `1px solid ${p.border}`,
             backgroundImage: 'none',
+            backdropFilter: 'blur(12px)',
           },
         },
       },
       MuiChip: {
-        styleOverrides: { root: { fontWeight: 500 } },
+        styleOverrides: {
+          root: {
+            fontWeight: 500,
+            border: `1px solid ${alpha(p.borderStrong, 0.5)}`,
+            backgroundColor: alpha(p.surfaceAlt, mode === 'light' ? 0.85 : 0.5),
+          },
+        },
       },
       MuiTooltip: {
         styleOverrides: {
