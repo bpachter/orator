@@ -254,19 +254,27 @@ export default function App() {
               </Typography>
             </Stack>
             <Stack direction="row" alignItems="center" spacing={1.5}>
-              {showRangePicker && <RangePicker value={filters.range} onChange={setRange} />}
+              {/* Range picker lives in toolbar only on md+ screens */}
+              {showRangePicker && (
+                <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+                  <RangePicker value={filters.range} onChange={setRange} />
+                </Box>
+              )}
               <SeriesSearch open={searchOpen} onOpenChange={setSearchOpen} />
               <SavedViewsMenu />
-              <Tooltip title="Command bar (Ctrl+T)" arrow>
-                <IconButton size="small" onClick={() => setCommandOpen(true)} aria-label="Open command bar" sx={{ color: 'text.secondary' }}>
-                  <TerminalIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Keyboard shortcuts (?)" arrow>
-                <IconButton size="small" onClick={() => setShortcutsOpen(true)} aria-label="Show keyboard shortcuts" sx={{ color: 'text.secondary' }}>
-                  <KeyboardIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
+              {/* Terminal + Keyboard shortcuts hidden on small screens to save space */}
+              <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 0.5 }}>
+                <Tooltip title="Command bar (Ctrl+T)" arrow>
+                  <IconButton size="small" onClick={() => setCommandOpen(true)} aria-label="Open command bar" sx={{ color: 'text.secondary' }}>
+                    <TerminalIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Keyboard shortcuts (?)" arrow>
+                  <IconButton size="small" onClick={() => setShortcutsOpen(true)} aria-label="Show keyboard shortcuts" sx={{ color: 'text.secondary' }}>
+                    <KeyboardIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
               <ThemeToggle />
               <ApiStatus
                 healthy={health.data?.status === 'ok' && Boolean(health.data?.fred_key)}
@@ -275,6 +283,21 @@ export default function App() {
               />
             </Stack>
           </Toolbar>
+          {/* Mobile range picker: shown as a scrollable second row on xs/sm */}
+          {showRangePicker && (
+            <Box
+              sx={{
+                display: { xs: 'flex', md: 'none' },
+                px: 2,
+                pb: 1,
+                overflowX: 'auto',
+                '&::-webkit-scrollbar': { display: 'none' },
+                scrollbarWidth: 'none',
+              }}
+            >
+              <RangePicker value={filters.range} onChange={setRange} />
+            </Box>
+          )}
         </AppBar>
 
         <Box component="main" sx={{ flex: 1, py: { xs: 2, md: 3 }, px: { xs: 2, md: 3 }, maxWidth: '100%' }}>
