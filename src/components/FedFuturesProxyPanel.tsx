@@ -36,28 +36,6 @@ export function FedFuturesProxyPanel() {
   const [horizon, setHorizon] = useState<HorizonMode>(3)
   const [showRecessions, setShowRecessions] = useState(true)
 
-  if (macro.isLoading || yc.isLoading) {
-    return (
-      <PanelCard title="Fed Funds vs Market-Implied Path" subtitle="Building historical trajectory map...">
-        <LoadingState />
-      </PanelCard>
-    )
-  }
-
-  if (macro.isError || yc.isError) {
-    return (
-      <PanelCard title="Fed Funds vs Market-Implied Path">
-        <ErrorState
-          message={(macro.error as Error)?.message ?? (yc.error as Error)?.message}
-          onRetry={() => {
-            void macro.refetch()
-            void yc.refetch()
-          }}
-        />
-      </PanelCard>
-    )
-  }
-
   const fedFunds = macro.data?.series?.FEDFUNDS ?? []
   const surface = yc.data
   const maxGhostPaths = DENSITY_PATHS[density]
@@ -155,6 +133,28 @@ export function FedFuturesProxyPanel() {
         layer: 'below' as const,
       }))
   }, [showRecessions, fedFunds])
+
+  if (macro.isLoading || yc.isLoading) {
+    return (
+      <PanelCard title="Fed Funds vs Market-Implied Path" subtitle="Building historical trajectory map...">
+        <LoadingState />
+      </PanelCard>
+    )
+  }
+
+  if (macro.isError || yc.isError) {
+    return (
+      <PanelCard title="Fed Funds vs Market-Implied Path">
+        <ErrorState
+          message={(macro.error as Error)?.message ?? (yc.error as Error)?.message}
+          onRetry={() => {
+            void macro.refetch()
+            void yc.refetch()
+          }}
+        />
+      </PanelCard>
+    )
+  }
 
   const latestFed = latest(fedFunds)
   const latestSurfaceRow = surface?.z?.[surface.dates.length - 1] ?? []
