@@ -343,7 +343,6 @@ export function FedFuturesProxyPanel() {
             </Box>
           </Box>
         </Box>
-        </Stack>
       </PanelCard>
 
       <PanelCard dense title="Fed Funds Rate vs Historical Implied Policy Paths" subtitle="Black: realized Fed Funds. Grey: past implied trajectories. Cyan: latest implied path.">
