@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Box, Chip, LinearProgress, Paper, Stack, Typography } from '@mui/material'
 import type { FredObs } from '../types'
 import type { RecessionSignal } from '../api/fred'
@@ -87,48 +87,181 @@ function RiskGauge({
   title,
   score,
   description,
+  active,
+  onToggle,
 }: {
   title: string
   score: number
   description: string
+  active: boolean
+  onToggle: () => void
 }) {
   const color = riskColor(score)
   return (
-    <PanelCard>
-      <Stack spacing={1.5}>
-        <Typography
-          variant="overline"
-          sx={{ color: 'text.secondary', lineHeight: 1, letterSpacing: '0.08em' }}
-        >
-          {title}
-        </Typography>
-        <Stack direction="row" alignItems="baseline" spacing={1.5}>
+    <Box
+      role="button"
+      tabIndex={0}
+      onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onToggle()
+        }
+      }}
+      sx={{
+        cursor: 'pointer',
+        '& .MuiPaper-root': {
+          borderColor: active ? color + 'cc' : undefined,
+          boxShadow: active ? `0 0 0 1px ${color}66, 0 0 24px ${color}2e` : 'none',
+          transition: 'border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease',
+        },
+        '&:hover .MuiPaper-root, &:focus-visible .MuiPaper-root': {
+          borderColor: color + 'aa',
+          boxShadow: `0 0 0 1px ${color}55, 0 0 18px ${color}26`,
+          transform: 'translateY(-1px)',
+        },
+      }}
+    >
+      <PanelCard>
+        <Stack spacing={1.5}>
           <Typography
-            variant="h2"
-            sx={{ color, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}
+            variant="overline"
+            sx={{ color: 'text.secondary', lineHeight: 1, letterSpacing: '0.08em' }}
           >
-            {Math.round(score * 100)}%
+            {title}
           </Typography>
-          <Chip
-            label={riskLabel(score)}
-            size="small"
-            sx={{ bgcolor: color + '22', color, fontWeight: 700 }}
+          <Stack direction="row" alignItems="baseline" spacing={1.5}>
+            <Typography
+              variant="h2"
+              sx={{ color, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}
+            >
+              {Math.round(score * 100)}%
+            </Typography>
+            <Chip
+              label={riskLabel(score)}
+              size="small"
+              sx={{ bgcolor: color + '22', color, fontWeight: 700 }}
+            />
+            <Chip
+              label={active ? 'ON' : 'OFF'}
+              size="small"
+              sx={{ bgcolor: active ? color + '22' : palette.surfaceAlt, color: active ? color : 'text.secondary', fontWeight: 700 }}
+            />
+          </Stack>
+          <Typography variant="caption" color="text.secondary">
+            {description}
+          </Typography>
+          <LinearProgress
+            variant="determinate"
+            value={score * 100}
+            sx={{
+              height: 8,
+              borderRadius: 4,
+              bgcolor: palette.surfaceAlt,
+              '& .MuiLinearProgress-bar': { bgcolor: color, borderRadius: 4 },
+            }}
           />
         </Stack>
-        <Typography variant="caption" color="text.secondary">
-          {description}
-        </Typography>
-        <LinearProgress
-          variant="determinate"
-          value={score * 100}
+      </PanelCard>
+    </Box>
+  )
+}
+
+function CombinedRiskChart({
+  recessionRiskData,
+  stagflationData,
+  showRecession,
+  showStagflation,
+}: {
+  recessionRiskData: FredObs[]
+  stagflationData: FredObs[]
+  showRecession: boolean
+  showStagflation: boolean
+}) {
+  const traces: PlotlyTrace[] = useMemo(() => {
+    const out: PlotlyTrace[] = []
+    if (showRecession && recessionRiskData.length) {
+      out.push({
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Recession Risk',
+        x: recessionRiskData.map((o) => o.date),
+        y: recessionRiskData.map((o) => o.value),
+        line: { color: palette.series.red, width: 2, shape: 'spline' },
+        fill: 'tozeroy',
+        fillcolor: palette.series.red + '18',
+        hovertemplate: 'Recession Risk<br>%{x}: %{y:.1f}%<extra></extra>',
+      })
+    }
+    if (showStagflation && stagflationData.length) {
+      out.push({
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Stagflation Pressure',
+        x: stagflationData.map((o) => o.date),
+        y: stagflationData.map((o) => o.value),
+        line: { color: palette.series.amber, width: 2, shape: 'spline' },
+        hovertemplate: 'Stagflation Pressure<br>%{x}: %{y:.1f}%<extra></extra>',
+      })
+    }
+    return out
+  }, [recessionRiskData, stagflationData, showRecession, showStagflation])
+
+  if (!traces.length) {
+    return (
+      <PanelCard
+        title="Recession Risk Model"
+        subtitle="Toggle either top card to display a line in the combined trend chart"
+      >
+        <Box
           sx={{
-            height: 8,
-            borderRadius: 4,
-            bgcolor: palette.surfaceAlt,
-            '& .MuiLinearProgress-bar': { bgcolor: color, borderRadius: 4 },
+            height: 180,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'text.disabled',
           }}
-        />
-      </Stack>
+        >
+          Select at least one top card
+        </Box>
+      </PanelCard>
+    )
+  }
+
+  return (
+    <PanelCard
+      title="Recession Risk Model"
+      subtitle="Combined 5Y trend overlay: Recession Risk + Stagflation Pressure"
+    >
+      <PlotlyChart
+        traces={traces}
+        minHeight={180}
+        ariaLabel="Recession risk and stagflation pressure trend"
+        layout={{
+          yaxis: { range: [0, 100], ticksuffix: '%' },
+          shapes: [
+            {
+              type: 'line',
+              xref: 'paper',
+              x0: 0,
+              x1: 1,
+              y0: 40,
+              y1: 40,
+              line: { color: palette.series.red + 'aa', width: 1.2, dash: 'dash' },
+            },
+            {
+              type: 'line',
+              xref: 'paper',
+              x0: 0,
+              x1: 1,
+              y0: 30,
+              y1: 30,
+              line: { color: palette.series.amber + 'aa', width: 1.2, dash: 'dot' },
+            },
+          ],
+          legend: { orientation: 'h', x: 0, y: 1.15 },
+        }}
+      />
     </PanelCard>
   )
 }
@@ -264,6 +397,8 @@ function MiniChart({ title, subtitle, data, color, threshold }: MiniChartProps) 
 export function RecessionSignalsPanel() {
   const { filters } = useFilters()
   const rs = useRecessionSignals(filters.range)
+  const [showRecessionLine, setShowRecessionLine] = useState(true)
+  const [showStagflationLine, setShowStagflationLine] = useState(true)
 
   if (rs.isLoading) {
     return (
@@ -297,8 +432,14 @@ export function RecessionSignalsPanel() {
     ...o,
     value: o.value * 100,
   }))
+  const stagflationPressureData = (data.series['STAGFLATION_PRESSURE'] ?? []).map((o) => ({
+    ...o,
+    value: o.value * 100,
+  }))
   const risk3mDelta = deltaPoints(data.series['RECESSION_RISK'] ?? [], 3)
   const risk12mDelta = deltaPoints(data.series['RECESSION_RISK'] ?? [], 12)
+  const stag3mDelta = deltaPoints(data.series['STAGFLATION_PRESSURE'] ?? [], 3)
+  const stag12mDelta = deltaPoints(data.series['STAGFLATION_PRESSURE'] ?? [], 12)
 
   return (
     <Stack spacing={3}>
@@ -321,22 +462,25 @@ export function RecessionSignalsPanel() {
         <RiskGauge
           title="Recession Risk — Weighted Composite"
           score={data.composite_score}
-          description={`${triggeredCount} of ${data.signals.length} signals triggered · ${watchCount} on watch`}
+          description={`${triggeredCount} of ${data.signals.length} signals triggered · ${watchCount} on watch · 3M ${formatDeltaPoints(risk3mDelta)} · 12M ${formatDeltaPoints(risk12mDelta)}`}
+          active={showRecessionLine}
+          onToggle={() => setShowRecessionLine((v) => !v)}
         />
         <RiskGauge
           title="Stagflation Pressure"
           score={data.stagflation_score}
-          description="Misery Index + real wage erosion (purchasing-power signals)"
+          description={`Misery Index + real wage erosion · 3M ${formatDeltaPoints(stag3mDelta)} · 12M ${formatDeltaPoints(stag12mDelta)}`}
+          active={showStagflationLine}
+          onToggle={() => setShowStagflationLine((v) => !v)}
         />
       </Box>
 
       {/* Recession risk history trend */}
-      <MiniChart
-        title="Recession Risk Model"
-        subtitle={`Weighted composite (monthly, up to 5Y) · 3M ${formatDeltaPoints(risk3mDelta)} · 12M ${formatDeltaPoints(risk12mDelta)}`}
-        data={recessionRiskData}
-        color={palette.series.red}
-        threshold={40}
+      <CombinedRiskChart
+        recessionRiskData={recessionRiskData}
+        stagflationData={stagflationPressureData}
+        showRecession={showRecessionLine}
+        showStagflation={showStagflationLine}
       />
 
       {/* Signal cards sorted by severity */}

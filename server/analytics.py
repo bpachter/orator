@@ -333,6 +333,38 @@ def stagflation_pressure_score(misery: float | None, real_wages: float | None) -
     return round((misery_p * 1.0 + realw_p * 0.75) / total_w, 3)
 
 
+def stagflation_pressure_history(
+    unrate: list[dict],
+    cpi_yoy: list[dict],
+    wages_yoy: list[dict],
+    years: int = 5,
+) -> list[dict]:
+    """Build monthly historical stagflation pressure (0-1) over a rolling window."""
+    if not unrate:
+        return []
+
+    latest_date = date.fromisoformat(unrate[-1]["date"])
+    cutoff_date = latest_date - timedelta(days=365 * max(1, years))
+    anchor_dates = [
+        obs["date"]
+        for obs in unrate
+        if date.fromisoformat(obs["date"]) >= cutoff_date
+    ]
+
+    history: list[dict] = []
+    for anchor in anchor_dates:
+        un_hist = [o for o in unrate if o["date"] <= anchor]
+        cpi_hist = [o for o in cpi_yoy if o["date"] <= anchor]
+        wages_hist = [o for o in wages_yoy if o["date"] <= anchor]
+
+        misery_val, _ = misery_index_signal(un_hist, cpi_hist)
+        realwage_val, _ = real_wages_signal(wages_hist, cpi_hist)
+        pressure = stagflation_pressure_score(misery_val, realwage_val)
+        history.append({"date": anchor, "value": pressure})
+
+    return history
+
+
 def recession_composite_history(
     series_map: dict[str, list[dict]],
     cpi_yoy: list[dict],

@@ -7,6 +7,7 @@ from server.analytics import (
     recession_composite,
     recession_composite_history,
     sahm_rule,
+    stagflation_pressure_history,
     stagflation_pressure_score,
     yield_curve_inverted,
 )
@@ -85,3 +86,17 @@ def test_stagflation_pressure_not_binary_only() -> None:
     # Watch-zone values should still produce non-zero pressure.
     score = stagflation_pressure_score(misery=7.5, real_wages=0.2)
     assert 0.0 < score < 1.0
+
+
+def test_stagflation_pressure_history_returns_points() -> None:
+    unrate = [{"date": f"2021-{m:02d}-01", "value": 4.0} for m in range(1, 13)] + [
+        {"date": f"2022-{m:02d}-01", "value": 4.2} for m in range(1, 13)
+    ]
+    cpi_yoy = [{"date": o["date"], "value": 2.0} for o in unrate]
+    wages_yoy = [{"date": o["date"], "value": 3.0} for o in unrate]
+
+    history = stagflation_pressure_history(unrate, cpi_yoy, wages_yoy, years=5)
+
+    assert len(history) == len(unrate)
+    assert history[-1]["date"] == unrate[-1]["date"]
+    assert 0.0 <= history[-1]["value"] <= 1.0

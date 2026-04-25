@@ -34,6 +34,7 @@ from .analytics import (
     recession_composite_weighted,
     sahm_rule,
     sahm_series,
+    stagflation_pressure_history,
     stagflation_pressure_score,
     yield_curve_inverted,
 )
@@ -416,6 +417,9 @@ def recession_signals(range: str = "MAX") -> RecessionSignalsResponse:  # noqa: 
     series_out["WAGES_YOY"] = wages_yoy
     series_out["LEI_6M_CHANGE"] = lei_6m_change_series(series_out.get("USALOLITONOSTSAM", []))
     series_out["RECESSION_RISK"] = recession_composite_history(series_out, cpi_yoy, wages_yoy, years=5)
+    series_out["STAGFLATION_PRESSURE"] = stagflation_pressure_history(
+        series_out.get("UNRATE", []), cpi_yoy, wages_yoy, years=5
+    )
 
     # --- Build signal objects -------------------------------------------
     signals = [
