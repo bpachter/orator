@@ -337,7 +337,7 @@ def stagflation_pressure_history(
     unrate: list[dict],
     cpi_yoy: list[dict],
     wages_yoy: list[dict],
-    years: int = 5,
+    years: int = 30,
 ) -> list[dict]:
     """Build monthly historical stagflation pressure (0-1) over a rolling window."""
     if not unrate:
@@ -369,7 +369,7 @@ def recession_composite_history(
     series_map: dict[str, list[dict]],
     cpi_yoy: list[dict],
     wages_yoy: list[dict],
-    years: int = 5,
+    years: int = 30,
 ) -> list[dict]:
     """Build monthly historical weighted recession risk over a rolling window.
 

@@ -231,7 +231,7 @@ function CombinedRiskChart({
   return (
     <PanelCard
       title="Recession Risk Model"
-      subtitle="Combined 5Y trend overlay: Recession Risk + Stagflation Pressure"
+      subtitle="Combined 30Y trend overlay: Recession Risk + Stagflation Pressure"
     >
       <PlotlyChart
         traces={traces}

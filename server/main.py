@@ -416,9 +416,9 @@ def recession_signals(range: str = "MAX") -> RecessionSignalsResponse:  # noqa: 
     series_out["CPI_YOY"] = cpi_yoy
     series_out["WAGES_YOY"] = wages_yoy
     series_out["LEI_6M_CHANGE"] = lei_6m_change_series(series_out.get("USALOLITONOSTSAM", []))
-    series_out["RECESSION_RISK"] = recession_composite_history(series_out, cpi_yoy, wages_yoy, years=5)
+    series_out["RECESSION_RISK"] = recession_composite_history(series_out, cpi_yoy, wages_yoy, years=30)
     series_out["STAGFLATION_PRESSURE"] = stagflation_pressure_history(
-        series_out.get("UNRATE", []), cpi_yoy, wages_yoy, years=5
+        series_out.get("UNRATE", []), cpi_yoy, wages_yoy, years=30
     )
 
     # --- Build signal objects -------------------------------------------
