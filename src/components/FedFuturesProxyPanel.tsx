@@ -69,7 +69,7 @@ export function FedFuturesProxyPanel() {
         mode: 'lines',
         x: points.map((p) => p.x),
         y: points.map((p) => p.y),
-        line: { color: 'rgba(148,163,184,0.16)', width: 1 },
+        line: { color: 'rgba(148,163,184,0.26)', width: 1.15 },
         hoverinfo: 'skip',
         showlegend: false,
       })
@@ -179,109 +179,170 @@ export function FedFuturesProxyPanel() {
       />
 
       <PanelCard>
-        <Stack spacing={1.25}>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', md: 'center' }}>
-            <Typography variant="caption" color="text.secondary" sx={{ minWidth: 88 }}>
-              Density
-            </Typography>
-            <Stack direction="row" spacing={0.75}>
-              <Chip
-                size="small"
-                label="Sparse"
-                clickable
-                onClick={() => setDensity('sparse')}
-                sx={{
-                  bgcolor: density === 'sparse' ? palette.series.blue + '22' : undefined,
-                  color: density === 'sparse' ? palette.series.blue : 'text.secondary',
-                  border: `1px solid ${density === 'sparse' ? palette.series.blue : palette.border}`,
-                  fontWeight: density === 'sparse' ? 700 : 500,
-                }}
-              />
-              <Chip
-                size="small"
-                label="Standard"
-                clickable
-                onClick={() => setDensity('standard')}
-                sx={{
-                  bgcolor: density === 'standard' ? palette.series.blue + '22' : undefined,
-                  color: density === 'standard' ? palette.series.blue : 'text.secondary',
-                  border: `1px solid ${density === 'standard' ? palette.series.blue : palette.border}`,
-                  fontWeight: density === 'standard' ? 700 : 500,
-                }}
-              />
-              <Chip
-                size="small"
-                label="Dense"
-                clickable
-                onClick={() => setDensity('dense')}
-                sx={{
-                  bgcolor: density === 'dense' ? palette.series.blue + '22' : undefined,
-                  color: density === 'dense' ? palette.series.blue : 'text.secondary',
-                  border: `1px solid ${density === 'dense' ? palette.series.blue : palette.border}`,
-                  fontWeight: density === 'dense' ? 700 : 500,
-                }}
-              />
-            </Stack>
-          </Stack>
-
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', md: 'center' }}>
-            <Typography variant="caption" color="text.secondary" sx={{ minWidth: 88 }}>
-              Horizon
-            </Typography>
-            <Stack direction="row" spacing={0.75}>
-              <Chip
-                size="small"
-                label="3Y"
-                clickable
-                onClick={() => setHorizon(3)}
-                sx={{
-                  bgcolor: horizon === 3 ? palette.series.cyan + '22' : undefined,
-                  color: horizon === 3 ? palette.series.cyan : 'text.secondary',
-                  border: `1px solid ${horizon === 3 ? palette.series.cyan : palette.border}`,
-                  fontWeight: horizon === 3 ? 700 : 500,
-                }}
-              />
-              <Chip
-                size="small"
-                label="5Y"
-                clickable
-                onClick={() => setHorizon(5)}
-                sx={{
-                  bgcolor: horizon === 5 ? palette.series.cyan + '22' : undefined,
-                  color: horizon === 5 ? palette.series.cyan : 'text.secondary',
-                  border: `1px solid ${horizon === 5 ? palette.series.cyan : palette.border}`,
-                  fontWeight: horizon === 5 ? 700 : 500,
-                }}
-              />
-            </Stack>
-            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ ml: { md: 1 } }}>
-              <Switch size="small" checked={showRecessions} onChange={(e) => setShowRecessions(e.target.checked)} />
-              <Typography variant="caption" color="text.secondary">
-                Recession shading
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1.35fr) minmax(320px, 0.9fr)' },
+            gap: 2,
+            alignItems: 'stretch',
+          }}
+        >
+          <Stack spacing={1.25} justifyContent="space-between">
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', md: 'center' }}>
+              <Typography variant="caption" color="text.secondary" sx={{ minWidth: 88 }}>
+                Density
               </Typography>
+              <Stack direction="row" spacing={0.75}>
+                <Chip
+                  size="small"
+                  label="Sparse"
+                  clickable
+                  onClick={() => setDensity('sparse')}
+                  sx={{
+                    bgcolor: density === 'sparse' ? palette.series.blue + '22' : undefined,
+                    color: density === 'sparse' ? palette.series.blue : 'text.secondary',
+                    border: `1px solid ${density === 'sparse' ? palette.series.blue : palette.border}`,
+                    fontWeight: density === 'sparse' ? 700 : 500,
+                  }}
+                />
+                <Chip
+                  size="small"
+                  label="Standard"
+                  clickable
+                  onClick={() => setDensity('standard')}
+                  sx={{
+                    bgcolor: density === 'standard' ? palette.series.blue + '22' : undefined,
+                    color: density === 'standard' ? palette.series.blue : 'text.secondary',
+                    border: `1px solid ${density === 'standard' ? palette.series.blue : palette.border}`,
+                    fontWeight: density === 'standard' ? 700 : 500,
+                  }}
+                />
+                <Chip
+                  size="small"
+                  label="Dense"
+                  clickable
+                  onClick={() => setDensity('dense')}
+                  sx={{
+                    bgcolor: density === 'dense' ? palette.series.blue + '22' : undefined,
+                    color: density === 'dense' ? palette.series.blue : 'text.secondary',
+                    border: `1px solid ${density === 'dense' ? palette.series.blue : palette.border}`,
+                    fontWeight: density === 'dense' ? 700 : 500,
+                  }}
+                />
+              </Stack>
             </Stack>
+
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', md: 'center' }}>
+              <Typography variant="caption" color="text.secondary" sx={{ minWidth: 88 }}>
+                Horizon
+              </Typography>
+              <Stack direction="row" spacing={0.75}>
+                <Chip
+                  size="small"
+                  label="3Y"
+                  clickable
+                  onClick={() => setHorizon(3)}
+                  sx={{
+                    bgcolor: horizon === 3 ? palette.series.cyan + '22' : undefined,
+                    color: horizon === 3 ? palette.series.cyan : 'text.secondary',
+                    border: `1px solid ${horizon === 3 ? palette.series.cyan : palette.border}`,
+                    fontWeight: horizon === 3 ? 700 : 500,
+                  }}
+                />
+                <Chip
+                  size="small"
+                  label="5Y"
+                  clickable
+                  onClick={() => setHorizon(5)}
+                  sx={{
+                    bgcolor: horizon === 5 ? palette.series.cyan + '22' : undefined,
+                    color: horizon === 5 ? palette.series.cyan : 'text.secondary',
+                    border: `1px solid ${horizon === 5 ? palette.series.cyan : palette.border}`,
+                    fontWeight: horizon === 5 ? 700 : 500,
+                  }}
+                />
+              </Stack>
+              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ ml: { md: 1 } }}>
+                <Switch size="small" checked={showRecessions} onChange={(e) => setShowRecessions(e.target.checked)} />
+                <Typography variant="caption" color="text.secondary">
+                  Recession shading
+                </Typography>
+              </Stack>
+            </Stack>
+
+            <Typography variant="caption" color="text.secondary">
+              Historical implied paths are sampled from the selected period with {maxGhostPaths} target trajectories and a {horizon}Y forward horizon.
+            </Typography>
           </Stack>
 
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', md: 'center' }}>
-          <Chip
-            size="small"
-            label={`Fed Funds: ${latestFed ? `${latestFed.value.toFixed(2)}%` : 'n/a'}`}
-            sx={{ bgcolor: palette.series.blue + '22', color: palette.series.blue, fontWeight: 600 }}
-          />
-          <Chip
-            size="small"
-            label={`Implied 1Y: ${implied1y !== undefined ? `${implied1y.toFixed(2)}%` : 'n/a'}`}
-            sx={{ bgcolor: palette.series.cyan + '22', color: palette.series.cyan, fontWeight: 600 }}
-          />
-          <Chip
-            size="small"
-            label={`Implied 2Y: ${implied2y !== undefined ? `${implied2y.toFixed(2)}%` : 'n/a'}`}
-            sx={{ bgcolor: palette.series.purple + '22', color: palette.series.purple, fontWeight: 600 }}
-          />
-          <Typography variant="caption" color="text.secondary" sx={{ ml: { md: 1 } }}>
-            Grey lines are historical implied paths sampled from the selected period ({maxGhostPaths} target trajectories, {horizon}Y horizon).
-          </Typography>
-        </Stack>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gap: 1,
+            }}
+          >
+            <Box
+              sx={{
+                p: 1.25,
+                borderRadius: 1.5,
+                border: `1px solid ${palette.series.blue}55`,
+                bgcolor: palette.series.blue + '14',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                minHeight: 82,
+              }}
+            >
+              <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1 }}>
+                Fed Funds
+              </Typography>
+              <Typography variant="h5" sx={{ color: palette.series.blue, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>
+                {latestFed ? `${latestFed.value.toFixed(2)}%` : 'n/a'}
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                p: 1.25,
+                borderRadius: 1.5,
+                border: `1px solid ${palette.series.cyan}55`,
+                bgcolor: palette.series.cyan + '14',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                minHeight: 82,
+              }}
+            >
+              <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1 }}>
+                Implied 1Y
+              </Typography>
+              <Typography variant="h5" sx={{ color: palette.series.cyan, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>
+                {implied1y !== undefined ? `${implied1y.toFixed(2)}%` : 'n/a'}
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                p: 1.25,
+                borderRadius: 1.5,
+                border: `1px solid ${palette.series.purple}55`,
+                bgcolor: palette.series.purple + '14',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                minHeight: 82,
+              }}
+            >
+              <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1 }}>
+                Implied 2Y
+              </Typography>
+              <Typography variant="h5" sx={{ color: palette.series.purple, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>
+                {implied2y !== undefined ? `${implied2y.toFixed(2)}%` : 'n/a'}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
         </Stack>
       </PanelCard>
 
