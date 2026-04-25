@@ -21,6 +21,7 @@ export const DEFAULT_FILTERS: DashboardFilters = {
 
 const VALID_VIEWS: ActiveView[] = [
   'yield-curve',
+  'fed-futures-proxy',
   'macro',
   'cpi',
   'spreads',

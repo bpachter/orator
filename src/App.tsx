@@ -46,6 +46,7 @@ import EventNoteIcon from '@mui/icons-material/EventNote'
 import HistoryIcon from '@mui/icons-material/History'
 import BuildIcon from '@mui/icons-material/Build'
 import TerminalIcon from '@mui/icons-material/Terminal'
+import QueryStatsIcon from '@mui/icons-material/QueryStats'
 import { useTheme } from '@mui/material/styles'
 import type { ActiveView } from './types'
 import { useFilters } from './state/filters'
@@ -61,6 +62,7 @@ import { useHealth } from './hooks/useFredQueries'
 import { palette } from './theme'
 
 const YieldCurve3D = lazy(() => import('./components/YieldCurve3D').then((m) => ({ default: m.YieldCurve3D })))
+const FedFuturesProxyPanel = lazy(() => import('./components/FedFuturesProxyPanel').then((m) => ({ default: m.FedFuturesProxyPanel })))
 const MacroPanel = lazy(() => import('./components/MacroPanel').then((m) => ({ default: m.MacroPanel })))
 const CpiBreakdown = lazy(() => import('./components/CpiBreakdown').then((m) => ({ default: m.CpiBreakdown })))
 const SpreadPanel = lazy(() => import('./components/SpreadPanel').then((m) => ({ default: m.SpreadPanel })))
@@ -108,6 +110,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Rates & Yields',
     items: [
       { value: 'yield-curve', label: 'Yield Curve', icon: <TimelineIcon fontSize="small" /> },
+      { value: 'fed-futures-proxy', label: 'Fed Futures Proxy', icon: <QueryStatsIcon fontSize="small" /> },
       { value: 'spreads', label: 'Spreads', icon: <ShowChartIcon fontSize="small" /> },
       { value: 'credit', label: 'Credit Conditions', icon: <AccountBalanceIcon fontSize="small" /> },
     ],
@@ -278,6 +281,7 @@ export default function App() {
           <ErrorBoundary>
             <Suspense fallback={<LoadingState message="Preparing view…" height={400} />}>
               {filters.view === 'yield-curve' && <YieldCurve3D />}
+              {filters.view === 'fed-futures-proxy' && <FedFuturesProxyPanel />}
               {filters.view === 'macro' && <MacroPanel />}
               {filters.view === 'cpi' && <CpiBreakdown />}
               {filters.view === 'spreads' && <SpreadPanel />}

@@ -7,6 +7,7 @@ export type TimeRange = '6M' | '1Y' | '3Y' | '5Y' | '10Y' | '20Y' | '30Y' | 'MAX
 
 export type ActiveView =
   | 'yield-curve'
+  | 'fed-futures-proxy'
   | 'macro'
   | 'cpi'
   | 'spreads'
