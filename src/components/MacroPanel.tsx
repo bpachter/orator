@@ -78,7 +78,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="Fed Funds Rate"
-              data={macro.data?.series?.DFF ?? []}
+              data={macro.data?.series?.FEDFUNDS ?? []}
               unit="%"
               color={palette.series.blue}
             />
@@ -119,7 +119,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="Nonfarm Payrolls YoY"
-              data={labor.data?.series?.['PAYEMS_YOY'] ?? []}
+              data={labor.data?.series?.PAYEMS ?? []}
               unit="%"
               color={palette.series.green}
             />
@@ -127,15 +127,15 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="Job Openings"
-              data={labor.data?.series?.JTSJOR ?? []}
-              unit="millions"
+              data={labor.data?.series?.JTSJOL ?? []}
+              unit="thousands"
               color={palette.series.cyan}
             />
           </Grid>
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="Avg Hourly Earnings YoY"
-              data={labor.data?.series?.['AHETPI_YOY'] ?? []}
+              data={labor.data?.series?.AHETPI ?? []}
               unit="%"
               color={palette.series.amber}
             />
@@ -168,7 +168,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="CPI YoY"
-              data={macro.data?.series?.CPIAUCSL_YOY ?? []}
+              data={macro.data?.series?.CPIAUCSL ?? []}
               unit="%"
               color={palette.series.red}
             />
@@ -176,7 +176,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="Core CPI YoY"
-              data={inflation.data?.series?.['CPILFESL_YOY'] ?? []}
+              data={inflation.data?.series?.CPILFESL ?? []}
               unit="%"
               color={palette.series.orange}
             />
@@ -184,7 +184,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="PCE YoY"
-              data={inflation.data?.series?.['PCEPI_YOY'] ?? []}
+              data={inflation.data?.series?.PCEPI ?? []}
               unit="%"
               color={palette.series.amber}
             />
@@ -192,7 +192,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="PPI YoY"
-              data={inflation.data?.series?.['PPIACO_YOY'] ?? []}
+              data={inflation.data?.series?.PPIACO ?? []}
               unit="%"
               color={palette.series.yellow}
             />
@@ -200,7 +200,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="Import Prices YoY"
-              data={inflation.data?.series?.['IMPGS_YOY'] ?? []}
+              data={inflation.data?.series?.IR ?? []}
               unit="%"
               color={palette.series.teal}
             />
@@ -208,7 +208,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="Export Prices YoY"
-              data={inflation.data?.series?.['EXPGS_YOY'] ?? []}
+              data={inflation.data?.series?.IQ ?? []}
               unit="%"
               color={palette.series.cyan}
             />
@@ -241,7 +241,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="Manufacturing Output"
-              data={activity.data?.series?.IPMANSICS ?? []}
+              data={activity.data?.series?.IPMAN ?? []}
               unit="index"
               color={palette.series.cyan}
             />
@@ -249,7 +249,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="Capacity Utilization"
-              data={activity.data?.series?.CAPUTIL ?? []}
+              data={activity.data?.series?.TCU ?? []}
               unit="%"
               color={palette.series.purple}
             />
@@ -257,8 +257,8 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="Durable Goods Orders"
-              data={activity.data?.series?.DGOEA3M086SBEA ?? []}
-              unit="%"
+              data={activity.data?.series?.DGORDER ?? []}
+              unit="$M"
               color={palette.series.orange}
             />
           </Grid>
@@ -282,7 +282,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="Retail Sales YoY"
-              data={consumer.data?.series?.['RSXFS_YOY'] ?? []}
+              data={consumer.data?.series?.RSXFS ?? []}
               unit="%"
               color={palette.series.green}
             />
@@ -306,7 +306,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="Real Disposable Income YoY"
-              data={consumer.data?.series?.['DIFGSXP_YOY'] ?? []}
+              data={consumer.data?.series?.DSPIC96 ?? []}
               unit="%"
               color={palette.series.cyan}
             />
@@ -314,16 +314,16 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="PCE YoY"
-              data={consumer.data?.series?.['PCEPI_YOY'] ?? []}
+              data={consumer.data?.series?.PCE ?? []}
               unit="%"
               color={palette.series.orange}
             />
           </Grid>
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
-              label="Credit Card Delinquency"
-              data={credit.data?.series?.MMNRNJ ?? []}
-              unit="bps"
+              label="Credit Card Charge-Off Rate"
+              data={credit.data?.series?.TERMCBCCALLNS ?? []}
+              unit="%"
               color={palette.series.red}
             />
           </Grid>
@@ -355,7 +355,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="Case-Shiller YoY"
-              data={housing.data?.series?.['CSUSHPIUSA_YOY'] ?? []}
+              data={housing.data?.series?.CSUSHPISA ?? []}
               unit="%"
               color={palette.series.green}
             />
@@ -379,7 +379,7 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={4}>
             <MacroIndicator
               label="New Home Sales"
-              data={housing.data?.series?.USSRNPY ?? []}
+              data={housing.data?.series?.HSN1F ?? []}
               unit="thousands/mo"
               color={palette.series.teal}
             />
@@ -396,9 +396,9 @@ export function MacroPanel() {
           <Grid item xs={12} md={6} lg={6}>
             <MacroIndicator
               label="Sahm Rule Score"
-              data={recession.data?.series?.['SAHM_SCORE'] ?? []}
+              data={recession.data?.series?.SAHM_SCORE ?? []}
               unit="score"
-              color={recession.data?.series?.['SAHM_SCORE']?.[recession.data.series['SAHM_SCORE'].length - 1]?.value ?? 0 > 0.5 ? palette.negative : palette.positive}
+              color={recession.data?.series?.SAHM_SCORE?.[recession.data.series.SAHM_SCORE.length - 1]?.value ?? 0 > 0.5 ? palette.negative : palette.positive}
             />
           </Grid>
           <Grid item xs={12} md={6} lg={6}>

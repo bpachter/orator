@@ -16,7 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from . import cache, observability
-from .analytics import recession_composite, sahm_rule, yield_curve_inverted
+from .analytics import recession_composite, sahm_rule, sahm_series, yield_curve_inverted
 from .errors import ApiError, error_response
 from .fred_client import fetch_series, get_start_for_range, today_iso
 from .schemas import (
@@ -360,6 +360,9 @@ def recession_signals(range: str = "MAX") -> RecessionSignalsResponse:
     sahm_value, sahm_trig = sahm_rule(series_out.get("UNRATE", []))
     inv2y, inv2y_trig = yield_curve_inverted(series_out.get("T10Y2Y", []))
     inv3m, inv3m_trig = yield_curve_inverted(series_out.get("T10Y3M", []))
+
+    # Add Sahm Rule score as a time series so the frontend can chart it
+    series_out["SAHM_SCORE"] = sahm_series(series_out.get("UNRATE", []))
 
     signals = [
         RecessionSignal(

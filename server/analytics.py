@@ -22,6 +22,27 @@ def sahm_rule(unrate: list[dict]) -> tuple[float | None, bool]:
     return delta, delta >= 0.5
 
 
+def sahm_series(unrate: list[dict]) -> list[dict]:
+    """Return the Sahm Rule score as a time series aligned with unrate dates."""
+    if len(unrate) < 15:
+        return []
+    dates = [o["date"] for o in unrate]
+    values = [o["value"] for o in unrate]
+    rolling3 = [
+        sum(values[i - 2 : i + 1]) / 3 for i in range(2, len(values))
+    ]
+    # rolling3[i] corresponds to dates[i + 2]
+    result = []
+    for i, r3 in enumerate(rolling3):
+        date_idx = i + 2
+        if i < 12:
+            continue  # need 13 rolling3 values to compute trailing min
+        trailing_min = min(rolling3[max(0, i - 12) : i])
+        delta = round(r3 - trailing_min, 3)
+        result.append({"date": dates[date_idx], "value": delta})
+    return result
+
+
 def latest_value(series: list[dict]) -> float | None:
     return series[-1]["value"] if series else None
 

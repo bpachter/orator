@@ -91,6 +91,7 @@ HOUSING_SERIES: list[SeriesDef] = [
     {"id": "PERMIT", "label": "Building Permits", "color": "#06b6d4", "unit": "thousands"},
     {"id": "MSACSR", "label": "Months' Supply of Houses", "color": "#a78bfa", "unit": "months"},
     {"id": "RRVRUSQ156N", "label": "Rental Vacancy Rate", "color": "#f97316", "unit": "%"},
+    {"id": "HSN1F", "label": "New Home Sales", "color": "#14b8a6", "unit": "thousands"},
 ]
 
 # Inputs to the recession-signals composite
