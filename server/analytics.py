@@ -10,6 +10,7 @@ Signal suite:
 
 from __future__ import annotations
 
+from datetime import date, timedelta
 from typing import Any
 
 
@@ -270,3 +271,85 @@ def recession_composite_weighted(signals: list[dict[str, Any]]) -> float:
     total_w = sum(s.get("weight", 1.0) for s in signals)
     trig_w = sum(s.get("weight", 1.0) for s in signals if s.get("triggered"))
     return round(trig_w / total_w, 3) if total_w > 0 else 0.0
+
+
+def recession_composite_history(
+    series_map: dict[str, list[dict]],
+    cpi_yoy: list[dict],
+    wages_yoy: list[dict],
+    years: int = 5,
+) -> list[dict]:
+    """Build monthly historical weighted recession risk over a rolling window.
+
+    Uses UNRATE monthly timestamps as anchors and evaluates each signal as-of
+    that anchor date using only information available at that time.
+    """
+    unrate = series_map.get("UNRATE", [])
+    if not unrate:
+        return []
+
+    latest_date = date.fromisoformat(unrate[-1]["date"])
+    cutoff_date = latest_date - timedelta(days=365 * max(1, years))
+    anchor_dates = [
+        obs["date"]
+        for obs in unrate
+        if date.fromisoformat(obs["date"]) >= cutoff_date
+    ]
+
+    if not anchor_dates:
+        return []
+
+    history: list[dict] = []
+    weights = {
+        "lei": 2.0,
+        "ism": 1.5,
+        "gdp": 0.75,
+        "sahm": 1.0,
+        "claims": 1.25,
+        "unwind": 1.5,
+        "inv2y": 0.75,
+        "inv3m": 0.75,
+        "hy": 1.5,
+        "delin": 1.25,
+        "misery": 1.0,
+        "realw": 0.75,
+    }
+
+    for anchor in anchor_dates:
+        # Use only observations at or before this anchor to avoid lookahead bias.
+        s = {k: [o for o in v if o["date"] <= anchor] for k, v in series_map.items()}
+        cpi_hist = [o for o in cpi_yoy if o["date"] <= anchor]
+        wages_hist = [o for o in wages_yoy if o["date"] <= anchor]
+
+        _, sahm_trig = sahm_rule(s.get("UNRATE", []))
+        _, inv2y_trig = yield_curve_inverted(s.get("T10Y2Y", []))
+        _, inv3m_trig = yield_curve_inverted(s.get("T10Y3M", []))
+        _, unwind_trig = inversion_unwind_signal(s.get("T10Y2Y", []))
+        _, hy_trig = hy_spread_signal(s.get("BAMLH0A0HYM2", []))
+        _, ism_trig = ism_pmi_signal(s.get("NAPM", []))
+        _, lei_trig = lei_signal(s.get("USSLIND", []))
+        _, gdp_trig = gdp_negative_signal(s.get("A191RL1Q225SBEA", []))
+        _, misery_trig = misery_index_signal(s.get("UNRATE", []), cpi_hist)
+        _, realwage_trig = real_wages_signal(wages_hist, cpi_hist)
+        _, delin_trig = credit_delinquency_signal(s.get("DRCCLACBS", []))
+        _, claims_trig = initial_claims_trend_signal(s.get("IC4WSA", []))
+
+        score = recession_composite_weighted(
+            [
+                {"triggered": lei_trig, "weight": weights["lei"]},
+                {"triggered": ism_trig, "weight": weights["ism"]},
+                {"triggered": gdp_trig, "weight": weights["gdp"]},
+                {"triggered": sahm_trig, "weight": weights["sahm"]},
+                {"triggered": claims_trig, "weight": weights["claims"]},
+                {"triggered": unwind_trig, "weight": weights["unwind"]},
+                {"triggered": inv2y_trig, "weight": weights["inv2y"]},
+                {"triggered": inv3m_trig, "weight": weights["inv3m"]},
+                {"triggered": hy_trig, "weight": weights["hy"]},
+                {"triggered": delin_trig, "weight": weights["delin"]},
+                {"triggered": misery_trig, "weight": weights["misery"]},
+                {"triggered": realwage_trig, "weight": weights["realw"]},
+            ]
+        )
+        history.append({"date": anchor, "value": score})
+
+    return history

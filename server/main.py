@@ -30,6 +30,7 @@ from .analytics import (
     misery_series,
     real_wages_series,
     real_wages_signal,
+    recession_composite_history,
     recession_composite_weighted,
     sahm_rule,
     sahm_series,
@@ -411,6 +412,7 @@ def recession_signals(range: str = "MAX") -> RecessionSignalsResponse:  # noqa: 
     series_out["CPI_YOY"] = cpi_yoy
     series_out["WAGES_YOY"] = wages_yoy
     series_out["LEI_6M_CHANGE"] = lei_6m_change_series(series_out.get("USSLIND", []))
+    series_out["RECESSION_RISK"] = recession_composite_history(series_out, cpi_yoy, wages_yoy, years=5)
 
     # --- Build signal objects -------------------------------------------
     signals = [

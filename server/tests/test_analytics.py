@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from server.analytics import recession_composite, sahm_rule, yield_curve_inverted
+from server.analytics import (
+    recession_composite,
+    recession_composite_history,
+    sahm_rule,
+    yield_curve_inverted,
+)
 
 
 def _series(values: list[float]) -> list[dict]:
@@ -38,3 +43,30 @@ def test_recession_composite() -> None:
 
 def test_recession_composite_empty() -> None:
     assert recession_composite([]) == 0.0
+
+
+def test_recession_composite_history_returns_series() -> None:
+    # Build enough monthly points for rolling windows + YoY calculations.
+    unrate = [{"date": f"2021-{m:02d}-01", "value": 4.0} for m in range(1, 13)] + [
+        {"date": f"2022-{m:02d}-01", "value": 4.2} for m in range(1, 13)
+    ]
+    cpi_yoy = [{"date": o["date"], "value": 2.0} for o in unrate]
+    wages_yoy = [{"date": o["date"], "value": 3.0} for o in unrate]
+
+    series_map = {
+        "UNRATE": unrate,
+        "T10Y2Y": [{"date": o["date"], "value": 0.5} for o in unrate],
+        "T10Y3M": [{"date": o["date"], "value": 0.4} for o in unrate],
+        "BAMLH0A0HYM2": [{"date": o["date"], "value": 300.0} for o in unrate],
+        "NAPM": [{"date": o["date"], "value": 52.0} for o in unrate],
+        "USSLIND": [{"date": o["date"], "value": 100.0} for o in unrate],
+        "A191RL1Q225SBEA": [{"date": o["date"], "value": 1.5} for o in unrate],
+        "DRCCLACBS": [{"date": o["date"], "value": 2.0} for o in unrate],
+        "IC4WSA": [{"date": o["date"], "value": 200000.0} for o in unrate],
+    }
+
+    history = recession_composite_history(series_map, cpi_yoy, wages_yoy, years=5)
+
+    assert len(history) == len(unrate)
+    assert history[-1]["date"] == unrate[-1]["date"]
+    assert 0.0 <= history[-1]["value"] <= 1.0

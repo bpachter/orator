@@ -55,6 +55,20 @@ function riskLabel(score: number): string {
   return 'Low'
 }
 
+function formatDeltaPoints(delta: number | null): string {
+  if (delta === null) return 'n/a'
+  const sign = delta > 0 ? '+' : ''
+  return `${sign}${delta.toFixed(1)}pp`
+}
+
+function deltaPoints(series: FredObs[], periods: number): number | null {
+  if (series.length <= periods) return null
+  const last = series[series.length - 1]?.value
+  const prev = series[series.length - 1 - periods]?.value
+  if (last === undefined || prev === undefined) return null
+  return (last - prev) * 100
+}
+
 /** Sort signals: triggered + critical first, then by severity, then alphabetical */
 function severitySortKey(s: RecessionSignal): number {
   if (s.triggered && s.severity === 'critical') return 0
@@ -279,6 +293,12 @@ export function RecessionSignalsPanel() {
   const realWagesData = data.series['REAL_WAGES'] ?? []
   const napmData = data.series['NAPM'] ?? []
   const leiChangeData = data.series['LEI_6M_CHANGE'] ?? []
+  const recessionRiskData = (data.series['RECESSION_RISK'] ?? []).map((o) => ({
+    ...o,
+    value: o.value * 100,
+  }))
+  const risk3mDelta = deltaPoints(data.series['RECESSION_RISK'] ?? [], 3)
+  const risk12mDelta = deltaPoints(data.series['RECESSION_RISK'] ?? [], 12)
 
   return (
     <Stack spacing={3}>
@@ -345,6 +365,13 @@ export function RecessionSignalsPanel() {
             gap: 2,
           }}
         >
+          <MiniChart
+            title="Recession Risk Model"
+            subtitle={`Weighted composite (monthly, up to 5Y) · 3M ${formatDeltaPoints(risk3mDelta)} · 12M ${formatDeltaPoints(risk12mDelta)}`}
+            data={recessionRiskData}
+            color={palette.series.red}
+            threshold={40}
+          />
           <MiniChart
             title="Sahm Rule Score"
             subtitle="Triggers at 0.5 — 3M avg unemployment rise above 12M low"
