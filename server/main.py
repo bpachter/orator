@@ -23,7 +23,7 @@ from .analytics import (
     hy_spread_signal,
     initial_claims_trend_signal,
     inversion_unwind_signal,
-    ism_pmi_signal,
+    manufacturing_momentum_signal,
     lei_6m_change_series,
     lei_signal,
     misery_index_signal,
@@ -34,6 +34,7 @@ from .analytics import (
     recession_composite_weighted,
     sahm_rule,
     sahm_series,
+    stagflation_pressure_score,
     yield_curve_inverted,
 )
 from .errors import ApiError, error_response
@@ -390,6 +391,7 @@ def recession_signals(range: str = "MAX") -> RecessionSignalsResponse:  # noqa: 
     # YoY transforms for series delivered as raw levels
     cpi_yoy = yoy(series_out.get("CPIAUCSL", []))
     wages_yoy = yoy(series_out.get("AHETPI", []))
+    ipman_yoy = yoy(series_out.get("IPMAN", []))
 
     # --- Signal analytics -----------------------------------------------
     sahm_val, sahm_trig = sahm_rule(series_out.get("UNRATE", []))
@@ -397,8 +399,8 @@ def recession_signals(range: str = "MAX") -> RecessionSignalsResponse:  # noqa: 
     inv3m_val, inv3m_trig = yield_curve_inverted(series_out.get("T10Y3M", []))
     unwind_val, unwind_trig = inversion_unwind_signal(series_out.get("T10Y2Y", []))
     hy_val, hy_trig = hy_spread_signal(series_out.get("BAMLH0A0HYM2", []))
-    ism_val, ism_trig = ism_pmi_signal(series_out.get("NAPM", []))
-    lei_val, lei_trig = lei_signal(series_out.get("USSLIND", []))
+    ism_val, ism_trig = manufacturing_momentum_signal(ipman_yoy)
+    lei_val, lei_trig = lei_signal(series_out.get("USALOLITONOSTSAM", []))
     gdp_val, gdp_trig = gdp_negative_signal(series_out.get("A191RL1Q225SBEA", []))
     misery_val, misery_trig = misery_index_signal(series_out.get("UNRATE", []), cpi_yoy)
     realwage_val, realwage_trig = real_wages_signal(wages_yoy, cpi_yoy)
@@ -409,9 +411,10 @@ def recession_signals(range: str = "MAX") -> RecessionSignalsResponse:  # noqa: 
     series_out["SAHM_SCORE"] = sahm_series(series_out.get("UNRATE", []))
     series_out["MISERY_INDEX"] = misery_series(series_out.get("UNRATE", []), cpi_yoy)
     series_out["REAL_WAGES"] = real_wages_series(wages_yoy, cpi_yoy)
+    series_out["IPMAN_YOY"] = ipman_yoy
     series_out["CPI_YOY"] = cpi_yoy
     series_out["WAGES_YOY"] = wages_yoy
-    series_out["LEI_6M_CHANGE"] = lei_6m_change_series(series_out.get("USSLIND", []))
+    series_out["LEI_6M_CHANGE"] = lei_6m_change_series(series_out.get("USALOLITONOSTSAM", []))
     series_out["RECESSION_RISK"] = recession_composite_history(series_out, cpi_yoy, wages_yoy, years=5)
 
     # --- Build signal objects -------------------------------------------
@@ -420,16 +423,16 @@ def recession_signals(range: str = "MAX") -> RecessionSignalsResponse:  # noqa: 
         RecessionSignal(
             id="lei", label="Conference Board LEI",
             value=lei_val, triggered=lei_trig,
-            description="Leading Economic Index 6-month % change < 0 flags cycle downturn",
+            description="Leading index proxy (OECD CLI) 6-month % change < 0 flags cycle downturn",
             category="cycle", weight=2.0,
             severity=_severity(lei_val, 0.5, 0.0, -2.0, higher_is_worse=False),
         ),
         RecessionSignal(
-            id="ism_pmi", label="ISM Manufacturing PMI",
+            id="ism_pmi", label="Manufacturing Output Momentum",
             value=ism_val, triggered=ism_trig,
-            description="PMI below 50 for 2+ consecutive months = manufacturing contraction",
+            description="IPMAN YoY below 0 for 3+ consecutive months = manufacturing contraction",
             category="cycle", weight=1.5,
-            severity=_severity(ism_val, 52.0, 50.0, 45.0, higher_is_worse=False),
+            severity=_severity(ism_val, 2.0, 0.0, -5.0, higher_is_worse=False),
         ),
         RecessionSignal(
             id="gdp", label="Real GDP Growth",
@@ -515,8 +518,7 @@ def recession_signals(range: str = "MAX") -> RecessionSignalsResponse:  # noqa: 
 
     all_dump = [s.model_dump() for s in signals]
     composite = recession_composite_weighted(all_dump)
-    stagflation_dump = [s for s in all_dump if s["category"] == "stagflation"]
-    stagflation = recession_composite_weighted(stagflation_dump)
+    stagflation = stagflation_pressure_score(misery_val, realwage_val)
 
     result = RecessionSignalsResponse(
         updated=today_iso(),

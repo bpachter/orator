@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from server.analytics import (
+    manufacturing_momentum_signal,
     recession_composite,
     recession_composite_history,
     sahm_rule,
+    stagflation_pressure_score,
     yield_curve_inverted,
 )
 
@@ -58,8 +60,8 @@ def test_recession_composite_history_returns_series() -> None:
         "T10Y2Y": [{"date": o["date"], "value": 0.5} for o in unrate],
         "T10Y3M": [{"date": o["date"], "value": 0.4} for o in unrate],
         "BAMLH0A0HYM2": [{"date": o["date"], "value": 300.0} for o in unrate],
-        "NAPM": [{"date": o["date"], "value": 52.0} for o in unrate],
-        "USSLIND": [{"date": o["date"], "value": 100.0} for o in unrate],
+        "IPMAN": [{"date": o["date"], "value": 100.0 + i} for i, o in enumerate(unrate)],
+        "USALOLITONOSTSAM": [{"date": o["date"], "value": 100.0} for o in unrate],
         "A191RL1Q225SBEA": [{"date": o["date"], "value": 1.5} for o in unrate],
         "DRCCLACBS": [{"date": o["date"], "value": 2.0} for o in unrate],
         "IC4WSA": [{"date": o["date"], "value": 200000.0} for o in unrate],
@@ -70,3 +72,16 @@ def test_recession_composite_history_returns_series() -> None:
     assert len(history) == len(unrate)
     assert history[-1]["date"] == unrate[-1]["date"]
     assert 0.0 <= history[-1]["value"] <= 1.0
+
+
+def test_manufacturing_momentum_signal_triggers_after_three_negative_months() -> None:
+    ipman_yoy = _series([0.5, -0.1, -0.2, -0.3])
+    val, triggered = manufacturing_momentum_signal(ipman_yoy)
+    assert val == -0.3
+    assert triggered is True
+
+
+def test_stagflation_pressure_not_binary_only() -> None:
+    # Watch-zone values should still produce non-zero pressure.
+    score = stagflation_pressure_score(misery=7.5, real_wages=0.2)
+    assert 0.0 < score < 1.0

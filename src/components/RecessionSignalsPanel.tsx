@@ -291,7 +291,7 @@ export function RecessionSignalsPanel() {
   const hyData = data.series['BAMLH0A0HYM2'] ?? []
   const miseryData = data.series['MISERY_INDEX'] ?? []
   const realWagesData = data.series['REAL_WAGES'] ?? []
-  const napmData = data.series['NAPM'] ?? []
+  const napmData = data.series['IPMAN_YOY'] ?? []
   const leiChangeData = data.series['LEI_6M_CHANGE'] ?? []
   const recessionRiskData = (data.series['RECESSION_RISK'] ?? []).map((o) => ({
     ...o,
@@ -403,15 +403,15 @@ export function RecessionSignalsPanel() {
             threshold={0}
           />
           <MiniChart
-            title="ISM Manufacturing PMI"
-            subtitle="Below 50 = manufacturing contraction"
+            title="Manufacturing Output Momentum"
+            subtitle="IPMAN YoY below 0 = manufacturing contraction proxy"
             data={napmData}
             color={palette.series.purple}
-            threshold={50}
+            threshold={0}
           />
           <MiniChart
-            title="Conference Board LEI (6M Δ)"
-            subtitle="Negative 6-month % change = leading downturn signal"
+            title="Leading Index (6M Δ)"
+            subtitle="OECD CLI proxy: negative 6-month % change = leading downturn signal"
             data={leiChangeData}
             color={palette.series.blue}
             threshold={0}

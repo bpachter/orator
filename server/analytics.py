@@ -1,7 +1,7 @@
 """Derived analytics — recession signals, composites, and stagflation indicators.
 
 Signal suite:
-  Business Cycle   : Conference Board LEI, Real GDP Growth, ISM Manufacturing PMI
+    Business Cycle   : Leading Index proxy, Real GDP Growth, Manufacturing momentum proxy
   Labor Market     : Sahm Rule, Initial Claims 4W-MA Trend
   Financial        : 10Y-2Y Inversion, 10Y-3M Inversion, Post-Inversion Unwind,
                      High-Yield Credit Spread, Credit Card Delinquency
@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 from typing import Any
+
+from .transforms import yoy
 
 
 # ---------------------------------------------------------------------------
@@ -126,6 +128,19 @@ def ism_pmi_signal(napm: list[dict]) -> tuple[float | None, bool]:
     v = napm[-1]["value"]
     triggered = len(napm) >= 2 and v < 50 and napm[-2]["value"] < 50
     return round(v, 1), triggered
+
+
+def manufacturing_momentum_signal(ipman_yoy: list[dict]) -> tuple[float | None, bool]:
+    """Manufacturing momentum proxy via IPMAN YoY.
+
+    Triggers when YoY production growth is below 0 for 3+ consecutive months.
+    """
+    if not ipman_yoy:
+        return None, False
+    v = ipman_yoy[-1]["value"]
+    recent = ipman_yoy[-3:] if len(ipman_yoy) >= 3 else ipman_yoy
+    triggered = len(recent) >= 3 and all(o["value"] < 0 for o in recent)
+    return round(v, 2), triggered
 
 
 def lei_signal(lei: list[dict]) -> tuple[float | None, bool]:
@@ -273,6 +288,51 @@ def recession_composite_weighted(signals: list[dict[str, Any]]) -> float:
     return round(trig_w / total_w, 3) if total_w > 0 else 0.0
 
 
+def _tiered_pressure(
+    value: float | None,
+    watch: float,
+    trigger: float,
+    critical: float,
+    higher_is_worse: bool,
+) -> float:
+    """Convert thresholds into a 0-1 pressure score with smooth transitions."""
+    if value is None:
+        return 0.0
+
+    if higher_is_worse:
+        if value < watch:
+            return 0.0
+        if value < trigger:
+            span = max(trigger - watch, 1e-9)
+            return round(0.35 * (value - watch) / span, 3)
+        if value < critical:
+            span = max(critical - trigger, 1e-9)
+            return round(0.35 + 0.4 * (value - trigger) / span, 3)
+        return 1.0
+
+    if value > watch:
+        return 0.0
+    if value > trigger:
+        span = max(watch - trigger, 1e-9)
+        return round(0.35 * (watch - value) / span, 3)
+    if value > critical:
+        span = max(trigger - critical, 1e-9)
+        return round(0.35 + 0.4 * (trigger - value) / span, 3)
+    return 1.0
+
+
+def stagflation_pressure_score(misery: float | None, real_wages: float | None) -> float:
+    """Continuous 0-1 stagflation score (not trigger-only).
+
+    This captures mounting pressure in watch zones instead of collapsing to zero
+    unless strict trigger thresholds are crossed.
+    """
+    misery_p = _tiered_pressure(misery, 7.0, 10.0, 14.0, higher_is_worse=True)
+    realw_p = _tiered_pressure(real_wages, 0.5, 0.0, -2.0, higher_is_worse=False)
+    total_w = 1.0 + 0.75
+    return round((misery_p * 1.0 + realw_p * 0.75) / total_w, 3)
+
+
 def recession_composite_history(
     series_map: dict[str, list[dict]],
     cpi_yoy: list[dict],
@@ -326,8 +386,9 @@ def recession_composite_history(
         _, inv3m_trig = yield_curve_inverted(s.get("T10Y3M", []))
         _, unwind_trig = inversion_unwind_signal(s.get("T10Y2Y", []))
         _, hy_trig = hy_spread_signal(s.get("BAMLH0A0HYM2", []))
-        _, ism_trig = ism_pmi_signal(s.get("NAPM", []))
-        _, lei_trig = lei_signal(s.get("USSLIND", []))
+        ipman_yoy = yoy(s.get("IPMAN", []))
+        _, ism_trig = manufacturing_momentum_signal(ipman_yoy)
+        _, lei_trig = lei_signal(s.get("USALOLITONOSTSAM", []))
         _, gdp_trig = gdp_negative_signal(s.get("A191RL1Q225SBEA", []))
         _, misery_trig = misery_index_signal(s.get("UNRATE", []), cpi_hist)
         _, realwage_trig = real_wages_signal(wages_hist, cpi_hist)
