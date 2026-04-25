@@ -96,10 +96,23 @@ HOUSING_SERIES: list[SeriesDef] = [
 
 # Inputs to the recession-signals composite
 RECESSION_INPUT_SERIES: list[SeriesDef] = [
-    {"id": "UNRATE", "label": "Unemployment Rate", "color": "#4a9eff"},
-    {"id": "T10Y2Y", "label": "10Y–2Y Spread", "color": "#22c55e"},
-    {"id": "T10Y3M", "label": "10Y–3M Spread", "color": "#e8b84b"},
-    {"id": "USREC", "label": "NBER Recession", "color": "#ef444440"},
+    # Yield curve & spreads
+    {"id": "UNRATE",         "label": "Unemployment Rate",               "color": "#4a9eff"},
+    {"id": "T10Y2Y",         "label": "10Y–2Y Spread",                   "color": "#22c55e"},
+    {"id": "T10Y3M",         "label": "10Y–3M Spread",                   "color": "#e8b84b"},
+    {"id": "USREC",          "label": "NBER Recession",                  "color": "#ef444440"},
+    # Credit / financial conditions
+    {"id": "BAMLH0A0HYM2",   "label": "High-Yield Spread (ICE BofA)",    "color": "#ef4444"},
+    {"id": "DRCCLACBS",      "label": "Credit Card Delinquency Rate",    "color": "#f97316"},
+    # Business cycle
+    {"id": "NAPM",           "label": "ISM Manufacturing PMI",           "color": "#8b5cf6"},
+    {"id": "USSLIND",        "label": "Conference Board LEI",            "color": "#06b6d4"},
+    {"id": "A191RL1Q225SBEA","label": "Real GDP Growth (QoQ ann.)",      "color": "#22c55e"},
+    # Labor
+    {"id": "IC4WSA",         "label": "Initial Claims 4W MA",            "color": "#ec4899"},
+    # Inflation / stagflation inputs (raw levels — YoY computed server-side)
+    {"id": "CPIAUCSL",       "label": "CPI All Items",                   "color": "#ef4444"},
+    {"id": "AHETPI",         "label": "Avg Hourly Earnings",             "color": "#a78bfa"},
 ]
 
 INFLATION_SERIES: list[SeriesDef] = [

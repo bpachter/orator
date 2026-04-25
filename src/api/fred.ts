@@ -125,11 +125,15 @@ export interface RecessionSignal {
   value: number | null
   triggered: boolean
   description: string
+  category: string
+  weight: number
+  severity: string
 }
 
 export interface RecessionSignalsResponse {
   updated: string
   composite_score: number
+  stagflation_score: number
   signals: RecessionSignal[]
   series: Record<string, FredObs[]>
 }

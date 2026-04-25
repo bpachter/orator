@@ -95,11 +95,15 @@ class RecessionSignal(BaseModel):
     value: float | None
     triggered: bool
     description: str
+    category: str = "cycle"  # 'cycle' | 'financial' | 'stagflation' | 'labor'
+    weight: float = 1.0
+    severity: str = "normal"  # 'normal' | 'watch' | 'warning' | 'critical'
 
 
 class RecessionSignalsResponse(BaseModel):
     updated: str
-    composite_score: float = Field(..., description="0-1 weighted recession risk")
+    composite_score: float = Field(..., description="0-1 importance-weighted recession risk")
+    stagflation_score: float = Field(0.0, description="0-1 weighted stagflation pressure")
     signals: list[RecessionSignal]
     series: dict[str, list[Observation]]
 
