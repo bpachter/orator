@@ -38,19 +38,24 @@ from .analytics import (
     stagflation_pressure_score,
     yield_curve_inverted,
 )
+from .alphavantage_client import fetch_weekly_adjusted
 from .errors import ApiError, error_response
+from .eia_client import fetch_series as fetch_eia_series
 from .fred_client import fetch_series, get_start_for_range, today_iso
 from .schemas import (
     ActivityResponse,
     ConsumerResponse,
     CpiBreakdownResponse,
     CreditConditionsResponse,
+    EnergyResponse,
+    FiscalResponse,
     GroceryResponse,
     HealthResponse,
     HousingResponse,
     InflationResponse,
     LaborResponse,
     MacroResponse,
+    MarketPricesResponse,
     MarketsResponse,
     MetricsResponse,
     RecessionSignal,
@@ -64,17 +69,21 @@ from .series import (
     CONSUMER_SERIES,
     CPI_COMPONENTS,
     CREDIT_CONDITIONS_SERIES,
+    ENERGY_SERIES,
+    FISCAL_SERIES,
     GROCERY_SERIES,
     HOUSING_SERIES,
     INFLATION_SERIES,
     LABOR_SERIES,
     MACRO_SERIES,
+    MARKET_PRICES_SERIES,
     MARKETS_SERIES,
     RECESSION_INPUT_SERIES,
     SPREAD_SERIES,
     YIELD_MATURITIES,
 )
 from .transforms import yoy
+from .treasury_client import fetch_series as fetch_treasury_series
 
 observability.configure_logging()
 logger = logging.getLogger("orator")
@@ -179,6 +188,10 @@ def health() -> HealthResponse:
     return HealthResponse(
         status="ok",
         fred_key=bool(os.environ.get("FRED_API_KEY")),
+        eia_key=bool(os.environ.get("EIA_API_KEY")),
+        alphavantage_key=bool(os.environ.get("ALPHAVANTAGE_API_KEY")),
+        bea_key=bool(os.environ.get("BEA_API_KEY")),
+        census_key=bool(os.environ.get("CENSUS_API_KEY")),
         version=API_VERSION,
     )
 
@@ -663,5 +676,115 @@ def consumer(range: str = "10Y") -> ConsumerResponse:
     ]
 
     result = ConsumerResponse(updated=today_iso(), series=series_out, metadata=metadata)
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/energy", response_model=EnergyResponse, tags=["energy"])
+def energy(range: str = "10Y") -> EnergyResponse:
+    cache_key = f"energy:{range}"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range(range)
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
+    for s in ENERGY_SERIES:
+        try:
+            series_out[s["id"]] = fetch_eia_series(s["id"], start=start, end=end)
+        except ApiError as exc:
+            if exc.code in {"EIA_KEY_MISSING", "EIA_AUTH_FAILED"}:
+                raise
+            logger.warning("Skipping energy series %s: %s", s["id"], exc.message)
+            series_out[s["id"]] = []
+        except Exception as exc:
+            logger.warning("Skipping energy series %s: %s", s["id"], exc)
+            series_out[s["id"]] = []
+
+    metadata = [
+        SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
+        for s in ENERGY_SERIES
+    ]
+
+    result = EnergyResponse(updated=today_iso(), series=series_out, metadata=metadata)
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/fiscal", response_model=FiscalResponse, tags=["fiscal"])
+def fiscal(range: str = "10Y") -> FiscalResponse:
+    cache_key = f"fiscal:{range}"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range(range)
+    end = today_iso()
+
+    series_out: dict[str, list[dict]] = {}
+    for s in FISCAL_SERIES:
+        obs = fetch_series(s["id"], start, end)
+        series_out[s["id"]] = obs
+
+    # FiscalData no-key API enrichments for debt outstanding.
+    try:
+        debt_public = fetch_treasury_series(
+            "accounting/od/debt_to_penny",
+            date_field="record_date",
+            value_field="debt_held_public_amt",
+        )
+        debt_total = fetch_treasury_series(
+            "accounting/od/debt_to_penny",
+            date_field="record_date",
+            value_field="tot_pub_debt_out_amt",
+        )
+        series_out["TREASURY_DEBT_PUBLIC"] = [o for o in debt_public if start <= o["date"] <= end]
+        series_out["TREASURY_DEBT_TOTAL"] = [o for o in debt_total if start <= o["date"] <= end]
+    except Exception as exc:
+        logger.warning("Treasury FiscalData enrichments unavailable: %s", exc)
+        series_out.setdefault("TREASURY_DEBT_PUBLIC", [])
+        series_out.setdefault("TREASURY_DEBT_TOTAL", [])
+
+    metadata = [
+        SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
+        for s in FISCAL_SERIES
+    ]
+    metadata.extend([
+        SeriesMeta(id="TREASURY_DEBT_PUBLIC", label="Treasury Debt Held by Public", color="#6fa49a", unit="$"),
+        SeriesMeta(id="TREASURY_DEBT_TOTAL", label="Treasury Total Public Debt Outstanding", color="#d7b46a", unit="$"),
+    ])
+
+    result = FiscalResponse(updated=today_iso(), series=series_out, metadata=metadata)
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/market-prices", response_model=MarketPricesResponse, tags=["markets"])
+def market_prices(range: str = "5Y") -> MarketPricesResponse:
+    cache_key = f"market-prices:{range}"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range(range)
+    series_out: dict[str, list[dict]] = {}
+
+    # Cache each symbol independently to reduce Alpha Vantage free-tier burn.
+    for s in MARKET_PRICES_SERIES:
+        symbol = s["id"]
+        raw_key = f"av-weekly:{symbol}"
+        raw = cache.get(raw_key)
+        if raw is None:
+            raw = fetch_weekly_adjusted(symbol)
+            cache.store(raw_key, raw)
+        series_out[symbol] = [o for o in raw if o["date"] >= start]
+
+    metadata = [
+        SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
+        for s in MARKET_PRICES_SERIES
+    ]
+
+    result = MarketPricesResponse(updated=today_iso(), series=series_out, metadata=metadata)
     cache.store(cache_key, result)
     return result

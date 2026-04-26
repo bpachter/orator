@@ -43,6 +43,10 @@ class ErrorResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: str
     fred_key: bool
+    eia_key: bool = False
+    alphavantage_key: bool = False
+    bea_key: bool = False
+    census_key: bool = False
     version: str
 
 
@@ -135,6 +139,24 @@ class ActivityResponse(BaseModel):
 
 
 class MarketsResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]
+
+
+class EnergyResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]
+
+
+class FiscalResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]
+
+
+class MarketPricesResponse(BaseModel):
     updated: str
     series: dict[str, list[Observation]]
     metadata: list[SeriesMeta]

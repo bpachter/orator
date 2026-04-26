@@ -67,6 +67,10 @@ export interface GroceryResponse {
 export interface HealthResponse {
   status: string
   fred_key: boolean
+  eia_key?: boolean
+  alphavantage_key?: boolean
+  bea_key?: boolean
+  census_key?: boolean
   version?: string
 }
 
@@ -108,6 +112,24 @@ export interface ActivityResponse {
 }
 
 export interface MarketsResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
+export interface EnergyResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
+export interface FiscalResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
+export interface MarketPricesResponse {
   updated: string
   series: Record<string, FredObs[]>
   metadata: SeriesMetadata[]
@@ -198,6 +220,18 @@ export function fetchActivity(range: TimeRange = '10Y'): Promise<ActivityRespons
 
 export function fetchMarkets(range: TimeRange = '10Y'): Promise<MarketsResponse> {
   return request(`/api/markets?range=${range}`)
+}
+
+export function fetchEnergy(range: TimeRange = '10Y'): Promise<EnergyResponse> {
+  return request(`/api/energy?range=${range}`)
+}
+
+export function fetchFiscal(range: TimeRange = '10Y'): Promise<FiscalResponse> {
+  return request(`/api/fiscal?range=${range}`)
+}
+
+export function fetchMarketPrices(range: TimeRange = '5Y'): Promise<MarketPricesResponse> {
+  return request(`/api/market-prices?range=${range}`)
 }
 
 export function fetchConsumer(range: TimeRange = '10Y'): Promise<ConsumerResponse> {

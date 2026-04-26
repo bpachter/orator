@@ -5,11 +5,14 @@ import {
   fetchConsumer,
   fetchCpiBreakdown,
   fetchCreditConditions,
+  fetchEnergy,
+  fetchFiscal,
   fetchGrocery,
   fetchHealth,
   fetchHousing,
   fetchInflation,
   fetchLabor,
+  fetchMarketPrices,
   fetchMarkets,
   fetchRecessionSignals,
   fetchSpreads,
@@ -18,11 +21,14 @@ import {
   type ConsumerResponse,
   type CpiBreakdownResponse,
   type CreditConditionsResponse,
+  type EnergyResponse,
+  type FiscalResponse,
   type GroceryResponse,
   type HealthResponse,
   type HousingResponse,
   type InflationResponse,
   type LaborResponse,
+  type MarketPricesResponse,
   type MacroResponse,
   type MarketsResponse,
   type RecessionSignalsResponse,
@@ -97,6 +103,18 @@ export function useActivity(range: TimeRange = '10Y'): UseQueryResult<ActivityRe
 
 export function useMarkets(range: TimeRange = '10Y'): UseQueryResult<MarketsResponse> {
   return useQuery({ queryKey: ['markets', range], queryFn: () => fetchMarkets(range), staleTime: FIVE_MIN })
+}
+
+export function useEnergy(range: TimeRange = '10Y'): UseQueryResult<EnergyResponse> {
+  return useQuery({ queryKey: ['energy', range], queryFn: () => fetchEnergy(range), staleTime: FIVE_MIN })
+}
+
+export function useFiscal(range: TimeRange = '10Y'): UseQueryResult<FiscalResponse> {
+  return useQuery({ queryKey: ['fiscal', range], queryFn: () => fetchFiscal(range), staleTime: FIVE_MIN })
+}
+
+export function useMarketPrices(range: TimeRange = '5Y'): UseQueryResult<MarketPricesResponse> {
+  return useQuery({ queryKey: ['market-prices', range], queryFn: () => fetchMarketPrices(range), staleTime: FIVE_MIN })
 }
 
 export function useConsumer(range: TimeRange = '10Y'): UseQueryResult<ConsumerResponse> {

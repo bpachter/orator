@@ -150,6 +150,35 @@ MARKETS_SERIES: list[SeriesDef] = [
     {"id": "DTWEXBGS", "label": "Trade-Weighted USD (Broad)", "color": "#b0b9d4", "unit": "index"},
 ]
 
+FISCAL_SERIES: list[SeriesDef] = [
+    {"id": "FYFSD", "label": "Federal Surplus or Deficit", "color": "#c98f5a", "unit": "$B"},
+    {"id": "GFDEBTN", "label": "Gross Federal Debt", "color": "#d7b46a", "unit": "$M"},
+    {"id": "FGRECPT", "label": "Federal Receipts", "color": "#6fa49a", "unit": "$B"},
+    {"id": "FGEXPND", "label": "Federal Expenditures", "color": "#6d91c9", "unit": "$B"},
+    {"id": "WALCL", "label": "Fed Balance Sheet Total Assets", "color": "#b0b9d4", "unit": "$M"},
+    {"id": "TREAST", "label": "Fed Treasury Securities Holdings", "color": "#82aec2", "unit": "$M"},
+    {"id": "MBST", "label": "Fed MBS Holdings", "color": "#b7834c", "unit": "$M"},
+]
+
+MARKET_PRICES_SERIES: list[SeriesDef] = [
+    {"id": "SPY", "label": "SPDR S&P 500 ETF", "color": "#6fa49a", "unit": "$"},
+    {"id": "QQQ", "label": "Invesco QQQ", "color": "#6d91c9", "unit": "$"},
+    {"id": "IWM", "label": "iShares Russell 2000", "color": "#b0b9d4", "unit": "$"},
+    {"id": "DIA", "label": "SPDR Dow Jones ETF", "color": "#cfa75a", "unit": "$"},
+    {"id": "XLE", "label": "Energy Select Sector SPDR", "color": "#c98f5a", "unit": "$"},
+    {"id": "GLD", "label": "SPDR Gold Shares", "color": "#d7b46a", "unit": "$"},
+]
+
+ENERGY_SERIES: list[SeriesDef] = [
+    {"id": "PET.RWTC.W", "label": "WTI Crude (Spot)", "color": "#d7b46a", "unit": "$/bbl"},
+    {"id": "PET.RBRTE.W", "label": "Brent Crude (Spot)", "color": "#c98f5a", "unit": "$/bbl"},
+    {"id": "NG.RNGWHHD.W", "label": "Henry Hub Natural Gas", "color": "#6d91c9", "unit": "$/MMBtu"},
+    {"id": "PET.WCESTUS1.W", "label": "U.S. Crude Inventories", "color": "#6fa49a", "unit": "thousand barrels"},
+    {"id": "PET.WGTSTUS1.W", "label": "U.S. Gasoline Inventories", "color": "#82aec2", "unit": "thousand barrels"},
+    {"id": "PET.WPULEUS3.W", "label": "Refinery Utilization", "color": "#b0b9d4", "unit": "%"},
+    {"id": "ELEC.PRICE.US-RES.M", "label": "Residential Electricity Price", "color": "#b7834c", "unit": "cents/kWh"},
+]
+
 CONSUMER_SERIES: list[SeriesDef] = [
     {"id": "RSXFS", "label": "Retail Sales (ex Food Services, YoY %)", "color": "#6fa49a", "unit": "%", "yoy": True},
     {"id": "UMCSENT", "label": "U. Michigan Consumer Sentiment", "color": "#6d91c9", "unit": "index"},

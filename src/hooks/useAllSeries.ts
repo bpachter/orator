@@ -8,9 +8,12 @@ import {
   useActivity,
   useConsumer,
   useCreditConditions,
+  useEnergy,
+  useFiscal,
   useHousing,
   useInflation,
   useLabor,
+  useMarketPrices,
   useMacro,
   useMarkets,
   useRecessionSignals,
@@ -46,6 +49,9 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
   const consumer = useConsumer(range)
   const credit = useCreditConditions(range)
   const markets = useMarkets(range)
+  const marketPrices = useMarketPrices(range)
+  const energy = useEnergy(range)
+  const fiscal = useFiscal(range)
 
   return useMemo(() => {
     const endpoints: AllSeriesState['endpoints'] = {
@@ -59,6 +65,9 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
       consumer: consumer.data?.series,
       credit: credit.data?.series,
       markets: markets.data?.series,
+      'market-prices': marketPrices.data?.series,
+      energy: energy.data?.series,
+      fiscal: fiscal.data?.series,
     }
 
     const bundles: IndicatorBundle[] = INDICATOR_REGISTRY.map((meta) => {
@@ -79,6 +88,9 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
       consumer.data?.updated,
       credit.data?.updated,
       markets.data?.updated,
+      marketPrices.data?.updated,
+      energy.data?.updated,
+      fiscal.data?.updated,
     ]
       .filter(Boolean)
       .sort()
@@ -88,14 +100,14 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
       isLoading:
         macro.isLoading || labor.isLoading || inflation.isLoading || activity.isLoading ||
         spreads.isLoading || recession.isLoading || housing.isLoading || consumer.isLoading ||
-        credit.isLoading || markets.isLoading,
+        credit.isLoading || markets.isLoading || marketPrices.isLoading || energy.isLoading || fiscal.isLoading,
       isError:
         macro.isError || labor.isError || inflation.isError || activity.isError ||
-        spreads.isError || housing.isError || consumer.isError || credit.isError || markets.isError,
+        spreads.isError || housing.isError || consumer.isError || credit.isError || markets.isError || marketPrices.isError || energy.isError || fiscal.isError,
       bundles,
       byId,
       updated,
       endpoints,
     }
-  }, [macro, labor, inflation, activity, spreads, recession, housing, consumer, credit, markets])
+  }, [macro, labor, inflation, activity, spreads, recession, housing, consumer, credit, markets, marketPrices, energy, fiscal])
 }

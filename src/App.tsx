@@ -28,8 +28,11 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp'
 import LocalGroceryStoreIcon from '@mui/icons-material/LocalGroceryStore'
 import PaidIcon from '@mui/icons-material/Paid'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
 import FactoryIcon from '@mui/icons-material/Factory'
 import CandlestickChartIcon from '@mui/icons-material/CandlestickChart'
+import AutoGraphIcon from '@mui/icons-material/AutoGraph'
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import WorkIcon from '@mui/icons-material/Work'
 import HomeWorkIcon from '@mui/icons-material/HomeWork'
@@ -74,6 +77,9 @@ const InflationPanel = lazy(() => import('./components/InflationPanel').then((m)
 const CreditConditionsPanel = lazy(() => import('./components/CreditConditionsPanel').then((m) => ({ default: m.CreditConditionsPanel })))
 const ActivityPanel = lazy(() => import('./components/ActivityPanel').then((m) => ({ default: m.ActivityPanel })))
 const MarketsPanel = lazy(() => import('./components/MarketsPanel').then((m) => ({ default: m.MarketsPanel })))
+const MarketPricesPanel = lazy(() => import('./components/MarketPricesPanel').then((m) => ({ default: m.MarketPricesPanel })))
+const EnergyPanel = lazy(() => import('./components/EnergyPanel').then((m) => ({ default: m.EnergyPanel })))
+const FiscalPanel = lazy(() => import('./components/FiscalPanel').then((m) => ({ default: m.FiscalPanel })))
 const ConsumerPanel = lazy(() => import('./components/ConsumerPanel').then((m) => ({ default: m.ConsumerPanel })))
 const HeatmapPanel = lazy(() => import('./components/HeatmapPanel').then((m) => ({ default: m.HeatmapPanel })))
 const ComparePanel = lazy(() => import('./components/ComparePanel').then((m) => ({ default: m.ComparePanel })))
@@ -113,6 +119,7 @@ const NAV_GROUPS: NavGroup[] = [
       { value: 'fed-futures-proxy', label: 'Fed Futures Proxy', icon: <QueryStatsIcon fontSize="small" /> },
       { value: 'spreads', label: 'Spreads', icon: <ShowChartIcon fontSize="small" /> },
       { value: 'credit', label: 'Credit Conditions', icon: <AccountBalanceIcon fontSize="small" /> },
+      { value: 'fiscal', label: 'Fiscal Monitor', icon: <AccountBalanceWalletIcon fontSize="small" /> },
     ],
   },
   {
@@ -130,6 +137,8 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { value: 'activity', label: 'Industrial Activity', icon: <FactoryIcon fontSize="small" /> },
       { value: 'markets', label: 'Markets', icon: <CandlestickChartIcon fontSize="small" /> },
+      { value: 'market-prices', label: 'Market Prices', icon: <AutoGraphIcon fontSize="small" /> },
+      { value: 'energy', label: 'Energy', icon: <LocalFireDepartmentIcon fontSize="small" /> },
       { value: 'consumer', label: 'Consumer', icon: <ShoppingCartIcon fontSize="small" /> },
     ],
   },
@@ -357,8 +366,11 @@ export default function App() {
               {filters.view === 'grocery' && <GroceryPanel />}
               {filters.view === 'inflation' && <InflationPanel />}
               {filters.view === 'credit' && <CreditConditionsPanel />}
+              {filters.view === 'fiscal' && <FiscalPanel />}
               {filters.view === 'activity' && <ActivityPanel />}
               {filters.view === 'markets' && <MarketsPanel />}
+              {filters.view === 'market-prices' && <MarketPricesPanel />}
+              {filters.view === 'energy' && <EnergyPanel />}
               {filters.view === 'consumer' && <ConsumerPanel />}
               {filters.view === 'labor' && <LaborPanel />}
               {filters.view === 'housing' && <HousingPanel />}

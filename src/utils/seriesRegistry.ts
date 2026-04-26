@@ -20,6 +20,9 @@ export type EndpointKey =
   | 'consumer'
   | 'credit'
   | 'markets'
+  | 'market-prices'
+  | 'energy'
+  | 'fiscal'
   | 'cpi'
   | 'grocery'
 
@@ -118,6 +121,31 @@ export const INDICATOR_REGISTRY: IndicatorMeta[] = [
   { id: 'GOLDS', label: 'Gold Spot Price', short: 'Gold', unit: '$/oz', color: s.amber, endpoint: 'markets', view: 'markets', section: 'Markets', category: 'leading', keywords: ['gold', 'commodities', 'safe haven'] },
   { id: 'DEXUSEU', label: 'USD / EUR FX Rate', short: 'EUR/USD', unit: '', color: s.blue, endpoint: 'markets', view: 'markets', section: 'Markets', category: 'coincident', keywords: ['fx', 'currency', 'euro', 'dollar'] },
   { id: 'DTWEXBGS', label: 'Trade-Weighted USD (Broad)', short: 'USD Idx', unit: 'idx', color: s.violet, endpoint: 'markets', view: 'markets', section: 'Markets', category: 'coincident', keywords: ['dollar', 'usd', 'trade weighted'] },
+
+  // -------- Energy --------
+  { id: 'PET.RWTC.W', label: 'WTI Crude (Spot)', short: 'WTI', unit: '$/bbl', color: s.yellow, endpoint: 'energy', view: 'energy', section: 'Energy', category: 'leading', keywords: ['wti', 'crude', 'oil', 'energy'] },
+  { id: 'PET.RBRTE.W', label: 'Brent Crude (Spot)', short: 'Brent', unit: '$/bbl', color: s.red, endpoint: 'energy', view: 'energy', section: 'Energy', category: 'leading', keywords: ['brent', 'crude', 'oil', 'energy'] },
+  { id: 'NG.RNGWHHD.W', label: 'Henry Hub Natural Gas', short: 'Nat Gas', unit: '$/MMBtu', color: s.blue, endpoint: 'energy', view: 'energy', section: 'Energy', category: 'leading', keywords: ['natural gas', 'henry hub', 'energy'] },
+  { id: 'PET.WCESTUS1.W', label: 'U.S. Crude Inventories', short: 'Crude Stocks', unit: 'k bbl', color: s.green, endpoint: 'energy', view: 'energy', section: 'Energy', category: 'coincident', keywords: ['inventory', 'stocks', 'crude', 'energy'] },
+  { id: 'PET.WGTSTUS1.W', label: 'U.S. Gasoline Inventories', short: 'Gasoline Stocks', unit: 'k bbl', color: s.cyan, endpoint: 'energy', view: 'energy', section: 'Energy', category: 'coincident', keywords: ['inventory', 'gasoline', 'stocks', 'energy'] },
+  { id: 'PET.WPULEUS3.W', label: 'Refinery Utilization', short: 'Refinery Util', unit: '%', color: s.violet, endpoint: 'energy', view: 'energy', section: 'Energy', category: 'coincident', keywords: ['refinery', 'utilization', 'energy'] },
+  { id: 'ELEC.PRICE.US-RES.M', label: 'Residential Electricity Price', short: 'Power Price', unit: 'c/kWh', color: s.orange, endpoint: 'energy', view: 'energy', section: 'Energy', category: 'lagging', keywords: ['electricity', 'power', 'utility', 'price'] },
+
+  // -------- Fiscal --------
+  { id: 'FYFSD', label: 'Federal Surplus or Deficit', short: 'Deficit', unit: '$B', color: s.red, endpoint: 'fiscal', view: 'fiscal', section: 'Fiscal', category: 'lagging', keywords: ['deficit', 'surplus', 'federal budget'] },
+  { id: 'GFDEBTN', label: 'Gross Federal Debt', short: 'Debt', unit: '$M', color: s.yellow, endpoint: 'fiscal', view: 'fiscal', section: 'Fiscal', category: 'lagging', keywords: ['debt', 'federal', 'treasury'] },
+  { id: 'FGRECPT', label: 'Federal Receipts', short: 'Receipts', unit: '$B', color: s.green, endpoint: 'fiscal', view: 'fiscal', section: 'Fiscal', category: 'coincident', keywords: ['receipts', 'taxes', 'federal'] },
+  { id: 'FGEXPND', label: 'Federal Expenditures', short: 'Outlays', unit: '$B', color: s.blue, endpoint: 'fiscal', view: 'fiscal', section: 'Fiscal', category: 'coincident', keywords: ['expenditures', 'outlays', 'federal'] },
+  { id: 'WALCL', label: 'Fed Balance Sheet Assets', short: 'Fed Assets', unit: '$M', color: s.violet, endpoint: 'fiscal', view: 'fiscal', section: 'Fiscal', category: 'lagging', keywords: ['fed balance sheet', 'walcl', 'qe', 'qt'] },
+  { id: 'TREASURY_DEBT_PUBLIC', label: 'Treasury Debt Held by Public', short: 'Debt Public', unit: '$', color: s.teal, endpoint: 'fiscal', view: 'fiscal', section: 'Fiscal', category: 'lagging', keywords: ['treasury', 'debt held by public'] },
+
+  // -------- Market Prices --------
+  { id: 'SPY', label: 'SPDR S&P 500 ETF', short: 'SPY', unit: '$', color: s.green, endpoint: 'market-prices', view: 'market-prices', section: 'Market Prices', category: 'leading', keywords: ['spy', 'sp500', 'etf', 'equity'] },
+  { id: 'QQQ', label: 'Invesco QQQ', short: 'QQQ', unit: '$', color: s.blue, endpoint: 'market-prices', view: 'market-prices', section: 'Market Prices', category: 'leading', keywords: ['qqq', 'nasdaq', 'tech'] },
+  { id: 'IWM', label: 'iShares Russell 2000', short: 'IWM', unit: '$', color: s.violet, endpoint: 'market-prices', view: 'market-prices', section: 'Market Prices', category: 'leading', keywords: ['iwm', 'small cap', 'russell'] },
+  { id: 'DIA', label: 'SPDR Dow Jones ETF', short: 'DIA', unit: '$', color: s.amber, endpoint: 'market-prices', view: 'market-prices', section: 'Market Prices', category: 'leading', keywords: ['dia', 'dow', 'etf'] },
+  { id: 'XLE', label: 'Energy Select Sector SPDR', short: 'XLE', unit: '$', color: s.orange, endpoint: 'market-prices', view: 'market-prices', section: 'Market Prices', category: 'leading', keywords: ['xle', 'energy', 'sector'] },
+  { id: 'GLD', label: 'SPDR Gold Shares', short: 'GLD', unit: '$', color: s.yellow, endpoint: 'market-prices', view: 'market-prices', section: 'Market Prices', category: 'leading', keywords: ['gld', 'gold', 'commodity'] },
 ]
 /* eslint-enable */
 
