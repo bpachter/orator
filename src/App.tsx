@@ -438,7 +438,28 @@ function SidebarContent({ currentView, onNavigate }: { currentView: ActiveView; 
                         key={item.value}
                         selected={active}
                         onClick={() => onNavigate(item.value)}
-                        sx={{ mx: 1, my: 0.25, borderRadius: 1, px: 1.5, py: 0.75, '&.Mui-selected': { bgcolor: 'action.selected', color: 'primary.main', '& .MuiListItemIcon-root': { color: 'primary.main' } } }}
+                        sx={{
+                          mx: 1,
+                          my: 0.25,
+                          borderRadius: 1,
+                          px: 1.5,
+                          py: 0.75,
+                          transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
+                          '&.Mui-selected': {
+                            bgcolor: alpha(sidebarTheme.palette.primary.main, 0.12),
+                            color: 'primary.main',
+                            borderLeft: `2px solid ${sidebarTheme.palette.primary.main}`,
+                            pl: '10px',
+                            boxShadow: `inset 0 0 12px ${alpha(sidebarTheme.palette.primary.main, 0.08)}`,
+                            '& .MuiListItemIcon-root': { color: 'primary.main' },
+                            '&:hover': {
+                              bgcolor: alpha(sidebarTheme.palette.primary.main, 0.16),
+                            },
+                          },
+                          '&:not(.Mui-selected):hover': {
+                            bgcolor: alpha(sidebarTheme.palette.primary.main, 0.06),
+                          },
+                        }}
                       >
                         <ListItemIcon sx={{ minWidth: 32, color: 'text.secondary' }}>{item.icon}</ListItemIcon>
                         <ListItemText primary={item.label} primaryTypographyProps={{ fontSize: 13, fontWeight: active ? 600 : 400 }} />
