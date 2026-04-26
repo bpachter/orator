@@ -46,3 +46,80 @@ label {
     font-size: 1.125rem !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ORATOR — Ambient UI Design System
+   Deep data. Sovereign clarity. Atmospheric depth.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── CSS design tokens: nebula channels (r g b, space-separated) */
+:root {
+  --nebula-azure:  120 168 218;
+  --nebula-gold:   200 165 96;
+  --nebula-slate:  148 174 210;
+  --nebula-violet: 140 160 210;
+}
+
+[data-theme='dark'] {
+  --nebula-azure:  64 120 196;
+  --nebula-gold:   182 146 68;
+  --nebula-slate:  72 104 158;
+  --nebula-violet: 88 118 178;
+}
+
+/* ── Subtle star field — dark mode only ───────────────────────── */
+/* Rendered as body::before at z-index: -1 so it sits above the
+   html base background but below all app content.               */
+[data-theme='dark'] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image:
+    radial-gradient(circle at 12px 18px,  rgba(208,224,252,0.72) 0 1.1px, transparent 1.2px),
+    radial-gradient(circle at 68px 84px,  rgba(238,224,190,0.65) 0 0.9px, transparent 1.0px),
+    radial-gradient(circle at 114px 36px, rgba(204,220,250,0.68) 0 1.2px, transparent 1.3px),
+    radial-gradient(circle at 48px 128px, rgba(226,212,180,0.60) 0 0.8px, transparent 0.9px),
+    radial-gradient(circle at 154px 100px,rgba(206,222,252,0.62) 0 0.7px, transparent 0.8px),
+    radial-gradient(circle at 96px  58px, rgba(234,218,188,0.55) 0 0.7px, transparent 0.8px),
+    radial-gradient(circle at 180px 144px,rgba(200,218,250,0.52) 0 0.9px, transparent 1.0px),
+    radial-gradient(circle at 34px  66px, rgba(218,206,174,0.48) 0 0.6px, transparent 0.7px),
+    radial-gradient(circle at 142px 26px, rgba(212,228,254,0.58) 0 1.0px, transparent 1.1px),
+    radial-gradient(circle at 76px 162px, rgba(228,214,184,0.50) 0 0.7px, transparent 0.8px),
+    radial-gradient(circle at 164px 72px, rgba(210,226,252,0.45) 0 0.8px, transparent 0.9px),
+    radial-gradient(circle at 22px 106px, rgba(220,210,180,0.42) 0 0.6px, transparent 0.7px);
+  background-size: 200px 200px;
+  opacity: 0.38;
+  animation: orator-star-pan 300s linear infinite;
+  transition: opacity 1.2s ease;
+}
+
+/* ── Ambient aurora gradient layer — rendered via body backgroundImage
+   in theme.ts (CssBaseline). Keyframe here for body animation use. */
+
+@keyframes orator-star-pan {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-200px, -240px, 0); }
+}
+
+/* ── Premium selection color ───────────────────────────────────── */
+::selection {
+  background: rgb(var(--nebula-azure) / 0.28);
+  color: inherit;
+}
+
+/* ── Focus ring ────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid rgb(var(--nebula-azure) / 0.7);
+  outline-offset: 2px;
+}
+
+/* ── Smooth theme transitions (applied when toggling mode) ──────── */
+.theme-fading,
+.theme-fading * {
+  transition:
+    background-color 0.28s ease,
+    border-color     0.28s ease,
+    color            0.18s ease !important;
+}

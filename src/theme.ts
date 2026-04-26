@@ -140,19 +140,35 @@ export function createOratorTheme(mode: ThemeMode) {
       MuiCssBaseline: {
         styleOverrides: {
           '*, *::before, *::after': { boxSizing: 'border-box' },
-          'html, body, #root': { height: '100%', margin: 0, padding: 0 },
+          'html': { height: '100%', margin: 0, padding: 0, backgroundColor: p.bg },
+          'body, #root': { height: '100%', margin: 0, padding: 0 },
           body: {
-            backgroundColor: p.bg,
+            // Transparent background so the html base color and the dark-mode
+            // CSS star layer (body::before, z-index:-1) show through.
+            backgroundColor: 'transparent',
             backgroundImage:
               mode === 'light'
-                ? 'radial-gradient(circle at top left, rgba(212,173,99,0.08), transparent 28%), linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0))'
-                : 'radial-gradient(circle at top left, rgba(212,173,99,0.10), transparent 24%), linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0))',
+                ? [
+                    'radial-gradient(ellipse 80% 60% at 10% 6%,  rgba(176,140,68,0.09)  0%, transparent 58%)',
+                    'radial-gradient(ellipse 64% 52% at 90% 96%, rgba(110,158,212,0.08) 0%, transparent 58%)',
+                    'radial-gradient(ellipse 50% 40% at 82% 10%, rgba(130,174,220,0.06) 0%, transparent 54%)',
+                    'radial-gradient(ellipse 34% 26% at 46% 72%, rgba(160,144,76,0.05)  0%, transparent 52%)',
+                    'linear-gradient(180deg, rgba(255,255,255,0.50) 0%, rgba(255,255,255,0) 60%)',
+                  ].join(', ')
+                : [
+                    'radial-gradient(ellipse 80% 60% at 12% 8%,  rgba(64,120,196,0.15)  0%, transparent 60%)',
+                    'radial-gradient(ellipse 60% 50% at 88% 92%, rgba(48,84,156,0.13)   0%, transparent 60%)',
+                    'radial-gradient(ellipse 48% 38% at 84% 12%, rgba(182,146,68,0.09)  0%, transparent 55%)',
+                    'radial-gradient(ellipse 36% 28% at 44% 78%, rgba(72,112,184,0.07)  0%, transparent 55%)',
+                    'radial-gradient(ellipse 28% 22% at 68% 44%, rgba(88,118,178,0.05)  0%, transparent 52%)',
+                    'linear-gradient(180deg, rgba(10,22,42,0.12) 0%, rgba(255,255,255,0) 60%)',
+                  ].join(', '),
             color: p.textPrimary,
             WebkitFontSmoothing: 'antialiased',
           },
           '::-webkit-scrollbar': { width: 6, height: 6 },
-          '::-webkit-scrollbar-track': { background: p.bg },
-          '::-webkit-scrollbar-thumb': { background: p.border, borderRadius: 3 },
+          '::-webkit-scrollbar-track': { background: 'transparent' },
+          '::-webkit-scrollbar-thumb': { background: alpha(p.border, 0.7), borderRadius: 3 },
           '::-webkit-scrollbar-thumb:hover': { background: p.borderStrong },
         },
       },
@@ -162,10 +178,22 @@ export function createOratorTheme(mode: ThemeMode) {
           root: {
             backgroundImage:
               mode === 'light'
-                ? 'linear-gradient(180deg, rgba(255,255,255,0.98), rgba(244,246,249,0.92))'
-                : 'linear-gradient(180deg, rgba(23,35,54,0.82), rgba(16,26,41,0.96))',
+                ? 'linear-gradient(155deg, rgba(255,255,255,0.92) 0%, rgba(244,246,249,0.86) 100%)'
+                : 'linear-gradient(155deg, rgba(22,34,54,0.88) 0%, rgba(12,20,34,0.94) 100%)',
             border: `1px solid ${p.border}`,
-            backgroundColor: p.surface,
+            backgroundColor:
+              mode === 'light' ? 'rgba(255,255,255,0.82)' : 'rgba(14,22,38,0.80)',
+            backdropFilter: 'blur(10px) saturate(120%)',
+            WebkitBackdropFilter: 'blur(10px) saturate(120%)',
+            transition: 'box-shadow 0.22s ease, border-color 0.22s ease',
+            '&:hover': {
+              boxShadow:
+                mode === 'dark'
+                  ? '0 8px 36px rgba(0,0,0,0.30), inset 0 1px 0 rgba(90,150,220,0.08)'
+                  : '0 6px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(180,145,76,0.10)',
+              borderColor:
+                mode === 'dark' ? alpha(p.borderStrong, 0.80) : alpha(p.borderStrong, 0.75),
+            },
           },
         },
       },
@@ -206,10 +234,19 @@ export function createOratorTheme(mode: ThemeMode) {
         defaultProps: { elevation: 0 },
         styleOverrides: {
           root: {
-            backgroundColor: mode === 'light' ? alpha(p.surface, 0.92) : alpha('#0d1726', 0.94),
-            borderBottom: `1px solid ${p.border}`,
-            backgroundImage: 'none',
-            backdropFilter: 'blur(12px)',
+            backgroundColor:
+              mode === 'light' ? 'rgba(244,246,249,0.86)' : 'rgba(8,15,28,0.86)',
+            borderBottom: `1px solid ${alpha(p.border, 0.8)}`,
+            backgroundImage:
+              mode === 'dark'
+                ? `linear-gradient(90deg, rgba(64,120,196,0.04) 0%, transparent 40%, rgba(182,146,68,0.03) 100%)`
+                : 'none',
+            backdropFilter: 'blur(20px) saturate(160%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+            boxShadow:
+              mode === 'dark'
+                ? `0 1px 0 ${alpha(p.brand, 0.14)}, 0 4px 20px rgba(0,0,0,0.14)`
+                : `0 1px 0 ${alpha(p.brand, 0.10)}, 0 2px 10px rgba(0,0,0,0.05)`,
           },
         },
       },

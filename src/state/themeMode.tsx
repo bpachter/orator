@@ -34,6 +34,7 @@ export function ThemeModeProvider({ children }: { children: ReactNode }) {
     } catch {
       /* ignore */
     }
+    document.documentElement.setAttribute('data-theme', mode)
   }, [mode])
 
   const setMode = useCallback((next: ThemeMode) => setModeState(next), [])

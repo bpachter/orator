@@ -47,7 +47,7 @@ import HistoryIcon from '@mui/icons-material/History'
 import BuildIcon from '@mui/icons-material/Build'
 import TerminalIcon from '@mui/icons-material/Terminal'
 import QueryStatsIcon from '@mui/icons-material/QueryStats'
-import { useTheme } from '@mui/material/styles'
+import { useTheme, alpha } from '@mui/material/styles'
 import type { ActiveView } from './types'
 import { useFilters } from './state/filters'
 import { useThemeMode } from './state/themeMode'
@@ -217,7 +217,7 @@ export default function App() {
   const sidebar = <SidebarContent currentView={filters.view} onNavigate={handleNavigate} />
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', background: 'transparent' }}>
       {isCompact ? (
         <SwipeableDrawer
           variant="temporary"
@@ -227,21 +227,41 @@ export default function App() {
           ModalProps={{ keepMounted: true }}
           disableSwipeToOpen={false}
           swipeAreaWidth={16}
-          sx={{ '& .MuiDrawer-paper': { width: SIDEBAR_WIDTH, bgcolor: 'background.paper', borderRight: `1px solid ${palette.border}` } }}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: SIDEBAR_WIDTH,
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(8,15,28,0.96)' : 'rgba(255,255,255,0.97)',
+              backdropFilter: 'blur(20px) saturate(140%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(140%)',
+              borderRight: `1px solid ${theme.palette.divider}`,
+            },
+          }}
         >
           {sidebar}
         </SwipeableDrawer>
       ) : (
         <Box
           component="nav"
-          sx={{ width: SIDEBAR_WIDTH, flexShrink: 0, borderRight: `1px solid ${palette.border}`, bgcolor: 'background.paper', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto' }}
+          sx={{
+            width: SIDEBAR_WIDTH,
+            flexShrink: 0,
+            borderRight: `1px solid ${theme.palette.divider}`,
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(8,15,28,0.90)' : 'rgba(255,255,255,0.92)',
+            backdropFilter: 'blur(20px) saturate(140%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(140%)',
+            position: 'sticky',
+            top: 0,
+            height: '100vh',
+            overflowY: 'auto',
+            zIndex: 10,
+          }}
         >
           {sidebar}
         </Box>
       )}
 
       <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-        <AppBar position="sticky" color="default" elevation={0} sx={{ borderBottom: `1px solid ${palette.border}` }}>
+        <AppBar position="sticky" color="default" elevation={0} sx={{ borderBottom: `1px solid ${theme.palette.divider}` }}>
           <Toolbar disableGutters sx={{ px: { xs: 2, md: 3 }, minHeight: 56, gap: 2 }}>
             {isCompact && (
               <IconButton
@@ -353,7 +373,7 @@ export default function App() {
           </ErrorBoundary>
         </Box>
 
-        <Box component="footer" sx={{ px: { xs: 2, md: 3 }, py: 1.25, borderTop: `1px solid ${palette.border}`, color: 'text.disabled', fontSize: 11, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+        <Box component="footer" sx={{ px: { xs: 2, md: 3 }, py: 1.25, borderTop: `1px solid ${theme.palette.divider}`, color: 'text.disabled', fontSize: 11, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, backdropFilter: 'blur(8px)', backgroundColor: theme.palette.mode === 'dark' ? 'rgba(8,15,28,0.60)' : 'rgba(244,246,249,0.70)' }}>
           <span>Data: Federal Reserve Bank of St. Louis (FRED) · BLS</span>
           <span>
             <Link href="https://bpachter.github.io" color="inherit" underline="hover">← Portfolio</Link>
@@ -372,6 +392,7 @@ export default function App() {
 }
 
 function SidebarContent({ currentView, onNavigate }: { currentView: ActiveView; onNavigate: (v: ActiveView) => void }) {
+  const sidebarTheme = useTheme()
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const toggle = (id: string) => setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }))
 
@@ -394,7 +415,7 @@ function SidebarContent({ currentView, onNavigate }: { currentView: ActiveView; 
           ORATOR
         </Typography>
       </Box>
-      <Divider sx={{ borderColor: palette.border }} />
+      <Divider sx={{ borderColor: sidebarTheme.palette.divider }} />
 
       <Box sx={{ flex: 1, overflowY: 'auto', py: 1 }}>
         {NAV_GROUPS.map((group) => {
