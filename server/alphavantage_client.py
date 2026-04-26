@@ -46,6 +46,8 @@ def fetch_weekly_adjusted(symbol: str) -> list[dict]:
             payload = resp.json()
             if payload.get("Note"):
                 raise ApiError(429, "ALPHAVANTAGE_RATE_LIMIT", str(payload.get("Note")))
+            if payload.get("Information"):
+                raise ApiError(429, "ALPHAVANTAGE_RATE_LIMIT", str(payload.get("Information")))
             if payload.get("Error Message"):
                 raise ApiError(404, "ALPHAVANTAGE_SYMBOL_NOT_FOUND", str(payload.get("Error Message")))
 

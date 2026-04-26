@@ -250,6 +250,7 @@ export function VolatilityPanel() {
             traces={termBars}
             layout={{
               ...layout,
+              xaxis: { ...layout.xaxis, type: 'category' as const },
               yaxis: { ...layout.yaxis, rangemode: 'tozero' },
               bargap: 0.4,
             }}

@@ -158,7 +158,7 @@ MARKETS_SERIES: list[SeriesDef] = [
     {"id": "SP500", "label": "S&P 500 Index", "color": "#6fa49a", "unit": "index"},
     {"id": "VIXCLS", "label": "VIX Volatility Index", "color": "#c98f5a", "unit": "index"},
     {"id": "DCOILWTICO", "label": "Crude Oil (WTI)", "color": "#d7b46a", "unit": "$/bbl"},
-    {"id": "GOLDS", "label": "Gold Spot Price ($/oz)", "color": "#cfa75a", "unit": "$/oz"},
+    {"id": "GOLDAMGBD228NLBM", "label": "Gold Spot Price ($/oz)", "color": "#cfa75a", "unit": "$/oz"},
     {"id": "DEXUSEU", "label": "USD / EUR Exchange Rate", "color": "#6d91c9", "unit": "USD"},
     {"id": "DTWEXBGS", "label": "Trade-Weighted USD (Broad)", "color": "#b0b9d4", "unit": "index"},
 ]

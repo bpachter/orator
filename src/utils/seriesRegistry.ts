@@ -132,7 +132,7 @@ export const INDICATOR_REGISTRY: IndicatorMeta[] = [
   { id: 'SP500', label: 'S&P 500 Index', short: 'S&P 500', unit: 'idx', color: s.green, endpoint: 'markets', view: 'markets', section: 'Markets', category: 'leading', keywords: ['sp500', 'stocks', 'equity'] },
   { id: 'VIXCLS', label: 'VIX Volatility Index', short: 'VIX', unit: 'idx', color: s.red, endpoint: 'markets', view: 'markets', section: 'Markets', category: 'leading', keywords: ['vix', 'volatility', 'fear'], inverted: true },
   { id: 'DCOILWTICO', label: 'Crude Oil (WTI)', short: 'WTI', unit: '$/bbl', color: s.yellow, endpoint: 'markets', view: 'markets', section: 'Markets', category: 'leading', keywords: ['oil', 'crude', 'energy', 'wti'] },
-  { id: 'GOLDS', label: 'Gold Spot Price', short: 'Gold', unit: '$/oz', color: s.amber, endpoint: 'markets', view: 'markets', section: 'Markets', category: 'leading', keywords: ['gold', 'commodities', 'safe haven'] },
+  { id: 'GOLDAMGBD228NLBM', label: 'Gold Spot Price', short: 'Gold', unit: '$/oz', color: s.amber, endpoint: 'markets', view: 'markets', section: 'Markets', category: 'leading', keywords: ['gold', 'commodities', 'safe haven'] },
   { id: 'DEXUSEU', label: 'USD / EUR FX Rate', short: 'EUR/USD', unit: '', color: s.blue, endpoint: 'markets', view: 'markets', section: 'Markets', category: 'coincident', keywords: ['fx', 'currency', 'euro', 'dollar'] },
   { id: 'DTWEXBGS', label: 'Trade-Weighted USD (Broad)', short: 'USD Idx', unit: 'idx', color: s.violet, endpoint: 'markets', view: 'markets', section: 'Markets', category: 'coincident', keywords: ['dollar', 'usd', 'trade weighted'] },
 

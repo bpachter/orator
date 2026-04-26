@@ -12,7 +12,7 @@ from typing import Any
 
 from .bea_client import fetch_nipa_table
 from .errors import ApiError
-from .fred_client import fetch_series
+from .fred_client import fetch_series, today_iso
 
 logger = logging.getLogger("orator.earnings")
 
@@ -112,19 +112,14 @@ def fetch_corporate_earnings() -> dict[str, Any]:
     except Exception as exc:
         logger.warning("BEA corporate profits failed: %s", exc)
 
-    # 2. S&P 500 EPS (FRED: EARNINGS) — quarterly
-    try:
-        eps_data = fetch_series("EARNINGS", start="1990-01-01")
-        result["earnings_per_share"] = [
-            {"date": o["date"], "value": o["value"]}
-            for o in eps_data if o["value"] is not None
-        ]
-    except Exception as exc:
-        logger.warning("FRED EARNINGS series failed: %s", exc)
+    # 2. S&P 500 Shiller CAPE / PE10 (FRED: PE10) — monthly, from Robert Shiller
+    # NOTE: S&P 500 EPS is not available as a free FRED series.
+    # We leave earnings_per_share empty; the panel will hide that section gracefully.
+    end = today_iso()
 
     # 3. S&P 500 P/E Ratio (FRED: PE10) — estimate, Shiller's CAPE
     try:
-        pe_data = fetch_series("PE10", start="1990-01-01")
+        pe_data = fetch_series("PE10", start="1990-01-01", end=end)
         result["pe_ratio"] = [
             {"date": o["date"], "value": o["value"]}
             for o in pe_data if o["value"] is not None

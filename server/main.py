@@ -905,13 +905,23 @@ def market_prices(range: str = "5Y") -> MarketPricesResponse:
     series_out: dict[str, list[dict]] = {}
 
     # Cache each symbol independently to reduce Alpha Vantage free-tier burn.
+    # Add a small delay between uncached fetches to stay under 5 calls/min.
     for s in MARKET_PRICES_SERIES:
         symbol = s["id"]
         raw_key = f"av-weekly:{symbol}"
         raw = cache.get(raw_key)
         if raw is None:
-            raw = fetch_weekly_adjusted(symbol)
-            cache.store(raw_key, raw)
+            try:
+                raw = fetch_weekly_adjusted(symbol)
+                cache.store(raw_key, raw)
+            except ApiError as exc:
+                logger.warning("Alpha Vantage skipping %s: %s", symbol, exc.message)
+                raw = []
+                cache.store(raw_key, raw)  # Cache empty to avoid hammering rate limit
+            except Exception as exc:
+                logger.warning("Alpha Vantage skipping %s: %s", symbol, exc)
+                raw = []
+            time.sleep(12)  # ~5 calls/min limit: 60s / 5 = 12s gap between fetches
         series_out[symbol] = [o for o in raw if o["date"] >= start]
 
     metadata = [
@@ -974,27 +984,55 @@ def gdp_breakdown() -> GdpBreakdownResponse:
 
 @app.get("/api/global-credit", response_model=GlobalCreditResponse, tags=["macro"])
 def global_credit() -> GlobalCreditResponse:
-    """BIS private non-financial sector credit as % of GDP by country."""
+    """BIS private non-financial sector credit as % of GDP by country.
+
+    Primary: FRED BIS-mirrored quarterly series (CRDQ{ISO}PABIS).
+    Fallback: Direct BIS stats API (may be unavailable).
+    """
     cache_key = "global-credit"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
+    # FRED carries BIS credit/GDP data under series IDs: CRDQ{ISO2}PABIS
+    FRED_BIS_SERIES = {
+        c["iso"]: f"CRDQ{c['iso']}PABIS"
+        for c in BIS_CREDIT_COUNTRIES
+    }
+
     series_out: list[GlobalCreditSeries] = []
     for country in BIS_CREDIT_COUNTRIES:
+        iso = country["iso"]
+        fred_id = FRED_BIS_SERIES[iso]
+
+        # Try FRED first (BIS-mirrored series)
+        data: list[dict] = []
         try:
-            data = fetch_credit_gdp(country["iso"])
-            if data:
-                series_out.append(
-                    GlobalCreditSeries(
-                        country=country["iso"],
-                        label=country["label"],
-                        color=country["color"],
-                        data=[{"date": o["date"], "value": o["value"]} for o in data],
-                    )
-                )
+            raw = fetch_series(fred_id, start="1990-01-01", end=today_iso())
+            data = [{"date": o["date"], "value": o["value"]} for o in raw]
+        except ApiError as exc:
+            if exc.status_code == 503:
+                raise
+            logger.warning("FRED BIS credit skipping %s (%s): %s", iso, fred_id, exc.message)
         except Exception as exc:
-            logger.warning("BIS credit data unavailable for %s: %s", country["iso"], exc)
+            logger.warning("FRED BIS credit skipping %s (%s): %s", iso, fred_id, exc)
+
+        # Fallback to BIS direct API if FRED returned nothing
+        if not data:
+            try:
+                data = fetch_credit_gdp(iso)
+            except Exception as exc:
+                logger.warning("BIS direct API also unavailable for %s: %s", iso, exc)
+
+        if data:
+            series_out.append(
+                GlobalCreditSeries(
+                    country=iso,
+                    label=country["label"],
+                    color=country["color"],
+                    data=data,
+                )
+            )
 
     result = GlobalCreditResponse(updated=today_iso(), series=series_out)
     cache.store(cache_key, result)

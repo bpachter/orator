@@ -68,7 +68,7 @@ export function CorporateEarningsPanel() {
               value={latestPE?.toFixed(1)}
               unit="x"
               valueColor={latestPE && latestPE > 30 ? '#ef4444' : latestPE && latestPE > 20 ? '#f59e0b' : '#22c55e'}
-              caption={latestPE && latestPE > 30 ? 'Elevated' : latestPE && latestPE > 20 ? 'Fair' : 'Cheap'}
+              caption={latestPE != null ? (latestPE > 30 ? 'Elevated' : latestPE > 20 ? 'Fair' : 'Cheap') : undefined}
             />
           </Grid>
         </Grid>
@@ -194,14 +194,18 @@ export function CorporateEarningsPanel() {
               {latestProfits && latestProfits > 0
                 ? `Corporate profits are growing ${latestProfits > 10 ? 'strongly' : 'moderately'} at ${latestProfits.toFixed(1)}% YoY, `
                 : `Corporate profits are declining at ${Math.abs(latestProfits || 0).toFixed(1)}% YoY, `}
-              {latestNetMargin && latestNetMargin > 10
-                ? `with healthy net margins of ${latestNetMargin.toFixed(2)}%.`
-                : `with squeezed net margins of ${latestNetMargin?.toFixed(2)}%.`}
-              {latestPE && latestPE > 30
-                ? ` Valuations (CAPE ${latestPE.toFixed(1)}x) appear stretched.`
-                : latestPE && latestPE > 20
-                  ? ` Valuations (CAPE ${latestPE.toFixed(1)}x) are fair to elevated.`
-                  : ` Valuations (CAPE ${latestPE?.toFixed(1)}x) appear reasonable.`}
+              {latestNetMargin != null
+                ? latestNetMargin > 10
+                  ? `with healthy net margins of ${latestNetMargin.toFixed(2)}%.`
+                  : `with squeezed net margins of ${latestNetMargin.toFixed(2)}%.`
+                : 'with margin data unavailable.'}
+              {latestPE != null
+                ? latestPE > 30
+                  ? ` Valuations (CAPE ${latestPE.toFixed(1)}x) appear stretched.`
+                  : latestPE > 20
+                    ? ` Valuations (CAPE ${latestPE.toFixed(1)}x) are fair to elevated.`
+                    : ` Valuations (CAPE ${latestPE.toFixed(1)}x) appear reasonable.`
+                : ''}
             </Typography>
           </Stack>
         </Box>
