@@ -291,9 +291,7 @@ export function GrowthVsStagflation() {
                   name: 'GDP YoY %',
                   line: { color: '#6d91c9', width: 2 },
                   fill: 'tozeroy',
-                  fillcolor: gdpGrowth.map((o) =>
-                    o.value > 2.5 ? 'rgba(34, 197, 94, 0.2)' : o.value > 0 ? 'rgba(245, 158, 11, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                  ),
+                  fillcolor: 'rgba(109, 145, 201, 0.1)',
                 },
                 {
                   x: gdpGrowth.map((o) => o.date),
@@ -327,9 +325,7 @@ export function GrowthVsStagflation() {
                   name: 'CPI YoY %',
                   line: { color: '#ef4444', width: 2 },
                   fill: 'tozeroy',
-                  fillcolor: cpiGrowth.map((o) =>
-                    o.value > 4 ? 'rgba(239, 68, 68, 0.2)' : o.value > 2.5 ? 'rgba(245, 158, 11, 0.2)' : 'rgba(34, 197, 94, 0.2)',
-                  ),
+                  fillcolor: 'rgba(239, 68, 68, 0.1)',
                 },
                 {
                   x: cpiGrowth.map((o) => o.date),

@@ -65,6 +65,11 @@ const VIEW_LABELS: Record<ActiveView, string> = {
   calendar: 'Economic Calendar',
   crisis: 'Crisis Comparison',
   custom: 'Custom Dashboards',
+  'fed-cycle': 'Fed Policy Cycle Monitor',
+  'recession-early-warning': 'Recession Early Warning System',
+  'inflation-decomposition': 'Inflation Decomposition',
+  'growth-stagflation': 'Growth vs. Stagflation Scenarios',
+  valuation: 'Equity Valuation Dashboard',
 }
 
 /**

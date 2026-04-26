@@ -104,6 +104,8 @@ const RecessionEarlyWarning = lazy(() => import('./components/dashboards/Recessi
 const InflationDecomposition = lazy(() => import('./components/dashboards/InflationDecomposition').then((m) => ({ default: m.InflationDecomposition })))
 const GrowthVsStagflation = lazy(() => import('./components/dashboards/GrowthVsStagflation').then((m) => ({ default: m.GrowthVsStagflation })))
 const ValuationDashboard = lazy(() => import('./components/dashboards/ValuationDashboard').then((m) => ({ default: m.ValuationDashboard })))
+const MobileNav = lazy(() => import('./components/MobileNav').then((m) => ({ default: m.MobileNav })))
+const MobileDashboard = lazy(() => import('./components/MobileDashboard').then((m) => ({ default: m.MobileDashboard })))
 
 import { CommandBar } from './components/shared/CommandBar'
 
@@ -198,6 +200,17 @@ const NAV_GROUPS: NavGroup[] = [
       { value: 'custom', label: 'Custom Dashboards', icon: <BuildIcon fontSize="small" /> },
     ],
   },
+  {
+    id: 'dashboards',
+    label: 'Story Dashboards',
+    items: [
+      { value: 'fed-cycle', label: 'Fed Policy Cycle', icon: <AccountBalanceIcon fontSize="small" /> },
+      { value: 'recession-early-warning', label: 'Recession Early Warning', icon: <WarningAmberIcon fontSize="small" /> },
+      { value: 'inflation-decomposition', label: 'Inflation Decomposition', icon: <TrendingUpIcon fontSize="small" /> },
+      { value: 'growth-stagflation', label: 'Growth vs. Stagflation', icon: <BarChartIcon fontSize="small" /> },
+      { value: 'valuation', label: 'Equity Valuation', icon: <CandlestickChartIcon fontSize="small" /> },
+    ],
+  },
 ]
 
 const ALL_NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((g) => g.items)
@@ -206,6 +219,7 @@ const SIDEBAR_WIDTH = 248
 export default function App() {
   const theme = useTheme()
   const isCompact = useMediaQuery(theme.breakpoints.down('md'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')) // Very small screens (< 600px)
   const { filters, setView, setRange } = useFilters()
   const { toggleMode } = useThemeMode()
   const health = useHealth()
@@ -394,46 +408,59 @@ export default function App() {
         <Box component="main" sx={{ flex: 1, py: { xs: 2, md: 3 }, px: { xs: 2, md: 3 }, maxWidth: '100%' }}>
           <ErrorBoundary>
             <Suspense fallback={<LoadingState message="Preparing view…" height={400} />}>
-              {filters.view === 'yield-curve' && <YieldCurve3D />}
-              {filters.view === 'fed-futures-proxy' && <FedFuturesProxyPanel />}
-              {filters.view === 'macro' && <MacroPanel />}
-              {filters.view === 'cpi' && <CpiBreakdown />}
-              {filters.view === 'spreads' && <SpreadPanel />}
-              {filters.view === 'grocery' && <GroceryPanel />}
-              {filters.view === 'inflation' && <InflationPanel />}
-              {filters.view === 'credit' && <CreditConditionsPanel />}
-              {filters.view === 'fiscal' && <FiscalPanel />}
-              {filters.view === 'activity' && <ActivityPanel />}
-              {filters.view === 'markets' && <MarketsPanel />}
-              {filters.view === 'market-prices' && <MarketPricesPanel />}
-              {filters.view === 'energy' && <EnergyPanel />}
-              {filters.view === 'consumer' && <ConsumerPanel />}
-              {filters.view === 'global-macro' && <GlobalMacroPanel />}
-              {filters.view === 'volatility' && <VolatilityPanel />}
-              {filters.view === 'gdp-breakdown' && <GdpBreakdownPanel />}
-              {filters.view === 'global-credit' && <GlobalCreditPanel />}
-              {filters.view === 'trade' && <TradePanel />}
-              {filters.view === 'corporate-earnings' && <CorporateEarningsPanel />}
-              {filters.view === 'monetary-conditions' && <MonetaryConditionsPanel />}
-              {filters.view === 'labor' && <LaborPanel />}
-              {filters.view === 'housing' && <HousingPanel />}
-              {filters.view === 'recession' && <RecessionSignalsPanel />}
-              {filters.view === 'heatmap' && <HeatmapPanel />}
-              {filters.view === 'compare' && <ComparePanel />}
-              {filters.view === 'correlation' && <CorrelationPanel />}
-              {filters.view === 'calendar' && <CalendarPanel />}
-              {filters.view === 'crisis' && <CrisisComparePanel />}
-              {filters.view === 'custom' && <CustomDashboardPanel />}
+              {isMobile ? (
+                <MobileDashboard />
+              ) : (
+                <>
+                  {filters.view === 'yield-curve' && <YieldCurve3D />}
+                  {filters.view === 'fed-futures-proxy' && <FedFuturesProxyPanel />}
+                  {filters.view === 'macro' && <MacroPanel />}
+                  {filters.view === 'cpi' && <CpiBreakdown />}
+                  {filters.view === 'spreads' && <SpreadPanel />}
+                  {filters.view === 'grocery' && <GroceryPanel />}
+                  {filters.view === 'inflation' && <InflationPanel />}
+                  {filters.view === 'credit' && <CreditConditionsPanel />}
+                  {filters.view === 'fiscal' && <FiscalPanel />}
+                  {filters.view === 'activity' && <ActivityPanel />}
+                  {filters.view === 'markets' && <MarketsPanel />}
+                  {filters.view === 'market-prices' && <MarketPricesPanel />}
+                  {filters.view === 'energy' && <EnergyPanel />}
+                  {filters.view === 'consumer' && <ConsumerPanel />}
+                  {filters.view === 'global-macro' && <GlobalMacroPanel />}
+                  {filters.view === 'volatility' && <VolatilityPanel />}
+                  {filters.view === 'gdp-breakdown' && <GdpBreakdownPanel />}
+                  {filters.view === 'global-credit' && <GlobalCreditPanel />}
+                  {filters.view === 'trade' && <TradePanel />}
+                  {filters.view === 'corporate-earnings' && <CorporateEarningsPanel />}
+                  {filters.view === 'monetary-conditions' && <MonetaryConditionsPanel />}
+                  {filters.view === 'labor' && <LaborPanel />}
+                  {filters.view === 'housing' && <HousingPanel />}
+                  {filters.view === 'recession' && <RecessionSignalsPanel />}
+                  {filters.view === 'heatmap' && <HeatmapPanel />}
+                  {filters.view === 'compare' && <ComparePanel />}
+                  {filters.view === 'correlation' && <CorrelationPanel />}
+                  {filters.view === 'calendar' && <CalendarPanel />}
+                  {filters.view === 'crisis' && <CrisisComparePanel />}
+                  {filters.view === 'custom' && <CustomDashboardPanel />}
+                  {filters.view === 'fed-cycle' && <FedCycleMonitor />}
+                  {filters.view === 'recession-early-warning' && <RecessionEarlyWarning />}
+                  {filters.view === 'inflation-decomposition' && <InflationDecomposition />}
+                  {filters.view === 'growth-stagflation' && <GrowthVsStagflation />}
+                  {filters.view === 'valuation' && <ValuationDashboard />}
+                </>
+              )}
             </Suspense>
           </ErrorBoundary>
         </Box>
 
-        <Box component="footer" sx={{ px: { xs: 2, md: 3 }, py: 1.25, borderTop: `1px solid ${theme.palette.divider}`, color: 'text.disabled', fontSize: 11, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, backdropFilter: 'blur(8px)', backgroundColor: theme.palette.mode === 'dark' ? 'rgba(8,15,28,0.60)' : 'rgba(244,246,249,0.70)' }}>
+        <Box component="footer" sx={{ px: { xs: 2, md: 3 }, py: 1.25, borderTop: `1px solid ${theme.palette.divider}`, color: 'text.disabled', fontSize: 11, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, backdropFilter: 'blur(8px)', backgroundColor: theme.palette.mode === 'dark' ? 'rgba(8,15,28,0.60)' : 'rgba(244,246,249,0.70)', display: isMobile ? 'none' : 'flex' }}>
           <span>Data: Federal Reserve Bank of St. Louis (FRED) · BLS</span>
           <span>
             <Link href="https://bpachter.github.io" color="inherit" underline="hover">← Portfolio</Link>
           </span>
         </Box>
+
+        {isMobile && <MobileNav />}
       </Box>
 
       <KeyboardShortcutsDialog

@@ -21,7 +21,6 @@ export function ValuationDashboard() {
   const epsData = earnings.data?.earnings_per_share ?? []
   const profitsData = earnings.data?.profits ?? []
   const tenYearData = markets.data?.series.GS10 ?? []
-  const divYieldData = markets.data?.series.VIXCLS ?? [] // Use VIX as proxy for risk sentiment
   const hySpreadsData = spreads.data?.series.BAMLH0A0HYM2 ?? [] // HY credit spread
 
   // Latest values
@@ -29,7 +28,6 @@ export function ValuationDashboard() {
   const epsLatest = epsData.length > 0 ? epsData[epsData.length - 1].value : null
   const profitsLatest = profitsData.length > 0 ? profitsData[profitsData.length - 1].value : null
   const tenYearLatest = tenYearData.length > 0 ? tenYearData[tenYearData.length - 1].value : null
-  const hySpreadLatest = hySpreadsData.length > 0 ? hySpreadsData[hySpreadsData.length - 1].value : null
 
   // Compute equity risk premium (S&P earnings yield - 10Y Treasury)
   const equityRiskPremium = useMemo(() => {
@@ -335,9 +333,7 @@ export function ValuationDashboard() {
                   name: 'HY Spread',
                   line: { color: '#f59e0b', width: 2 },
                   fill: 'tozeroy',
-                  fillcolor: hySpreadsData.map((o) =>
-                    o.value > 600 ? 'rgba(239, 68, 68, 0.2)' : o.value > 400 ? 'rgba(245, 158, 11, 0.2)' : 'rgba(34, 197, 94, 0.2)',
-                  ),
+                  fillcolor: 'rgba(245, 158, 11, 0.1)',
                 },
               ]}
               layout={{

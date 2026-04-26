@@ -2,8 +2,8 @@
  * RecessionEarlyWarning — Story dashboard for recession probability signals.
  * Combines leading indicators (ISM, jobless claims, yield curve) with recession probability meter.
  */
-import { useMemo, useState } from 'react'
-import { Grid, Stack, Typography, Box, LinearProgress } from '@mui/material'
+import { useState } from 'react'
+import { Grid, Typography, Box, LinearProgress } from '@mui/material'
 import { CompositeDashboard, type DashboardSection } from './CompositeDashboard'
 import { PlotlyChart, KpiChip } from '../shared'
 import { useActivity, useLabor, useMarkets, useRecessionSignals } from '../../hooks/useFredQueries'
@@ -19,29 +19,12 @@ export function RecessionEarlyWarning() {
 
   // Extract key series
   const ismData = activity.data?.series.MMNRNJ ?? [] // ISM manufacturing
-  const ismServiceData = activity.data?.series.MMNRNJ ?? [] // ISM services
   const claimsData = labor.data?.series.ICSA ?? [] // Initial claims
   const spreadData = markets.data?.series.T10Y2Y ?? [] // 10Y-2Y spread
   const recProb = recession.data?.series['RECPROUSM156N'] ?? [] // Recession probability
 
   // Compute recession probability (latest)
   const recessProb = recProb.length > 0 ? recProb[recProb.length - 1].value : 0
-
-  // Compute leading indicator composite
-  // Negative values = recession signal
-  const leadingComposite = useMemo(() => {
-    if (!ismData.length || !spreadData.length) return []
-    const result = []
-    for (let i = 0; i < Math.min(ismData.length, spreadData.length); i++) {
-      const ismNorm = (ismData[i].value - 50) // ISM > 50 = expansion
-      const spreadNorm = spreadData[i].value > 0 ? 1 : -1 // Spread sign
-      result.push({
-        date: ismData[i].date,
-        value: (ismNorm + spreadNorm * 5) / 2, // Composite score
-      })
-    }
-    return result
-  }, [ismData, spreadData])
 
   // KPI row: Recession Prob, ISM, Yield Spread, Initial Claims
   const ismLatest = ismData.length > 0 ? ismData[ismData.length - 1].value : null
@@ -212,9 +195,7 @@ export function RecessionEarlyWarning() {
                   name: 'Spread',
                   line: { color: '#22c55e', width: 2 },
                   fill: 'tozeroy',
-                  fillcolor: spreadData.map((o) =>
-                    o.value > 0 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                  ),
+                  fillcolor: 'rgba(34, 197, 94, 0.2)',
                 },
                 {
                   x: spreadData.map((o) => o.date),

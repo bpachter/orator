@@ -4,7 +4,7 @@
  * Market expectations (Fed Funds Futures), and interpretation of policy stance.
  */
 import { useMemo, useState } from 'react'
-import { Grid, Stack, Typography, Box } from '@mui/material'
+import { Grid, Typography, Box } from '@mui/material'
 import { CompositeDashboard, type DashboardSection } from './CompositeDashboard'
 import { PlotlyChart, KpiChip } from '../shared'
 import {
@@ -25,7 +25,6 @@ export function FedCycleMonitor() {
   // Compute derived metrics
   const fedFundsLatest = macro.data?.series.FEDFUNDS?.[macro.data.series.FEDFUNDS.length - 1]?.value
   const m2Latest = monetary.data?.series.M2SL?.[monetary.data.series.M2SL.length - 1]?.value
-  const tbillsLatest = markets.data?.series.TB3MS?.[markets.data.series.TB3MS.length - 1]?.value
   const tenYearLatest = markets.data?.series.GS10?.[markets.data.series.GS10.length - 1]?.value
 
   // Extract series for charts

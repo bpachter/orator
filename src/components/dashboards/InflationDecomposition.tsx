@@ -3,7 +3,7 @@
  * Shows: Total CPI, Core CPI, Goods vs. Services, Wage pressures, and expectations.
  */
 import { useMemo, useState } from 'react'
-import { Grid, Stack, Typography, Box } from '@mui/material'
+import { Grid, Typography, Box } from '@mui/material'
 import { CompositeDashboard, type DashboardSection } from './CompositeDashboard'
 import { PlotlyChart, KpiChip } from '../shared'
 import { useConsumer, useInflation, useLabor } from '../../hooks/useFredQueries'
@@ -19,9 +19,7 @@ export function InflationDecomposition() {
   // Extract series
   const cpiData = inflation.data?.series.CPIAUCSL ?? []
   const coreCpiData = inflation.data?.series.CPILFESL ?? []
-  const goodsData = inflation.data?.series.CPIAPPSL ?? [] // Apparel (goods proxy)
   const energyData = inflation.data?.series.CPIENGSL ?? []
-  const foodData = inflation.data?.series.CPIFABSL ?? [] // Food & beverages
   const servicesData = inflation.data?.series.CPILFESL ?? [] // Services (core proxy)
   const wageGrowthData = labor.data?.series.AWHAETP ?? [] // Avg hourly earnings growth
 
@@ -183,9 +181,7 @@ export function InflationDecomposition() {
                   name: 'Energy YoY %',
                   line: { color: '#ef4444', width: 2 },
                   fill: 'tozeroy',
-                  fillcolor: energyYoY.map((o) =>
-                    o.value > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(34, 197, 94, 0.2)',
-                  ),
+                  fillcolor: 'rgba(239, 68, 68, 0.1)',
                 },
               ]}
               layout={{

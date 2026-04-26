@@ -3,8 +3,8 @@
  * Provides synchronized time range picker, data fetching orchestration, and
  * consistent layout across story dashboards (FedCycle, RecessionWarning, etc).
  */
-import { ReactNode, useMemo } from 'react'
-import { Stack, Grid, Box, Typography } from '@mui/material'
+import { ReactNode } from 'react'
+import { Grid, Box, Typography } from '@mui/material'
 import { PanelCard, RangePicker, LoadingState, ErrorState } from '../shared'
 import type { TimeRange } from '../../types'
 
@@ -72,7 +72,7 @@ export function CompositeDashboard({
 
   return (
     <PanelCard>
-      <Stack spacing={3}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {/* Header */}
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
@@ -87,7 +87,7 @@ export function CompositeDashboard({
 
         {/* Range Picker */}
         <Box sx={{ mb: 2 }}>
-          <RangePicker range={range} onRangeChange={onRangeChange} />
+          <RangePicker value={range} onChange={onRangeChange} />
         </Box>
 
         {/* KPI Row (optional) */}
@@ -154,7 +154,7 @@ export function CompositeDashboard({
             )}
           </Box>
         ))}
-      </Stack>
+      </Box>
     </PanelCard>
   )
 }
