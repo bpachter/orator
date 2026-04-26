@@ -52,6 +52,8 @@ const VIEW_LABELS: Record<ActiveView, string> = {
   energy: 'Energy Dashboard',
   fiscal: 'Fiscal Monitor',
   consumer: 'Consumer',
+  'global-macro': 'Global Macro Divergence',
+  volatility: 'CBOE Volatility Suite',
   heatmap: 'Macro Heatmap',
   compare: 'Series Comparison',
   correlation: 'Correlation Matrix',

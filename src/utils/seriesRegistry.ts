@@ -23,6 +23,8 @@ export type EndpointKey =
   | 'market-prices'
   | 'energy'
   | 'fiscal'
+  | 'global-macro'
+  | 'volatility'
   | 'cpi'
   | 'grocery'
 
@@ -146,6 +148,30 @@ export const INDICATOR_REGISTRY: IndicatorMeta[] = [
   { id: 'DIA', label: 'SPDR Dow Jones ETF', short: 'DIA', unit: '$', color: s.amber, endpoint: 'market-prices', view: 'market-prices', section: 'Market Prices', category: 'leading', keywords: ['dia', 'dow', 'etf'] },
   { id: 'XLE', label: 'Energy Select Sector SPDR', short: 'XLE', unit: '$', color: s.orange, endpoint: 'market-prices', view: 'market-prices', section: 'Market Prices', category: 'leading', keywords: ['xle', 'energy', 'sector'] },
   { id: 'GLD', label: 'SPDR Gold Shares', short: 'GLD', unit: '$', color: s.yellow, endpoint: 'market-prices', view: 'market-prices', section: 'Market Prices', category: 'leading', keywords: ['gld', 'gold', 'commodity'] },
+
+  // -------- Global Macro --------
+  { id: 'USALOLITONOSTSAM', label: 'US CLI (OECD)', short: 'US CLI', unit: 'idx', color: s.blue, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'leading', keywords: ['cli', 'leading indicator', 'oecd', 'us'] },
+  { id: 'DEULORSGPNOSTSAM', label: 'Germany CLI (OECD)', short: 'DE CLI', unit: 'idx', color: s.yellow, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'leading', keywords: ['cli', 'leading indicator', 'oecd', 'germany'] },
+  { id: 'FRALORSGPNOSTSAM', label: 'France CLI (OECD)', short: 'FR CLI', unit: 'idx', color: s.green, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'leading', keywords: ['cli', 'leading indicator', 'oecd', 'france'] },
+  { id: 'JPNLORSGPNOSTSAM', label: 'Japan CLI (OECD)', short: 'JP CLI', unit: 'idx', color: s.orange, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'leading', keywords: ['cli', 'leading indicator', 'oecd', 'japan'] },
+  { id: 'GBRLORSGPNOSTSAM', label: 'UK CLI (OECD)', short: 'UK CLI', unit: 'idx', color: s.cyan, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'leading', keywords: ['cli', 'leading indicator', 'oecd', 'uk', 'britain'] },
+  { id: 'CHNLORSGPNOSTSAM', label: 'China CLI (OECD)', short: 'CN CLI', unit: 'idx', color: s.red, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'leading', keywords: ['cli', 'leading indicator', 'oecd', 'china'] },
+  { id: 'CANLORSGPNOSTSAM', label: 'Canada CLI (OECD)', short: 'CA CLI', unit: 'idx', color: s.violet, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'leading', keywords: ['cli', 'leading indicator', 'oecd', 'canada'] },
+  { id: 'ECBDFR', label: 'ECB Deposit Rate', short: 'ECB Rate', unit: '%', color: s.amber, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'lagging', keywords: ['ecb', 'euro', 'policy rate', 'europe'] },
+  { id: 'IRLTLT01DEM156N', label: 'Germany 10Y Bund', short: 'DE 10Y', unit: '%', color: s.yellow, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'coincident', keywords: ['bund', 'germany', '10y', 'sovereign yield'] },
+  { id: 'IRLTLT01GBM156N', label: 'UK 10Y Gilt', short: 'UK 10Y', unit: '%', color: s.teal, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'coincident', keywords: ['gilt', 'uk', '10y', 'sovereign yield'] },
+  { id: 'IRLTLT01JPM156N', label: 'Japan 10Y JGB', short: 'JP 10Y', unit: '%', color: s.orange, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'coincident', keywords: ['jgb', 'japan', '10y', 'sovereign yield'] },
+  { id: 'DEXJPUS', label: 'JPY/USD FX Rate', short: 'JPY/USD', unit: 'JPY', color: s.pink, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'coincident', keywords: ['yen', 'jpy', 'fx', 'currency'] },
+  { id: 'DEXUSUK', label: 'GBP/USD FX Rate', short: 'GBP/USD', unit: 'USD', color: s.purple, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'coincident', keywords: ['pound', 'gbp', 'fx', 'currency'] },
+  { id: 'WB_GDP_US', label: 'US GDP YoY (World Bank)', short: 'US GDP', unit: '%', color: s.blue, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'coincident', keywords: ['gdp', 'growth', 'us', 'world bank'], isYoy: true },
+  { id: 'WB_GDP_DE', label: 'Germany GDP YoY (World Bank)', short: 'DE GDP', unit: '%', color: s.yellow, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'coincident', keywords: ['gdp', 'growth', 'germany', 'world bank'], isYoy: true },
+  { id: 'WB_GDP_JP', label: 'Japan GDP YoY (World Bank)', short: 'JP GDP', unit: '%', color: s.orange, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'coincident', keywords: ['gdp', 'growth', 'japan', 'world bank'], isYoy: true },
+  { id: 'WB_GDP_CN', label: 'China GDP YoY (World Bank)', short: 'CN GDP', unit: '%', color: s.red, endpoint: 'global-macro', view: 'global-macro', section: 'Global Macro', category: 'coincident', keywords: ['gdp', 'growth', 'china', 'world bank'], isYoy: true },
+
+  // -------- Volatility --------
+  { id: 'VIX', label: 'CBOE VIX (30-day Implied Vol)', short: 'VIX', unit: 'idx', color: s.red, endpoint: 'volatility', view: 'volatility', section: 'Volatility', category: 'leading', keywords: ['vix', 'volatility', 'fear', 'cboe', 'options'], inverted: true },
+  { id: 'VIX3M', label: 'CBOE VIX3M (3-month Implied Vol)', short: 'VIX3M', unit: 'idx', color: s.blue, endpoint: 'volatility', view: 'volatility', section: 'Volatility', category: 'leading', keywords: ['vix3m', 'volatility', 'cboe', 'term structure'], inverted: true },
+  { id: 'SKEW', label: 'CBOE SKEW Index (Tail Risk)', short: 'SKEW', unit: 'idx', color: s.yellow, endpoint: 'volatility', view: 'volatility', section: 'Volatility', category: 'leading', keywords: ['skew', 'tail risk', 'cboe', 'crash risk', 'options'] },
 ]
 /* eslint-enable */
 

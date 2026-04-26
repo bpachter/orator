@@ -141,6 +141,18 @@ export interface ConsumerResponse {
   metadata: SeriesMetadata[]
 }
 
+export interface GlobalMacroResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
+export interface VolatilityResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
 export interface RecessionSignal {
   id: string
   label: string
@@ -236,6 +248,14 @@ export function fetchMarketPrices(range: TimeRange = '5Y'): Promise<MarketPrices
 
 export function fetchConsumer(range: TimeRange = '10Y'): Promise<ConsumerResponse> {
   return request(`/api/consumer?range=${range}`)
+}
+
+export function fetchGlobalMacro(range: TimeRange = '10Y'): Promise<GlobalMacroResponse> {
+  return request(`/api/global-macro?range=${range}`)
+}
+
+export function fetchVolatility(range: TimeRange = '10Y'): Promise<VolatilityResponse> {
+  return request(`/api/volatility?range=${range}`)
 }
 
 export function fetchMetrics(): Promise<MetricsResponse> {

@@ -39,9 +39,11 @@ from .analytics import (
     yield_curve_inverted,
 )
 from .alphavantage_client import fetch_weekly_adjusted
+from .cboe_client import fetch_index as fetch_cboe_index
 from .errors import ApiError, error_response
 from .eia_client import fetch_series as fetch_eia_series
 from .fred_client import fetch_series, get_start_for_range, today_iso
+from .worldbank_client import fetch_indicator as fetch_wb_indicator
 from .schemas import (
     ActivityResponse,
     ConsumerResponse,
@@ -49,6 +51,7 @@ from .schemas import (
     CreditConditionsResponse,
     EnergyResponse,
     FiscalResponse,
+    GlobalMacroResponse,
     GroceryResponse,
     HealthResponse,
     HousingResponse,
@@ -62,6 +65,7 @@ from .schemas import (
     RecessionSignalsResponse,
     SeriesMeta,
     SpreadsResponse,
+    VolatilityResponse,
     YieldCurveResponse,
 )
 from .series import (
@@ -71,6 +75,7 @@ from .series import (
     CREDIT_CONDITIONS_SERIES,
     ENERGY_SERIES,
     FISCAL_SERIES,
+    GLOBAL_MACRO_SERIES,
     GROCERY_SERIES,
     HOUSING_SERIES,
     INFLATION_SERIES,
@@ -80,6 +85,8 @@ from .series import (
     MARKETS_SERIES,
     RECESSION_INPUT_SERIES,
     SPREAD_SERIES,
+    VOLATILITY_SERIES,
+    WB_GDP_COUNTRIES,
     YIELD_MATURITIES,
 )
 from .transforms import yoy
@@ -756,6 +763,91 @@ def fiscal(range: str = "10Y") -> FiscalResponse:
     ])
 
     result = FiscalResponse(updated=today_iso(), series=series_out, metadata=metadata)
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/global-macro", response_model=GlobalMacroResponse, tags=["global"])
+def global_macro(range: str = "10Y") -> GlobalMacroResponse:
+    cache_key = f"global-macro:{range}"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range(range)
+    end = today_iso()
+    series_out: dict[str, list[dict]] = {}
+
+    # FRED-sourced CLI, policy rates, sovereign yields, FX
+    for s in GLOBAL_MACRO_SERIES:
+        try:
+            obs = fetch_series(s["id"], start, end)
+            series_out[s["id"]] = obs
+        except ApiError as exc:
+            if exc.status_code == 503:
+                raise
+            logger.warning("Skipping global-macro FRED series %s: %s", s["id"], exc.message)
+            series_out[s["id"]] = []
+        except Exception as exc:
+            logger.warning("Skipping global-macro FRED series %s: %s", s["id"], exc)
+            series_out[s["id"]] = []
+
+    # World Bank annual GDP YoY for G7 + China
+    for c in WB_GDP_COUNTRIES:
+        wb_id = f"WB_GDP_{c['iso']}"
+        try:
+            obs = fetch_wb_indicator(c["iso"], "NY.GDP.MKTP.KD.ZG")
+            series_out[wb_id] = [o for o in obs if o["date"] >= start]
+        except Exception as exc:
+            logger.warning("World Bank GDP skip %s: %s", c["iso"], exc)
+            series_out[wb_id] = []
+
+    metadata = [
+        SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
+        for s in GLOBAL_MACRO_SERIES
+    ]
+    for c in WB_GDP_COUNTRIES:
+        metadata.append(
+            SeriesMeta(
+                id=f"WB_GDP_{c['iso']}",
+                label=c["label"],
+                color=c["color"],
+                unit="%",
+            )
+        )
+
+    result = GlobalMacroResponse(updated=today_iso(), series=series_out, metadata=metadata)
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/volatility", response_model=VolatilityResponse, tags=["markets"])
+def volatility(range: str = "10Y") -> VolatilityResponse:
+    cache_key = f"volatility:{range}"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range(range)
+    series_out: dict[str, list[dict]] = {}
+
+    for s in VOLATILITY_SERIES:
+        sym = s["id"]
+        try:
+            series_out[sym] = fetch_cboe_index(sym, start=start)
+        except ApiError as exc:
+            logger.warning("Skipping CBOE series %s: %s", sym, exc.message)
+            series_out[sym] = []
+        except Exception as exc:
+            logger.warning("Skipping CBOE series %s: %s", sym, exc)
+            series_out[sym] = []
+
+    metadata = [
+        SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
+        for s in VOLATILITY_SERIES
+    ]
+
+    result = VolatilityResponse(updated=today_iso(), series=series_out, metadata=metadata)
     cache.store(cache_key, result)
     return result
 

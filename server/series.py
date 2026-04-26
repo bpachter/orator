@@ -188,3 +188,58 @@ CONSUMER_SERIES: list[SeriesDef] = [
     {"id": "TOTALSL", "label": "Total Consumer Credit Outstanding (YoY %)", "color": "#82aec2", "unit": "%", "yoy": True},
 ]
 
+# ---------------------------------------------------------------------------
+# Phase 4: Global Macro Divergence (FRED-proxied OECD CLI + sovereign data)
+# ---------------------------------------------------------------------------
+
+class WbCountryDef(TypedDict):
+    iso: str
+    label: str
+    color: str
+
+
+GLOBAL_MACRO_SERIES: list[SeriesDef] = [
+    # OECD Composite Leading Indicators (via FRED)
+    {"id": "USALOLITONOSTSAM", "label": "US CLI (OECD)", "color": "#6d91c9", "unit": "index"},
+    {"id": "DEULORSGPNOSTSAM", "label": "Germany CLI (OECD)", "color": "#d7b46a", "unit": "index"},
+    {"id": "FRALORSGPNOSTSAM", "label": "France CLI (OECD)", "color": "#6fa49a", "unit": "index"},
+    {"id": "JPNLORSGPNOSTSAM", "label": "Japan CLI (OECD)", "color": "#c98f5a", "unit": "index"},
+    {"id": "GBRLORSGPNOSTSAM", "label": "UK CLI (OECD)", "color": "#82aec2", "unit": "index"},
+    {"id": "CHNLORSGPNOSTSAM", "label": "China CLI (OECD)", "color": "#b7834c", "unit": "index"},
+    {"id": "CANLORSGPNOSTSAM", "label": "Canada CLI (OECD)", "color": "#b0b9d4", "unit": "index"},
+    # Central bank policy rates
+    {"id": "FEDFUNDS", "label": "Fed Funds Rate (US)", "color": "#6d91c9", "unit": "%"},
+    {"id": "ECBDFR", "label": "ECB Deposit Rate", "color": "#d7b46a", "unit": "%"},
+    # 10Y sovereign yields
+    {"id": "DGS10", "label": "US 10Y Treasury", "color": "#6fa49a", "unit": "%"},
+    {"id": "IRLTLT01DEM156N", "label": "Germany 10Y Bund", "color": "#c98f5a", "unit": "%"},
+    {"id": "IRLTLT01GBM156N", "label": "UK 10Y Gilt", "color": "#82aec2", "unit": "%"},
+    {"id": "IRLTLT01JPM156N", "label": "Japan 10Y JGB", "color": "#b7834c", "unit": "%"},
+    # Major FX pairs
+    {"id": "DEXUSEU", "label": "EUR/USD", "color": "#b0b9d4", "unit": "USD"},
+    {"id": "DEXJPUS", "label": "JPY/USD", "color": "#cfa75a", "unit": "JPY"},
+    {"id": "DEXUSUK", "label": "GBP/USD", "color": "#7b89b4", "unit": "USD"},
+]
+
+# World Bank annual GDP YoY countries
+WB_GDP_COUNTRIES: list[WbCountryDef] = [
+    {"iso": "US", "label": "US GDP YoY (WB)", "color": "#6d91c9"},
+    {"iso": "DE", "label": "Germany GDP YoY (WB)", "color": "#d7b46a"},
+    {"iso": "FR", "label": "France GDP YoY (WB)", "color": "#6fa49a"},
+    {"iso": "JP", "label": "Japan GDP YoY (WB)", "color": "#c98f5a"},
+    {"iso": "GB", "label": "UK GDP YoY (WB)", "color": "#82aec2"},
+    {"iso": "CN", "label": "China GDP YoY (WB)", "color": "#b7834c"},
+    {"iso": "CA", "label": "Canada GDP YoY (WB)", "color": "#b0b9d4"},
+    {"iso": "IT", "label": "Italy GDP YoY (WB)", "color": "#cfa75a"},
+]
+
+# ---------------------------------------------------------------------------
+# Phase 9: CBOE Volatility Suite
+# ---------------------------------------------------------------------------
+
+VOLATILITY_SERIES: list[SeriesDef] = [
+    {"id": "VIX", "label": "CBOE VIX (30-day Implied Vol)", "color": "#c98f5a", "unit": "index"},
+    {"id": "VIX3M", "label": "CBOE VIX3M (3-month Implied Vol)", "color": "#6d91c9", "unit": "index"},
+    {"id": "SKEW", "label": "CBOE SKEW Index (Tail Risk)", "color": "#d7b46a", "unit": "index"},
+]
+

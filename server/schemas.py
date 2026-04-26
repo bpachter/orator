@@ -166,3 +166,15 @@ class ConsumerResponse(BaseModel):
     updated: str
     series: dict[str, list[Observation]]
     metadata: list[SeriesMeta]
+
+
+class GlobalMacroResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]
+
+
+class VolatilityResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]

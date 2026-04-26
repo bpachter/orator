@@ -50,6 +50,8 @@ import HistoryIcon from '@mui/icons-material/History'
 import BuildIcon from '@mui/icons-material/Build'
 import TerminalIcon from '@mui/icons-material/Terminal'
 import QueryStatsIcon from '@mui/icons-material/QueryStats'
+import PublicIcon from '@mui/icons-material/Public'
+import WavesIcon from '@mui/icons-material/Waves'
 import { useTheme, alpha } from '@mui/material/styles'
 import type { ActiveView } from './types'
 import { useFilters } from './state/filters'
@@ -81,6 +83,8 @@ const MarketPricesPanel = lazy(() => import('./components/MarketPricesPanel').th
 const EnergyPanel = lazy(() => import('./components/EnergyPanel').then((m) => ({ default: m.EnergyPanel })))
 const FiscalPanel = lazy(() => import('./components/FiscalPanel').then((m) => ({ default: m.FiscalPanel })))
 const ConsumerPanel = lazy(() => import('./components/ConsumerPanel').then((m) => ({ default: m.ConsumerPanel })))
+const GlobalMacroPanel = lazy(() => import('./components/GlobalMacroPanel').then((m) => ({ default: m.GlobalMacroPanel })))
+const VolatilityPanel = lazy(() => import('./components/VolatilityPanel').then((m) => ({ default: m.VolatilityPanel })))
 const HeatmapPanel = lazy(() => import('./components/HeatmapPanel').then((m) => ({ default: m.HeatmapPanel })))
 const ComparePanel = lazy(() => import('./components/ComparePanel').then((m) => ({ default: m.ComparePanel })))
 const CorrelationPanel = lazy(() => import('./components/CorrelationPanel').then((m) => ({ default: m.CorrelationPanel })))
@@ -138,8 +142,16 @@ const NAV_GROUPS: NavGroup[] = [
       { value: 'activity', label: 'Industrial Activity', icon: <FactoryIcon fontSize="small" /> },
       { value: 'markets', label: 'Markets', icon: <CandlestickChartIcon fontSize="small" /> },
       { value: 'market-prices', label: 'Market Prices', icon: <AutoGraphIcon fontSize="small" /> },
+      { value: 'volatility', label: 'Volatility Suite', icon: <WavesIcon fontSize="small" /> },
       { value: 'energy', label: 'Energy', icon: <LocalFireDepartmentIcon fontSize="small" /> },
       { value: 'consumer', label: 'Consumer', icon: <ShoppingCartIcon fontSize="small" /> },
+    ],
+  },
+  {
+    id: 'global',
+    label: 'Global',
+    items: [
+      { value: 'global-macro', label: 'Global Macro', icon: <PublicIcon fontSize="small" /> },
     ],
   },
   {
@@ -372,6 +384,8 @@ export default function App() {
               {filters.view === 'market-prices' && <MarketPricesPanel />}
               {filters.view === 'energy' && <EnergyPanel />}
               {filters.view === 'consumer' && <ConsumerPanel />}
+              {filters.view === 'global-macro' && <GlobalMacroPanel />}
+              {filters.view === 'volatility' && <VolatilityPanel />}
               {filters.view === 'labor' && <LaborPanel />}
               {filters.view === 'housing' && <HousingPanel />}
               {filters.view === 'recession' && <RecessionSignalsPanel />}

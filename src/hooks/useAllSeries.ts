@@ -10,6 +10,7 @@ import {
   useCreditConditions,
   useEnergy,
   useFiscal,
+  useGlobalMacro,
   useHousing,
   useInflation,
   useLabor,
@@ -18,6 +19,7 @@ import {
   useMarkets,
   useRecessionSignals,
   useSpreads,
+  useVolatility,
 } from './useFredQueries'
 import type { FredObs, TimeRange } from '../types'
 import { INDICATOR_REGISTRY, type IndicatorMeta, type EndpointKey } from '../utils/seriesRegistry'
@@ -52,6 +54,8 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
   const marketPrices = useMarketPrices(range)
   const energy = useEnergy(range)
   const fiscal = useFiscal(range)
+  const globalMacro = useGlobalMacro(range)
+  const volatility = useVolatility(range)
 
   return useMemo(() => {
     const endpoints: AllSeriesState['endpoints'] = {
@@ -68,6 +72,8 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
       'market-prices': marketPrices.data?.series,
       energy: energy.data?.series,
       fiscal: fiscal.data?.series,
+      'global-macro': globalMacro.data?.series,
+      volatility: volatility.data?.series,
     }
 
     const bundles: IndicatorBundle[] = INDICATOR_REGISTRY.map((meta) => {
@@ -91,6 +97,8 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
       marketPrices.data?.updated,
       energy.data?.updated,
       fiscal.data?.updated,
+      globalMacro.data?.updated,
+      volatility.data?.updated,
     ]
       .filter(Boolean)
       .sort()
@@ -100,14 +108,16 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
       isLoading:
         macro.isLoading || labor.isLoading || inflation.isLoading || activity.isLoading ||
         spreads.isLoading || recession.isLoading || housing.isLoading || consumer.isLoading ||
-        credit.isLoading || markets.isLoading || marketPrices.isLoading || energy.isLoading || fiscal.isLoading,
+        credit.isLoading || markets.isLoading || marketPrices.isLoading || energy.isLoading || fiscal.isLoading ||
+        globalMacro.isLoading || volatility.isLoading,
       isError:
         macro.isError || labor.isError || inflation.isError || activity.isError ||
-        spreads.isError || housing.isError || consumer.isError || credit.isError || markets.isError || marketPrices.isError || energy.isError || fiscal.isError,
+        spreads.isError || housing.isError || consumer.isError || credit.isError || markets.isError || marketPrices.isError || energy.isError || fiscal.isError ||
+        globalMacro.isError || volatility.isError,
       bundles,
       byId,
       updated,
       endpoints,
     }
-  }, [macro, labor, inflation, activity, spreads, recession, housing, consumer, credit, markets, marketPrices, energy, fiscal])
+  }, [macro, labor, inflation, activity, spreads, recession, housing, consumer, credit, markets, marketPrices, energy, fiscal, globalMacro, volatility])
 }

@@ -23,6 +23,8 @@ export type ActiveView =
   | 'energy'
   | 'fiscal'
   | 'consumer'
+  | 'global-macro'
+  | 'volatility'
   | 'heatmap'
   | 'compare'
   | 'correlation'

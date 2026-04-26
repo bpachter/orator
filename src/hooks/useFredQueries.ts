@@ -7,6 +7,7 @@ import {
   fetchCreditConditions,
   fetchEnergy,
   fetchFiscal,
+  fetchGlobalMacro,
   fetchGrocery,
   fetchHealth,
   fetchHousing,
@@ -16,6 +17,7 @@ import {
   fetchMarkets,
   fetchRecessionSignals,
   fetchSpreads,
+  fetchVolatility,
   fetchYieldSurface,
   type ActivityResponse,
   type ConsumerResponse,
@@ -23,6 +25,7 @@ import {
   type CreditConditionsResponse,
   type EnergyResponse,
   type FiscalResponse,
+  type GlobalMacroResponse,
   type GroceryResponse,
   type HealthResponse,
   type HousingResponse,
@@ -33,6 +36,7 @@ import {
   type MarketsResponse,
   type RecessionSignalsResponse,
   type SpreadResponse,
+  type VolatilityResponse,
 } from '../api/fred'
 import type { TimeRange, YieldSurface } from '../types'
 
@@ -119,4 +123,12 @@ export function useMarketPrices(range: TimeRange = '5Y'): UseQueryResult<MarketP
 
 export function useConsumer(range: TimeRange = '10Y'): UseQueryResult<ConsumerResponse> {
   return useQuery({ queryKey: ['consumer', range], queryFn: () => fetchConsumer(range), staleTime: FIVE_MIN })
+}
+
+export function useGlobalMacro(range: TimeRange = '10Y'): UseQueryResult<GlobalMacroResponse> {
+  return useQuery({ queryKey: ['global-macro', range], queryFn: () => fetchGlobalMacro(range), staleTime: FIVE_MIN })
+}
+
+export function useVolatility(range: TimeRange = '10Y'): UseQueryResult<VolatilityResponse> {
+  return useQuery({ queryKey: ['volatility', range], queryFn: () => fetchVolatility(range), staleTime: FIVE_MIN })
 }

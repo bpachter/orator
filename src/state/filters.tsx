@@ -37,6 +37,8 @@ const VALID_VIEWS: ActiveView[] = [
   'energy',
   'fiscal',
   'consumer',
+  'global-macro',
+  'volatility',
   'heatmap',
   'compare',
   'correlation',
