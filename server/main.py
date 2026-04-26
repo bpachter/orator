@@ -34,11 +34,15 @@ from .analytics import (
     recession_composite_weighted,
     sahm_rule,
     sahm_series,
+    skew_elevated_signal,
     stagflation_pressure_history,
     stagflation_pressure_score,
+    vix_elevated_signal,
     yield_curve_inverted,
 )
 from .alphavantage_client import fetch_weekly_adjusted
+from .bea_client import fetch_nipa_table
+from .bis_client import fetch_credit_gdp
 from .cboe_client import fetch_index as fetch_cboe_index
 from .errors import ApiError, error_response
 from .eia_client import fetch_series as fetch_eia_series
@@ -53,6 +57,10 @@ from .schemas import (
     FiscalResponse,
     GlobalMacroResponse,
     GroceryResponse,
+    GdpBreakdownResponse,
+    GdpComponent,
+    GlobalCreditResponse,
+    GlobalCreditSeries,
     HealthResponse,
     HousingResponse,
     InflationResponse,
@@ -65,6 +73,7 @@ from .schemas import (
     RecessionSignalsResponse,
     SeriesMeta,
     SpreadsResponse,
+    TradeResponse,
     VolatilityResponse,
     YieldCurveResponse,
 )
@@ -81,10 +90,13 @@ from .series import (
     INFLATION_SERIES,
     LABOR_SERIES,
     MACRO_SERIES,
+    BIS_CREDIT_COUNTRIES,
+    GDP_COMPONENTS,
     MARKET_PRICES_SERIES,
     MARKETS_SERIES,
     RECESSION_INPUT_SERIES,
     SPREAD_SERIES,
+    TRADE_SERIES,
     VOLATILITY_SERIES,
     WB_GDP_COUNTRIES,
     YIELD_MATURITIES,
@@ -427,6 +439,16 @@ def recession_signals(range: str = "MAX") -> RecessionSignalsResponse:  # noqa: 
     realwage_val, realwage_trig = real_wages_signal(wages_yoy, cpi_yoy)
     delin_val, delin_trig = credit_delinquency_signal(series_out.get("DRCCLACBS", []))
     claims_val, claims_trig = initial_claims_trend_signal(series_out.get("IC4WSA", []))
+    vix_val, vix_trig = vix_elevated_signal(series_out.get("VIXCLS", []))
+
+    # SKEW: try CBOE client first, fall back to empty (FRED doesn't carry SKEW)
+    try:
+        skew_raw = fetch_cboe_index("SKEW", start=start)
+        series_out["SKEW"] = skew_raw
+    except Exception as exc:
+        logger.warning("CBOE SKEW unavailable for recession signals: %s", exc)
+        series_out["SKEW"] = []
+    skew_val, skew_trig = skew_elevated_signal(series_out.get("SKEW", []))
 
     # --- Computed time series for charting ------------------------------
     series_out["SAHM_SCORE"] = sahm_series(series_out.get("UNRATE", []))
@@ -522,6 +544,21 @@ def recession_signals(range: str = "MAX") -> RecessionSignalsResponse:  # noqa: 
             description="Delinquency rate on credit card loans ≥ 3.0% signals consumer financial stress",
             category="financial", weight=1.25,
             severity=_severity(delin_val, 2.5, 3.0, 4.5, higher_is_worse=True),
+        ),
+        # Volatility & Tail Risk
+        RecessionSignal(
+            id="vix_elevated", label="VIX Stress Regime",
+            value=vix_val, triggered=vix_trig,
+            description="CBOE VIX > 30 for 3+ consecutive sessions — systemic fear and risk-off conditions",
+            category="financial", weight=1.0,
+            severity=_severity(vix_val, 20.0, 30.0, 45.0, higher_is_worse=True),
+        ),
+        RecessionSignal(
+            id="skew_elevated", label="CBOE SKEW Tail Risk",
+            value=skew_val, triggered=skew_trig,
+            description="SKEW Index > 145 — options market pricing elevated left-tail / crash risk on S&P 500",
+            category="financial", weight=0.75,
+            severity=_severity(skew_val, 130.0, 145.0, 160.0, higher_is_worse=True),
         ),
         # Stagflation Pressure
         RecessionSignal(
@@ -880,3 +917,112 @@ def market_prices(range: str = "5Y") -> MarketPricesResponse:
     result = MarketPricesResponse(updated=today_iso(), series=series_out, metadata=metadata)
     cache.store(cache_key, result)
     return result
+
+
+@app.get("/api/gdp-breakdown", response_model=GdpBreakdownResponse, tags=["macro"])
+def gdp_breakdown() -> GdpBreakdownResponse:
+    """BEA NIPA T10101 — real GDP percent change from prior period by component."""
+    cache_key = "gdp-breakdown"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    try:
+        rows = fetch_nipa_table("T10101", frequency="Q")
+    except Exception as exc:
+        logger.error("BEA GDP breakdown error: %s", exc)
+        # Fall back to FRED equivalents if BEA is unavailable
+        rows = []
+
+    components_out: list[GdpComponent] = []
+    if rows:
+        for comp in GDP_COMPONENTS:
+            line_rows = [r for r in rows if str(r.get("line_number")) == comp["line"]]
+            data = [
+                {"date": r["period"], "value": r["value"]}
+                for r in sorted(line_rows, key=lambda x: x["period"])
+                if r["value"] is not None
+            ]
+            if data:
+                components_out.append(
+                    GdpComponent(id=f"bea_{comp['line']}", label=comp["label"], color=comp["color"], data=data)
+                )
+
+    # If BEA unavailable, fall back to FRED for core components
+    if not components_out:
+        fred_fallbacks = [c for c in GDP_COMPONENTS if c.get("fred")]
+        for comp in fred_fallbacks:
+            try:
+                raw = fetch_series(comp["fred"], start="1990-01-01")
+                data = [{"date": o["date"], "value": o["value"]} for o in raw if o["value"] is not None]
+                if data:
+                    components_out.append(
+                        GdpComponent(id=comp["fred"], label=comp["label"], color=comp["color"], data=data)
+                    )
+            except Exception as exc:
+                logger.warning("FRED fallback %s failed: %s", comp["fred"], exc)
+
+    result = GdpBreakdownResponse(updated=today_iso(), components=components_out)
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/global-credit", response_model=GlobalCreditResponse, tags=["macro"])
+def global_credit() -> GlobalCreditResponse:
+    """BIS private non-financial sector credit as % of GDP by country."""
+    cache_key = "global-credit"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    series_out: list[GlobalCreditSeries] = []
+    for country in BIS_CREDIT_COUNTRIES:
+        try:
+            data = fetch_credit_gdp(country["iso"])
+            if data:
+                series_out.append(
+                    GlobalCreditSeries(
+                        country=country["iso"],
+                        label=country["label"],
+                        color=country["color"],
+                        data=[{"date": o["date"], "value": o["value"]} for o in data],
+                    )
+                )
+        except Exception as exc:
+            logger.warning("BIS credit data unavailable for %s: %s", country["iso"], exc)
+
+    result = GlobalCreditResponse(updated=today_iso(), series=series_out)
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/trade", response_model=TradeResponse, tags=["macro"])
+def trade(range: str = "10Y") -> TradeResponse:
+    """FRED trade balance and flows series."""
+    cache_key = f"trade:{range}"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range(range)
+    series_out: dict[str, list[dict]] = {}
+
+    for s in TRADE_SERIES:
+        try:
+            series_out[s["id"]] = fetch_series(s["id"], start=start)
+        except ApiError as exc:
+            logger.warning("Skipping trade series %s: %s", s["id"], exc.message)
+            series_out[s["id"]] = []
+        except Exception as exc:
+            logger.warning("Skipping trade series %s: %s", s["id"], exc)
+            series_out[s["id"]] = []
+
+    metadata = [
+        SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
+        for s in TRADE_SERIES
+    ]
+
+    result = TradeResponse(updated=today_iso(), series=series_out, metadata=metadata)
+    cache.store(cache_key, result)
+    return result
+

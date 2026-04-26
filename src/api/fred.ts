@@ -153,6 +153,36 @@ export interface VolatilityResponse {
   metadata: SeriesMetadata[]
 }
 
+export interface GdpComponent {
+  id: string
+  label: string
+  color: string
+  data: FredObs[]  // date field is "2024Q3" BEA period format
+}
+
+export interface GdpBreakdownResponse {
+  updated: string
+  components: GdpComponent[]
+}
+
+export interface GlobalCreditSeries {
+  country: string
+  label: string
+  color: string
+  data: FredObs[]
+}
+
+export interface GlobalCreditResponse {
+  updated: string
+  series: GlobalCreditSeries[]
+}
+
+export interface TradeResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
 export interface RecessionSignal {
   id: string
   label: string
@@ -256,6 +286,18 @@ export function fetchGlobalMacro(range: TimeRange = '10Y'): Promise<GlobalMacroR
 
 export function fetchVolatility(range: TimeRange = '10Y'): Promise<VolatilityResponse> {
   return request(`/api/volatility?range=${range}`)
+}
+
+export function fetchGdpBreakdown(): Promise<GdpBreakdownResponse> {
+  return request('/api/gdp-breakdown')
+}
+
+export function fetchGlobalCredit(): Promise<GlobalCreditResponse> {
+  return request('/api/global-credit')
+}
+
+export function fetchTrade(range: TimeRange = '10Y'): Promise<TradeResponse> {
+  return request(`/api/trade?range=${range}`)
 }
 
 export function fetchMetrics(): Promise<MetricsResponse> {

@@ -52,6 +52,9 @@ import TerminalIcon from '@mui/icons-material/Terminal'
 import QueryStatsIcon from '@mui/icons-material/QueryStats'
 import PublicIcon from '@mui/icons-material/Public'
 import WavesIcon from '@mui/icons-material/Waves'
+import BarChartIcon from '@mui/icons-material/BarChart'
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
+import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import { useTheme, alpha } from '@mui/material/styles'
 import type { ActiveView } from './types'
 import { useFilters } from './state/filters'
@@ -85,6 +88,9 @@ const FiscalPanel = lazy(() => import('./components/FiscalPanel').then((m) => ({
 const ConsumerPanel = lazy(() => import('./components/ConsumerPanel').then((m) => ({ default: m.ConsumerPanel })))
 const GlobalMacroPanel = lazy(() => import('./components/GlobalMacroPanel').then((m) => ({ default: m.GlobalMacroPanel })))
 const VolatilityPanel = lazy(() => import('./components/VolatilityPanel').then((m) => ({ default: m.VolatilityPanel })))
+const GdpBreakdownPanel = lazy(() => import('./components/GdpBreakdownPanel').then((m) => ({ default: m.GdpBreakdownPanel })))
+const GlobalCreditPanel = lazy(() => import('./components/GlobalCreditPanel').then((m) => ({ default: m.GlobalCreditPanel })))
+const TradePanel = lazy(() => import('./components/TradePanel').then((m) => ({ default: m.TradePanel })))
 const HeatmapPanel = lazy(() => import('./components/HeatmapPanel').then((m) => ({ default: m.HeatmapPanel })))
 const ComparePanel = lazy(() => import('./components/ComparePanel').then((m) => ({ default: m.ComparePanel })))
 const CorrelationPanel = lazy(() => import('./components/CorrelationPanel').then((m) => ({ default: m.CorrelationPanel })))
@@ -152,6 +158,9 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Global',
     items: [
       { value: 'global-macro', label: 'Global Macro', icon: <PublicIcon fontSize="small" /> },
+      { value: 'gdp-breakdown', label: 'GDP Breakdown', icon: <BarChartIcon fontSize="small" /> },
+      { value: 'global-credit', label: 'Global Credit', icon: <AccountTreeIcon fontSize="small" /> },
+      { value: 'trade', label: 'Trade & Flows', icon: <SwapHorizIcon fontSize="small" /> },
     ],
   },
   {
@@ -386,6 +395,9 @@ export default function App() {
               {filters.view === 'consumer' && <ConsumerPanel />}
               {filters.view === 'global-macro' && <GlobalMacroPanel />}
               {filters.view === 'volatility' && <VolatilityPanel />}
+              {filters.view === 'gdp-breakdown' && <GdpBreakdownPanel />}
+              {filters.view === 'global-credit' && <GlobalCreditPanel />}
+              {filters.view === 'trade' && <TradePanel />}
               {filters.view === 'labor' && <LaborPanel />}
               {filters.view === 'housing' && <HousingPanel />}
               {filters.view === 'recession' && <RecessionSignalsPanel />}

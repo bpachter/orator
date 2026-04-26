@@ -113,6 +113,8 @@ RECESSION_INPUT_SERIES: list[SeriesDef] = [
     # Inflation / stagflation inputs (raw levels — YoY computed server-side)
     {"id": "CPIAUCSL",       "label": "CPI All Items",                   "color": "#c98f5a"},
     {"id": "AHETPI",         "label": "Avg Hourly Earnings",             "color": "#b0b9d4"},
+    # Volatility / tail-risk signals
+    {"id": "VIXCLS",         "label": "CBOE VIX (FRED daily)",           "color": "#c98f5a"},
 ]
 
 INFLATION_SERIES: list[SeriesDef] = [
@@ -126,10 +128,21 @@ INFLATION_SERIES: list[SeriesDef] = [
 ]
 
 CREDIT_CONDITIONS_SERIES: list[SeriesDef] = [
+    # Market spreads & policy rate
     {"id": "BAMLH0A0HYM2", "label": "High-Yield Spread (ICE BofA)", "color": "#c98f5a", "unit": "bps"},
     {"id": "PRIME", "label": "Prime Lending Rate", "color": "#6d91c9", "unit": "%"},
-    {"id": "TERMCBCCALLNS", "label": "Credit Card Charge-Off Rate", "color": "#b7834c", "unit": "%"},
     {"id": "FEDFUNDS", "label": "Fed Funds Rate", "color": "#d7b46a", "unit": "%"},
+    # Consumer delinquency & charge-offs
+    {"id": "TERMCBCCALLNS", "label": "Credit Card Charge-Off Rate", "color": "#b7834c", "unit": "%"},
+    {"id": "DRCCLACBS", "label": "Credit Card Delinquency Rate", "color": "#6fa49a", "unit": "%"},
+    # H.8 Bank lending breakdown (Federal Reserve H.8 release)
+    {"id": "LOANS", "label": "Total Bank Loans & Leases (YoY %)", "color": "#82aec2", "unit": "%", "yoy": True},
+    {"id": "BUSLOANS", "label": "C&I Loans (YoY %)", "color": "#b0b9d4", "unit": "%", "yoy": True},
+    {"id": "RREACBW027SBOG", "label": "Real Estate Loans (YoY %)", "color": "#7b89b4", "unit": "%", "yoy": True},
+    {"id": "CONSUMER", "label": "Consumer Loans (YoY %)", "color": "#cfa75a", "unit": "%", "yoy": True},
+    # G.19 consumer credit
+    {"id": "REVOLSL", "label": "Revolving Consumer Credit (YoY %)", "color": "#5f8f97", "unit": "%", "yoy": True},
+    {"id": "NONREVSL", "label": "Nonrevolving Consumer Credit (YoY %)", "color": "#a7a9bc", "unit": "%", "yoy": True},
 ]
 
 ACTIVITY_SERIES: list[SeriesDef] = [
@@ -242,4 +255,48 @@ VOLATILITY_SERIES: list[SeriesDef] = [
     {"id": "VIX3M", "label": "CBOE VIX3M (3-month Implied Vol)", "color": "#6d91c9", "unit": "index"},
     {"id": "SKEW", "label": "CBOE SKEW Index (Tail Risk)", "color": "#d7b46a", "unit": "index"},
 ]
+
+# ---------------------------------------------------------------------------
+# BEA GDP Breakdown — NIPA Table T10101 (real % change) and T10105 (levels)
+# Components: C (PCE), I (Gross Private Investment), G (Gov), NX (Net Exports)
+# ---------------------------------------------------------------------------
+GDP_COMPONENTS: list[dict] = [
+    # BEA NIPA T10101 line numbers → component mapping
+    # (line_number, fred_fallback_id, label, color)
+    {"line": "1",  "label": "Real GDP (Total)",            "color": "#6d91c9", "fred": "A191RL1Q225SBEA"},
+    {"line": "2",  "label": "Personal Consumption (C)",   "color": "#22c55e", "fred": "DPCERE1Q156NBEA"},
+    {"line": "7",  "label": "Gross Private Investment (I)","color": "#f59e0b", "fred": "A006RL1Q225SBEA"},
+    {"line": "22", "label": "Government (G)",              "color": "#a78bfa", "fred": "A822RL1Q225SBEA"},
+    {"line": "25", "label": "Exports",                     "color": "#34d399", "fred": "B020RL1Q225SBEA"},
+    {"line": "26", "label": "Imports",                     "color": "#ef4444", "fred": "B021RL1Q225SBEA"},
+    {"line": "27", "label": "Net Exports (NX)",            "color": "#c98f5a", "fred": "A019RL1Q225SBEA"},
+]
+
+# ---------------------------------------------------------------------------
+# BIS Global Credit — private non-financial sector debt as % of GDP
+# Fetched from BIS stats REST API (no key required)
+# ---------------------------------------------------------------------------
+BIS_CREDIT_COUNTRIES: list[dict] = [
+    {"iso": "US", "label": "United States", "color": "#6d91c9"},
+    {"iso": "CN", "label": "China",         "color": "#ef4444"},
+    {"iso": "JP", "label": "Japan",         "color": "#f59e0b"},
+    {"iso": "DE", "label": "Germany",       "color": "#22c55e"},
+    {"iso": "GB", "label": "United Kingdom","color": "#a78bfa"},
+    {"iso": "FR", "label": "France",        "color": "#c98f5a"},
+    {"iso": "CA", "label": "Canada",        "color": "#34d399"},
+    {"iso": "KR", "label": "South Korea",   "color": "#d7b46a"},
+]
+
+# ---------------------------------------------------------------------------
+# Trade — FRED series for trade balance / flows
+# ---------------------------------------------------------------------------
+TRADE_SERIES: list[SeriesDef] = [
+    {"id": "BOPGSTB",  "label": "Goods Trade Balance (BOP, $B)",     "color": "#c98f5a", "unit": "$B"},
+    {"id": "NETEXP",   "label": "Net Exports of Goods & Services",   "color": "#6d91c9", "unit": "$B"},
+    {"id": "EXPGS",    "label": "Exports of Goods & Services",       "color": "#22c55e", "unit": "$B"},
+    {"id": "IMPGS",    "label": "Imports of Goods & Services",       "color": "#ef4444", "unit": "$B"},
+    {"id": "BOPGSB",   "label": "Services Trade Balance",            "color": "#a78bfa", "unit": "$B"},
+    {"id": "DCOILWTICO","label": "WTI Crude Oil Price ($/bbl)",      "color": "#f59e0b", "unit": "$/bbl"},
+]
+
 

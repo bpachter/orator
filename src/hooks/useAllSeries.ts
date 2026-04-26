@@ -11,6 +11,8 @@ import {
   useEnergy,
   useFiscal,
   useGlobalMacro,
+  useGdpBreakdown,
+  useGlobalCredit,
   useHousing,
   useInflation,
   useLabor,
@@ -19,6 +21,7 @@ import {
   useMarkets,
   useRecessionSignals,
   useSpreads,
+  useTrade,
   useVolatility,
 } from './useFredQueries'
 import type { FredObs, TimeRange } from '../types'
@@ -55,6 +58,9 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
   const energy = useEnergy(range)
   const fiscal = useFiscal(range)
   const globalMacro = useGlobalMacro(range)
+  const gdpBreakdown = useGdpBreakdown()
+  const globalCredit = useGlobalCredit()
+  const trade = useTrade(range)
   const volatility = useVolatility(range)
 
   return useMemo(() => {
@@ -74,6 +80,15 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
       fiscal: fiscal.data?.series,
       'global-macro': globalMacro.data?.series,
       volatility: volatility.data?.series,
+      // GDP Breakdown: components array → convert to series dict keyed by component id
+      'gdp-breakdown': gdpBreakdown.data?.components
+        ? Object.fromEntries(gdpBreakdown.data.components.map((c) => [c.id, c.data]))
+        : undefined,
+      // Global Credit: array of country series → convert to dict keyed by country iso
+      'global-credit': globalCredit.data?.series
+        ? Object.fromEntries(globalCredit.data.series.map((s) => [`BIS_CREDIT_${s.country}`, s.data]))
+        : undefined,
+      trade: trade.data?.series,
     }
 
     const bundles: IndicatorBundle[] = INDICATOR_REGISTRY.map((meta) => {
@@ -99,6 +114,9 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
       fiscal.data?.updated,
       globalMacro.data?.updated,
       volatility.data?.updated,
+      gdpBreakdown.data?.updated,
+      globalCredit.data?.updated,
+      trade.data?.updated,
     ]
       .filter(Boolean)
       .sort()
@@ -109,15 +127,16 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
         macro.isLoading || labor.isLoading || inflation.isLoading || activity.isLoading ||
         spreads.isLoading || recession.isLoading || housing.isLoading || consumer.isLoading ||
         credit.isLoading || markets.isLoading || marketPrices.isLoading || energy.isLoading || fiscal.isLoading ||
-        globalMacro.isLoading || volatility.isLoading,
+        globalMacro.isLoading || volatility.isLoading ||
+        gdpBreakdown.isLoading || globalCredit.isLoading || trade.isLoading,
       isError:
         macro.isError || labor.isError || inflation.isError || activity.isError ||
         spreads.isError || housing.isError || consumer.isError || credit.isError || markets.isError || marketPrices.isError || energy.isError || fiscal.isError ||
-        globalMacro.isError || volatility.isError,
+        globalMacro.isError || volatility.isError || trade.isError,
       bundles,
       byId,
       updated,
       endpoints,
     }
-  }, [macro, labor, inflation, activity, spreads, recession, housing, consumer, credit, markets, marketPrices, energy, fiscal, globalMacro, volatility])
+  }, [macro, labor, inflation, activity, spreads, recession, housing, consumer, credit, markets, marketPrices, energy, fiscal, globalMacro, volatility, gdpBreakdown, globalCredit, trade])
 }

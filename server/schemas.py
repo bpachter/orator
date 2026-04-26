@@ -178,3 +178,33 @@ class VolatilityResponse(BaseModel):
     updated: str
     series: dict[str, list[Observation]]
     metadata: list[SeriesMeta]
+
+
+class GdpComponent(BaseModel):
+    id: str
+    label: str
+    color: str
+    data: list[Observation]  # {date: "2024Q3", value: float}
+
+
+class GdpBreakdownResponse(BaseModel):
+    updated: str
+    components: list[GdpComponent]
+
+
+class GlobalCreditSeries(BaseModel):
+    country: str
+    label: str
+    color: str
+    data: list[Observation]
+
+
+class GlobalCreditResponse(BaseModel):
+    updated: str
+    series: list[GlobalCreditSeries]
+
+
+class TradeResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]

@@ -214,6 +214,31 @@ def initial_claims_trend_signal(claims: list[dict]) -> tuple[float | None, bool]
     return round(v, 0), pct_change > 15
 
 
+def vix_elevated_signal(vix: list[dict]) -> tuple[float | None, bool]:
+    """VIX > 30 sustained (3+ consecutive sessions) = systemic fear / risk-off.
+
+    A single spike is noise; sustained elevation signals genuine market stress.
+    """
+    if not vix:
+        return None, False
+    v = vix[-1]["value"]
+    recent = vix[-3:] if len(vix) >= 3 else vix
+    triggered = len(recent) >= 3 and all(o["value"] > 30 for o in recent)
+    return round(v, 2), triggered
+
+
+def skew_elevated_signal(skew: list[dict]) -> tuple[float | None, bool]:
+    """CBOE SKEW > 145 = tail-risk pricing elevated (markets pricing left-tail crash risk).
+
+    SKEW measures implied skewness of the S&P 500 distribution from options prices.
+    Values > 145 historically correlate with increased probability of large drawdowns.
+    """
+    if not skew:
+        return None, False
+    v = skew[-1]["value"]
+    return round(v, 1), v > 145
+
+
 # ---------------------------------------------------------------------------
 # Computed time-series (for charting)
 # ---------------------------------------------------------------------------

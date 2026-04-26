@@ -25,6 +25,9 @@ export type EndpointKey =
   | 'fiscal'
   | 'global-macro'
   | 'volatility'
+  | 'gdp-breakdown'
+  | 'global-credit'
+  | 'trade'
   | 'cpi'
   | 'grocery'
 
@@ -115,6 +118,13 @@ export const INDICATOR_REGISTRY: IndicatorMeta[] = [
   { id: 'BAMLH0A0HYM2', label: 'High-Yield Spread (BofA)', short: 'HY Spread', unit: 'bps', color: s.red, endpoint: 'credit', view: 'credit', section: 'Credit', category: 'leading', keywords: ['credit', 'high yield', 'spread', 'risk'], inverted: true },
   { id: 'PRIME', label: 'Prime Lending Rate', short: 'Prime', unit: '%', color: s.blue, endpoint: 'credit', view: 'credit', section: 'Credit', category: 'lagging', keywords: ['prime', 'lending'] },
   { id: 'TERMCBCCALLNS', label: 'Credit Card Charge-Off Rate', short: 'CC Charge', unit: '%', color: s.orange, endpoint: 'credit', view: 'credit', section: 'Credit', category: 'lagging', keywords: ['credit card', 'delinquency'], inverted: true },
+  { id: 'DRCCLACBS', label: 'Credit Card Delinquency Rate', short: 'CC Delin.', unit: '%', color: s.amber, endpoint: 'credit', view: 'credit', section: 'Credit', category: 'lagging', keywords: ['delinquency', 'consumer', 'credit card'], inverted: true },
+  { id: 'LOANS', label: 'Total Bank Loans & Leases (YoY)', short: 'Bank Loans', unit: '%', color: s.cyan, endpoint: 'credit', view: 'credit', section: 'Credit', category: 'coincident', keywords: ['bank loans', 'h8', 'lending'], isYoy: true },
+  { id: 'BUSLOANS', label: 'C&I Loans (YoY)', short: 'C&I Loans', unit: '%', color: s.violet, endpoint: 'credit', view: 'credit', section: 'Credit', category: 'coincident', keywords: ['c&i', 'commercial', 'industrial loans', 'h8'], isYoy: true },
+  { id: 'RREACBW027SBOG', label: 'Real Estate Loans (YoY)', short: 'RE Loans', unit: '%', color: s.purple, endpoint: 'credit', view: 'credit', section: 'Credit', category: 'coincident', keywords: ['real estate', 'mortgage', 'bank', 'h8'], isYoy: true },
+  { id: 'CONSUMER', label: 'Consumer Loans (YoY)', short: 'Consumer Loans', unit: '%', color: s.teal, endpoint: 'credit', view: 'credit', section: 'Credit', category: 'coincident', keywords: ['consumer', 'loans', 'h8'], isYoy: true },
+  { id: 'REVOLSL', label: 'Revolving Credit (YoY)', short: 'Revolving', unit: '%', color: s.pink, endpoint: 'credit', view: 'credit', section: 'Credit', category: 'lagging', keywords: ['revolving', 'credit card', 'g19'], isYoy: true },
+  { id: 'NONREVSL', label: 'Nonrevolving Credit (YoY)', short: 'Nonrevolving', unit: '%', color: s.green, endpoint: 'credit', view: 'credit', section: 'Credit', category: 'lagging', keywords: ['nonrevolving', 'auto', 'student', 'g19'], isYoy: true },
 
   // -------- Markets --------
   { id: 'SP500', label: 'S&P 500 Index', short: 'S&P 500', unit: 'idx', color: s.green, endpoint: 'markets', view: 'markets', section: 'Markets', category: 'leading', keywords: ['sp500', 'stocks', 'equity'] },
@@ -172,6 +182,27 @@ export const INDICATOR_REGISTRY: IndicatorMeta[] = [
   { id: 'VIX', label: 'CBOE VIX (30-day Implied Vol)', short: 'VIX', unit: 'idx', color: s.red, endpoint: 'volatility', view: 'volatility', section: 'Volatility', category: 'leading', keywords: ['vix', 'volatility', 'fear', 'cboe', 'options'], inverted: true },
   { id: 'VIX3M', label: 'CBOE VIX3M (3-month Implied Vol)', short: 'VIX3M', unit: 'idx', color: s.blue, endpoint: 'volatility', view: 'volatility', section: 'Volatility', category: 'leading', keywords: ['vix3m', 'volatility', 'cboe', 'term structure'], inverted: true },
   { id: 'SKEW', label: 'CBOE SKEW Index (Tail Risk)', short: 'SKEW', unit: 'idx', color: s.yellow, endpoint: 'volatility', view: 'volatility', section: 'Volatility', category: 'leading', keywords: ['skew', 'tail risk', 'cboe', 'crash risk', 'options'] },
+
+  // -------- GDP Breakdown (BEA) --------
+  { id: 'A191RL1Q225SBEA', label: 'Real GDP (Total)', short: 'Real GDP', unit: '%', color: s.blue, endpoint: 'gdp-breakdown', view: 'gdp-breakdown', section: 'GDP Breakdown', category: 'coincident', keywords: ['gdp', 'growth', 'real', 'bea', 'nipa'] },
+  { id: 'DPCERE1Q156NBEA', label: 'Personal Consumption (C)', short: 'PCE', unit: '%', color: s.green, endpoint: 'gdp-breakdown', view: 'gdp-breakdown', section: 'GDP Breakdown', category: 'coincident', keywords: ['consumption', 'pce', 'gdp', 'consumer spending'] },
+  { id: 'A006RL1Q225SBEA', label: 'Gross Private Investment (I)', short: 'Investment', unit: '%', color: s.amber, endpoint: 'gdp-breakdown', view: 'gdp-breakdown', section: 'GDP Breakdown', category: 'leading', keywords: ['investment', 'capex', 'gdp', 'private'] },
+  { id: 'A822RL1Q225SBEA', label: 'Government Spending (G)', short: 'Gov Spending', unit: '%', color: s.violet, endpoint: 'gdp-breakdown', view: 'gdp-breakdown', section: 'GDP Breakdown', category: 'lagging', keywords: ['government', 'spending', 'gdp', 'fiscal'] },
+  { id: 'A019RL1Q225SBEA', label: 'Net Exports (NX)', short: 'Net Exports', unit: '%', color: s.orange, endpoint: 'gdp-breakdown', view: 'gdp-breakdown', section: 'GDP Breakdown', category: 'coincident', keywords: ['net exports', 'trade', 'gdp', 'nx'] },
+
+  // -------- Global Credit (BIS) --------
+  { id: 'BIS_CREDIT_US', label: 'US Private Credit (% GDP)', short: 'US Credit', unit: '%GDP', color: s.blue, endpoint: 'global-credit', view: 'global-credit', section: 'Global Credit', category: 'lagging', keywords: ['bis', 'credit', 'debt', 'private', 'us', 'gdp'] },
+  { id: 'BIS_CREDIT_CN', label: 'China Private Credit (% GDP)', short: 'CN Credit', unit: '%GDP', color: s.red, endpoint: 'global-credit', view: 'global-credit', section: 'Global Credit', category: 'lagging', keywords: ['bis', 'credit', 'china', 'debt', 'gdp'] },
+  { id: 'BIS_CREDIT_JP', label: 'Japan Private Credit (% GDP)', short: 'JP Credit', unit: '%GDP', color: s.amber, endpoint: 'global-credit', view: 'global-credit', section: 'Global Credit', category: 'lagging', keywords: ['bis', 'credit', 'japan', 'debt', 'gdp'] },
+  { id: 'BIS_CREDIT_DE', label: 'Germany Private Credit (% GDP)', short: 'DE Credit', unit: '%GDP', color: s.green, endpoint: 'global-credit', view: 'global-credit', section: 'Global Credit', category: 'lagging', keywords: ['bis', 'credit', 'germany', 'debt', 'gdp'] },
+
+  // -------- Trade & Flows --------
+  { id: 'BOPGSTB', label: 'Goods Trade Balance', short: 'Goods Balance', unit: '$B', color: s.orange, endpoint: 'trade', view: 'trade', section: 'Trade', category: 'coincident', keywords: ['trade balance', 'goods', 'exports', 'imports', 'bop'] },
+  { id: 'NETEXP', label: 'Net Exports of Goods & Services', short: 'Net Exports', unit: '$B', color: s.blue, endpoint: 'trade', view: 'trade', section: 'Trade', category: 'coincident', keywords: ['net exports', 'trade', 'nx'] },
+  { id: 'EXPGS', label: 'Exports of Goods & Services', short: 'Exports', unit: '$B', color: s.green, endpoint: 'trade', view: 'trade', section: 'Trade', category: 'coincident', keywords: ['exports', 'trade', 'goods', 'services'] },
+  { id: 'IMPGS', label: 'Imports of Goods & Services', short: 'Imports', unit: '$B', color: s.red, endpoint: 'trade', view: 'trade', section: 'Trade', category: 'coincident', keywords: ['imports', 'trade', 'goods', 'services'] },
+  { id: 'BOPGSB', label: 'Services Trade Balance', short: 'Services Balance', unit: '$B', color: s.violet, endpoint: 'trade', view: 'trade', section: 'Trade', category: 'coincident', keywords: ['trade balance', 'services', 'bop'] },
+  { id: 'DCOILWTICO', label: 'WTI Crude Oil Price', short: 'WTI Oil', unit: '$/bbl', color: s.amber, endpoint: 'trade', view: 'trade', section: 'Trade', category: 'leading', keywords: ['oil', 'wti', 'crude', 'energy', 'commodity'] },
 ]
 /* eslint-enable */
 
