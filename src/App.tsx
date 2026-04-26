@@ -473,7 +473,7 @@ function SidebarContent({ currentView, onNavigate }: { currentView: ActiveView; 
         })}
       </Box>
 
-      <Divider sx={{ borderColor: palette.border }} />
+      <Divider sx={{ borderColor: sidebarTheme.palette.divider }} />
       <Box sx={{ px: 2.5, py: 1.5 }}>
         <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: 10 }}>
           {ALL_NAV_ITEMS.length} dashboards · FRED + BLS

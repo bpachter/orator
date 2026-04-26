@@ -29,13 +29,35 @@ export function PanelCard({
   const pad = padding ?? (dense ? { xs: 1.5, sm: 2 } : { xs: 1.5, sm: 2.5 })
   return (
     <Paper
-      sx={{
+      sx={(muiTheme) => ({
         p: pad,
         display: 'flex',
         flexDirection: 'column',
         height: fullHeight ? '100%' : 'auto',
         gap: dense ? 1 : { xs: 1, sm: 1.5 },
-      }}
+        // Glassmorphism: see the ambient background through the panel
+        backgroundColor:
+          muiTheme.palette.mode === 'dark'
+            ? 'rgba(13,21,37,0.80)'
+            : 'rgba(255,255,255,0.84)',
+        backgroundImage:
+          muiTheme.palette.mode === 'dark'
+            ? 'linear-gradient(155deg, rgba(22,34,56,0.88) 0%, rgba(11,19,33,0.95) 100%)'
+            : 'linear-gradient(155deg, rgba(255,255,255,0.93) 0%, rgba(243,246,250,0.87) 100%)',
+        backdropFilter: 'blur(12px) saturate(125%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(125%)',
+        transition: 'box-shadow 0.24s ease, border-color 0.24s ease',
+        '&:hover': {
+          boxShadow:
+            muiTheme.palette.mode === 'dark'
+              ? '0 8px 40px rgba(0,0,0,0.32), inset 0 1px 0 rgba(90,150,220,0.10)'
+              : '0 6px 28px rgba(0,0,0,0.09), inset 0 1px 0 rgba(180,145,76,0.12)',
+          borderColor:
+            muiTheme.palette.mode === 'dark'
+              ? 'rgba(56,88,138,0.80)'
+              : 'rgba(182,196,218,0.90)',
+        },
+      })}
     >
       {(title || action) && (
         <Stack
