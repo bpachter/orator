@@ -28,6 +28,8 @@ export type EndpointKey =
   | 'gdp-breakdown'
   | 'global-credit'
   | 'trade'
+  | 'corporate-earnings'
+  | 'monetary-conditions'
   | 'cpi'
   | 'grocery'
 
@@ -203,6 +205,24 @@ export const INDICATOR_REGISTRY: IndicatorMeta[] = [
   { id: 'IMPGS', label: 'Imports of Goods & Services', short: 'Imports', unit: '$B', color: s.red, endpoint: 'trade', view: 'trade', section: 'Trade', category: 'coincident', keywords: ['imports', 'trade', 'goods', 'services'] },
   { id: 'BOPGSB', label: 'Services Trade Balance', short: 'Services Balance', unit: '$B', color: s.violet, endpoint: 'trade', view: 'trade', section: 'Trade', category: 'coincident', keywords: ['trade balance', 'services', 'bop'] },
   { id: 'DCOILWTICO', label: 'WTI Crude Oil Price', short: 'WTI Oil', unit: '$/bbl', color: s.amber, endpoint: 'trade', view: 'trade', section: 'Trade', category: 'leading', keywords: ['oil', 'wti', 'crude', 'energy', 'commodity'] },
+
+  // -------- Corporate Earnings & Profitability --------
+  { id: 'PROFITS', label: 'Corporate Profits (YoY %)', short: 'Profits YoY', unit: '%', color: s.orange, endpoint: 'corporate-earnings', view: 'corporate-earnings', section: 'Earnings', category: 'coincident', keywords: ['profits', 'corporate', 'earnings'], isYoy: true },
+  { id: 'NET_MARGIN', label: 'Net Profit Margin', short: 'Net Margin', unit: '%', color: s.blue, endpoint: 'corporate-earnings', view: 'corporate-earnings', section: 'Earnings', category: 'lagging', keywords: ['margin', 'profitability', 'earnings'] },
+  { id: 'OP_MARGIN', label: 'Operating Margin', short: 'Op Margin', unit: '%', color: s.cyan, endpoint: 'corporate-earnings', view: 'corporate-earnings', section: 'Earnings', category: 'lagging', keywords: ['margin', 'operating', 'profitability'] },
+  { id: 'EARNINGS', label: 'S&P 500 Earnings Per Share', short: 'S&P EPS', unit: '$', color: s.green, endpoint: 'corporate-earnings', view: 'corporate-earnings', section: 'Earnings', category: 'lagging', keywords: ['earnings', 'eps', 'stocks', 's&p 500'] },
+  { id: 'PE10', label: 'Shiller CAPE Ratio', short: 'CAPE', unit: 'x', color: s.red, endpoint: 'corporate-earnings', view: 'corporate-earnings', section: 'Earnings', category: 'lagging', keywords: ['valuation', 'pe', 'cape', 'multiples'] },
+
+  // -------- Monetary Conditions --------
+  { id: 'M1SL', label: 'M1 Money Supply (YoY %)', short: 'M1 YoY', unit: '%', color: s.blue, endpoint: 'monetary-conditions', view: 'monetary-conditions', section: 'Monetary', category: 'leading', keywords: ['m1', 'money supply', 'monetary'], isYoy: true },
+  { id: 'M2SL', label: 'M2 Money Supply (YoY %)', short: 'M2 YoY', unit: '%', color: s.cyan, endpoint: 'monetary-conditions', view: 'monetary-conditions', section: 'Monetary', category: 'leading', keywords: ['m2', 'money supply', 'monetary'], isYoy: true },
+  { id: 'M3SL', label: 'M3 Money Supply (YoY %)', short: 'M3 YoY', unit: '%', color: s.teal, endpoint: 'monetary-conditions', view: 'monetary-conditions', section: 'Monetary', category: 'leading', keywords: ['m3', 'money supply', 'monetary'], isYoy: true },
+  { id: 'AMBSL', label: 'Monetary Base (YoY %)', short: 'MonBase YoY', unit: '%', color: s.yellow, endpoint: 'monetary-conditions', view: 'monetary-conditions', section: 'Monetary', category: 'leading', keywords: ['monetary base', 'fed'], isYoy: true },
+  { id: 'RESBALNS', label: 'Bank Reserves (Outstanding)', short: 'Reserves', unit: '$B', color: s.orange, endpoint: 'monetary-conditions', view: 'monetary-conditions', section: 'Monetary', category: 'coincident', keywords: ['reserves', 'banks', 'fed'] },
+  { id: 'DPCBCTSL', label: 'Discount Window Borrowing', short: 'Disc Window', unit: '$M', color: s.amber, endpoint: 'monetary-conditions', view: 'monetary-conditions', section: 'Monetary', category: 'leading', keywords: ['discount window', 'fed', 'borrowing'] },
+  { id: 'RRPONTSYD', label: 'Fed Reverse Repos Outstanding', short: 'Rev Repos', unit: '$B', color: s.purple, endpoint: 'monetary-conditions', view: 'monetary-conditions', section: 'Monetary', category: 'coincident', keywords: ['reverse repo', 'fed', 'overnight'] },
+  { id: 'LMMNRNJ', label: 'Net % Banks Tightening Lending', short: 'Tighten %', unit: '%', color: s.red, endpoint: 'monetary-conditions', view: 'monetary-conditions', section: 'Monetary', category: 'coincident', keywords: ['lending standards', 'credit', 'tightening'], inverted: true },
+  { id: 'M2V', label: 'M2 Velocity (GDP/M2)', short: 'M2V', unit: 'x', color: s.violet, endpoint: 'monetary-conditions', view: 'monetary-conditions', section: 'Monetary', category: 'coincident', keywords: ['velocity', 'money', 'm2'] },
 ]
 /* eslint-enable */
 

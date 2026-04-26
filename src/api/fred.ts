@@ -183,6 +183,21 @@ export interface TradeResponse {
   metadata: SeriesMetadata[]
 }
 
+export interface CorporateEarningsResponse {
+  updated: string
+  profits: FredObs[]
+  net_margin: FredObs[]
+  operating_margin: FredObs[]
+  earnings_per_share: FredObs[]
+  pe_ratio: FredObs[]
+}
+
+export interface MonetaryConditionsResponse {
+  updated: string
+  series: Record<string, FredObs[]>
+  metadata: SeriesMetadata[]
+}
+
 export interface RecessionSignal {
   id: string
   label: string
@@ -298,6 +313,14 @@ export function fetchGlobalCredit(): Promise<GlobalCreditResponse> {
 
 export function fetchTrade(range: TimeRange = '10Y'): Promise<TradeResponse> {
   return request(`/api/trade?range=${range}`)
+}
+
+export function fetchCorporateEarnings(): Promise<CorporateEarningsResponse> {
+  return request('/api/corporate-earnings')
+}
+
+export function fetchMonetaryConditions(range: TimeRange = '10Y'): Promise<MonetaryConditionsResponse> {
+  return request(`/api/monetary-conditions?range=${range}`)
 }
 
 export function fetchMetrics(): Promise<MetricsResponse> {

@@ -42,6 +42,8 @@ const VALID_VIEWS: ActiveView[] = [
   'gdp-breakdown',
   'global-credit',
   'trade',
+  'corporate-earnings',
+  'monetary-conditions',
   'heatmap',
   'compare',
   'correlation',

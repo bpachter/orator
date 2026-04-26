@@ -208,3 +208,18 @@ class TradeResponse(BaseModel):
     updated: str
     series: dict[str, list[Observation]]
     metadata: list[SeriesMeta]
+
+
+class CorporateEarningsResponse(BaseModel):
+    updated: str
+    profits: list[Observation]
+    net_margin: list[Observation]
+    operating_margin: list[Observation]
+    earnings_per_share: list[Observation]
+    pe_ratio: list[Observation]
+
+
+class MonetaryConditionsResponse(BaseModel):
+    updated: str
+    series: dict[str, list[Observation]]
+    metadata: list[SeriesMeta]

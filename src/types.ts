@@ -28,6 +28,8 @@ export type ActiveView =
   | 'gdp-breakdown'
   | 'global-credit'
   | 'trade'
+  | 'corporate-earnings'
+  | 'monetary-conditions'
   | 'heatmap'
   | 'compare'
   | 'correlation'

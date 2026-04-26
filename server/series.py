@@ -299,4 +299,30 @@ TRADE_SERIES: list[SeriesDef] = [
     {"id": "DCOILWTICO","label": "WTI Crude Oil Price ($/bbl)",      "color": "#f59e0b", "unit": "$/bbl"},
 ]
 
+# ---------------------------------------------------------------------------
+# Monetary Conditions — FRED series for Fed transmission mechanism
+# ---------------------------------------------------------------------------
+MONETARY_SERIES: list[SeriesDef] = [
+    {"id": "M1SL",       "label": "M1 (YoY %)",                       "color": "#6d91c9", "unit": "%", "yoy": True},
+    {"id": "M2SL",       "label": "M2 (YoY %)",                       "color": "#82aec2", "unit": "%", "yoy": True},
+    {"id": "M3SL",       "label": "M3 (YoY %)",                       "color": "#5f8f97", "unit": "%", "yoy": True},
+    {"id": "AMBSL",      "label": "Monetary Base (YoY %)",           "color": "#c98f5a", "unit": "%", "yoy": True},
+    {"id": "RESBALNS",   "label": "Bank Reserves (billions)",        "color": "#d7b46a", "unit": "$B"},
+    {"id": "DPCBCTSL",   "label": "Discount Window Borrowing",       "color": "#b7834c", "unit": "$M"},
+    {"id": "RRPONTSYD",  "label": "Fed Reverse Repos Outstanding",   "color": "#a7a9bc", "unit": "$B"},
+    {"id": "LMMNRNJ",    "label": "Net % Tight Lending Standards",   "color": "#6fa49a", "unit": "%"},
+    {"id": "M2V",        "label": "M2 Velocity (GDP/M2)",            "color": "#b0b9d4", "unit": "ratio"},
+]
+
+# ---------------------------------------------------------------------------
+# Corporate Earnings & Profitability — BEA + FRED composite
+# ---------------------------------------------------------------------------
+EARNINGS_SERIES: list[SeriesDef] = [
+    {"id": "PROFITS",        "label": "Corporate Profits (YoY %)",    "color": "#c98f5a", "unit": "%", "yoy": True},
+    {"id": "NET_MARGIN",     "label": "Net Profit Margin",           "color": "#6d91c9", "unit": "%"},
+    {"id": "OP_MARGIN",      "label": "Operating Margin",            "color": "#82aec2", "unit": "%"},
+    {"id": "EARNINGS",       "label": "S&P 500 EPS",                 "color": "#22c55e", "unit": "$"},
+    {"id": "PE10",           "label": "Shiller CAPE Ratio",          "color": "#ef4444", "unit": "ratio"},
+]
+
 

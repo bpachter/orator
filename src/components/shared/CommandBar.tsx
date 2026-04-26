@@ -57,6 +57,8 @@ const VIEW_LABELS: Record<ActiveView, string> = {
   'gdp-breakdown': 'GDP Component Breakdown',
   'global-credit': 'Global Credit / BIS',
   trade: 'Trade Balance & Flows',
+  'corporate-earnings': 'Corporate Earnings & Valuation',
+  'monetary-conditions': 'Monetary Conditions & Fed Policy',
   heatmap: 'Macro Heatmap',
   compare: 'Series Comparison',
   correlation: 'Correlation Matrix',

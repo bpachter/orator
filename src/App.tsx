@@ -91,6 +91,8 @@ const VolatilityPanel = lazy(() => import('./components/VolatilityPanel').then((
 const GdpBreakdownPanel = lazy(() => import('./components/GdpBreakdownPanel').then((m) => ({ default: m.GdpBreakdownPanel })))
 const GlobalCreditPanel = lazy(() => import('./components/GlobalCreditPanel').then((m) => ({ default: m.GlobalCreditPanel })))
 const TradePanel = lazy(() => import('./components/TradePanel').then((m) => ({ default: m.TradePanel })))
+const CorporateEarningsPanel = lazy(() => import('./components/CorporateEarningsPanel').then((m) => ({ default: m.CorporateEarningsPanel })))
+const MonetaryConditionsPanel = lazy(() => import('./components/MonetaryConditionsPanel').then((m) => ({ default: m.MonetaryConditionsPanel })))
 const HeatmapPanel = lazy(() => import('./components/HeatmapPanel').then((m) => ({ default: m.HeatmapPanel })))
 const ComparePanel = lazy(() => import('./components/ComparePanel').then((m) => ({ default: m.ComparePanel })))
 const CorrelationPanel = lazy(() => import('./components/CorrelationPanel').then((m) => ({ default: m.CorrelationPanel })))
@@ -149,8 +151,16 @@ const NAV_GROUPS: NavGroup[] = [
       { value: 'markets', label: 'Markets', icon: <CandlestickChartIcon fontSize="small" /> },
       { value: 'market-prices', label: 'Market Prices', icon: <AutoGraphIcon fontSize="small" /> },
       { value: 'volatility', label: 'Volatility Suite', icon: <WavesIcon fontSize="small" /> },
+      { value: 'corporate-earnings', label: 'Earnings & Valuation', icon: <CandlestickChartIcon fontSize="small" /> },
       { value: 'energy', label: 'Energy', icon: <LocalFireDepartmentIcon fontSize="small" /> },
       { value: 'consumer', label: 'Consumer', icon: <ShoppingCartIcon fontSize="small" /> },
+    ],
+  },
+  {
+    id: 'monetary',
+    label: 'Monetary Policy',
+    items: [
+      { value: 'monetary-conditions', label: 'Monetary Conditions', icon: <AccountBalanceIcon fontSize="small" /> },
     ],
   },
   {
@@ -398,6 +408,8 @@ export default function App() {
               {filters.view === 'gdp-breakdown' && <GdpBreakdownPanel />}
               {filters.view === 'global-credit' && <GlobalCreditPanel />}
               {filters.view === 'trade' && <TradePanel />}
+              {filters.view === 'corporate-earnings' && <CorporateEarningsPanel />}
+              {filters.view === 'monetary-conditions' && <MonetaryConditionsPanel />}
               {filters.view === 'labor' && <LaborPanel />}
               {filters.view === 'housing' && <HousingPanel />}
               {filters.view === 'recession' && <RecessionSignalsPanel />}

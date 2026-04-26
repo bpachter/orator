@@ -7,6 +7,7 @@ import { useMemo } from 'react'
 import {
   useActivity,
   useConsumer,
+  useCorporateEarnings,
   useCreditConditions,
   useEnergy,
   useFiscal,
@@ -19,6 +20,7 @@ import {
   useMarketPrices,
   useMacro,
   useMarkets,
+  useMonetaryConditions,
   useRecessionSignals,
   useSpreads,
   useTrade,
@@ -62,6 +64,8 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
   const globalCredit = useGlobalCredit()
   const trade = useTrade(range)
   const volatility = useVolatility(range)
+  const corporateEarnings = useCorporateEarnings()
+  const monetaryConditions = useMonetaryConditions(range)
 
   return useMemo(() => {
     const endpoints: AllSeriesState['endpoints'] = {
@@ -89,6 +93,16 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
         ? Object.fromEntries(globalCredit.data.series.map((s) => [`BIS_CREDIT_${s.country}`, s.data]))
         : undefined,
       trade: trade.data?.series,
+      // Corporate Earnings: flat series from endpoint
+      'corporate-earnings': {
+        PROFITS: corporateEarnings.data?.profits ?? [],
+        NET_MARGIN: corporateEarnings.data?.net_margin ?? [],
+        OP_MARGIN: corporateEarnings.data?.operating_margin ?? [],
+        EARNINGS: corporateEarnings.data?.earnings_per_share ?? [],
+        PE10: corporateEarnings.data?.pe_ratio ?? [],
+      },
+      // Monetary Conditions: series dict from endpoint
+      'monetary-conditions': monetaryConditions.data?.series,
     }
 
     const bundles: IndicatorBundle[] = INDICATOR_REGISTRY.map((meta) => {
@@ -117,6 +131,8 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
       gdpBreakdown.data?.updated,
       globalCredit.data?.updated,
       trade.data?.updated,
+      corporateEarnings.data?.updated,
+      monetaryConditions.data?.updated,
     ]
       .filter(Boolean)
       .sort()
@@ -128,15 +144,17 @@ export function useAllSeries(range: TimeRange = '10Y'): AllSeriesState {
         spreads.isLoading || recession.isLoading || housing.isLoading || consumer.isLoading ||
         credit.isLoading || markets.isLoading || marketPrices.isLoading || energy.isLoading || fiscal.isLoading ||
         globalMacro.isLoading || volatility.isLoading ||
-        gdpBreakdown.isLoading || globalCredit.isLoading || trade.isLoading,
+        gdpBreakdown.isLoading || globalCredit.isLoading || trade.isLoading ||
+        corporateEarnings.isLoading || monetaryConditions.isLoading,
       isError:
         macro.isError || labor.isError || inflation.isError || activity.isError ||
         spreads.isError || housing.isError || consumer.isError || credit.isError || markets.isError || marketPrices.isError || energy.isError || fiscal.isError ||
-        globalMacro.isError || volatility.isError || trade.isError,
+        globalMacro.isError || volatility.isError || trade.isError ||
+        corporateEarnings.isError || monetaryConditions.isError,
       bundles,
       byId,
       updated,
       endpoints,
     }
-  }, [macro, labor, inflation, activity, spreads, recession, housing, consumer, credit, markets, marketPrices, energy, fiscal, globalMacro, volatility, gdpBreakdown, globalCredit, trade])
+  }, [macro, labor, inflation, activity, spreads, recession, housing, consumer, credit, markets, marketPrices, energy, fiscal, globalMacro, volatility, gdpBreakdown, globalCredit, trade, corporateEarnings, monetaryConditions])
 }

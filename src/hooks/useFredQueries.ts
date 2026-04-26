@@ -3,6 +3,7 @@ import {
   fetchActivity,
   fetchAllMacro,
   fetchConsumer,
+  fetchCorporateEarnings,
   fetchCpiBreakdown,
   fetchCreditConditions,
   fetchEnergy,
@@ -17,6 +18,7 @@ import {
   fetchLabor,
   fetchMarketPrices,
   fetchMarkets,
+  fetchMonetaryConditions,
   fetchRecessionSignals,
   fetchSpreads,
   fetchTrade,
@@ -24,6 +26,7 @@ import {
   fetchYieldSurface,
   type ActivityResponse,
   type ConsumerResponse,
+  type CorporateEarningsResponse,
   type CpiBreakdownResponse,
   type CreditConditionsResponse,
   type EnergyResponse,
@@ -39,6 +42,7 @@ import {
   type MarketPricesResponse,
   type MacroResponse,
   type MarketsResponse,
+  type MonetaryConditionsResponse,
   type RecessionSignalsResponse,
   type SpreadResponse,
   type TradeResponse,
@@ -149,4 +153,12 @@ export function useGlobalCredit(): UseQueryResult<GlobalCreditResponse> {
 
 export function useTrade(range: TimeRange = '10Y'): UseQueryResult<TradeResponse> {
   return useQuery({ queryKey: ['trade', range], queryFn: () => fetchTrade(range), staleTime: FIVE_MIN })
+}
+
+export function useCorporateEarnings(): UseQueryResult<CorporateEarningsResponse> {
+  return useQuery({ queryKey: ['corporate-earnings'], queryFn: fetchCorporateEarnings, staleTime: FIVE_MIN })
+}
+
+export function useMonetaryConditions(range: TimeRange = '10Y'): UseQueryResult<MonetaryConditionsResponse> {
+  return useQuery({ queryKey: ['monetary-conditions', range], queryFn: () => fetchMonetaryConditions(range), staleTime: FIVE_MIN })
 }

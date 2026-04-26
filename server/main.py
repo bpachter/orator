@@ -44,6 +44,7 @@ from .alphavantage_client import fetch_weekly_adjusted
 from .bea_client import fetch_nipa_table
 from .bis_client import fetch_credit_gdp
 from .cboe_client import fetch_index as fetch_cboe_index
+from .earnings_client import fetch_corporate_earnings
 from .errors import ApiError, error_response
 from .eia_client import fetch_series as fetch_eia_series
 from .fred_client import fetch_series, get_start_for_range, today_iso
@@ -51,6 +52,7 @@ from .worldbank_client import fetch_indicator as fetch_wb_indicator
 from .schemas import (
     ActivityResponse,
     ConsumerResponse,
+    CorporateEarningsResponse,
     CpiBreakdownResponse,
     CreditConditionsResponse,
     EnergyResponse,
@@ -69,6 +71,7 @@ from .schemas import (
     MarketPricesResponse,
     MarketsResponse,
     MetricsResponse,
+    MonetaryConditionsResponse,
     RecessionSignal,
     RecessionSignalsResponse,
     SeriesMeta,
@@ -82,6 +85,7 @@ from .series import (
     CONSUMER_SERIES,
     CPI_COMPONENTS,
     CREDIT_CONDITIONS_SERIES,
+    EARNINGS_SERIES,
     ENERGY_SERIES,
     FISCAL_SERIES,
     GLOBAL_MACRO_SERIES,
@@ -90,6 +94,7 @@ from .series import (
     INFLATION_SERIES,
     LABOR_SERIES,
     MACRO_SERIES,
+    MONETARY_SERIES,
     BIS_CREDIT_COUNTRIES,
     GDP_COMPONENTS,
     MARKET_PRICES_SERIES,
@@ -1023,6 +1028,70 @@ def trade(range: str = "10Y") -> TradeResponse:
     ]
 
     result = TradeResponse(updated=today_iso(), series=series_out, metadata=metadata)
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/corporate-earnings", response_model=CorporateEarningsResponse, tags=["markets"])
+def corporate_earnings() -> CorporateEarningsResponse:
+    """Corporate profitability: BEA profits, margins, S&P 500 EPS, P/E ratio."""
+    cache_key = "corporate-earnings"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    try:
+        data = fetch_corporate_earnings()
+        result = CorporateEarningsResponse(
+            updated=today_iso(),
+            profits=data.get("profits", []),
+            net_margin=data.get("net_margin", []),
+            operating_margin=data.get("operating_margin", []),
+            earnings_per_share=data.get("earnings_per_share", []),
+            pe_ratio=data.get("pe_ratio", []),
+        )
+    except Exception as exc:
+        logger.error("Corporate earnings error: %s", exc)
+        result = CorporateEarningsResponse(
+            updated=today_iso(),
+            profits=[],
+            net_margin=[],
+            operating_margin=[],
+            earnings_per_share=[],
+            pe_ratio=[],
+        )
+
+    cache.store(cache_key, result)
+    return result
+
+
+@app.get("/api/monetary-conditions", response_model=MonetaryConditionsResponse, tags=["rates"])
+def monetary_conditions(range: str = "10Y") -> MonetaryConditionsResponse:
+    """Monetary conditions: M1/M2/M3, monetary base, reserves, lending."""
+    cache_key = f"monetary-conditions:{range}"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    start = get_start_for_range(range)
+    series_out: dict[str, list[dict]] = {}
+
+    for s in MONETARY_SERIES:
+        try:
+            series_out[s["id"]] = fetch_series(s["id"], start=start)
+        except ApiError as exc:
+            logger.warning("Skipping monetary series %s: %s", s["id"], exc.message)
+            series_out[s["id"]] = []
+        except Exception as exc:
+            logger.warning("Skipping monetary series %s: %s", s["id"], exc)
+            series_out[s["id"]] = []
+
+    metadata = [
+        SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
+        for s in MONETARY_SERIES
+    ]
+
+    result = MonetaryConditionsResponse(updated=today_iso(), series=series_out, metadata=metadata)
     cache.store(cache_key, result)
     return result
 
