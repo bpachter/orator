@@ -453,7 +453,7 @@ export default function App() {
           </ErrorBoundary>
         </Box>
 
-        <Box component="footer" sx={{ px: { xs: 2, md: 3 }, py: 1.25, borderTop: `1px solid ${theme.palette.divider}`, color: 'text.disabled', fontSize: 11, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, backdropFilter: 'blur(8px)', backgroundColor: theme.palette.mode === 'dark' ? 'rgba(8,15,28,0.60)' : 'rgba(244,246,249,0.70)', display: isMobile ? 'none' : 'flex' }}>
+        <Box component="footer" sx={{ px: { xs: 2, md: 3 }, py: 1.25, borderTop: `1px solid ${theme.palette.divider}`, color: 'text.disabled', fontSize: 11, display: isMobile ? 'none' : 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, backdropFilter: 'blur(8px)', backgroundColor: theme.palette.mode === 'dark' ? 'rgba(8,15,28,0.60)' : 'rgba(244,246,249,0.70)' }}>
           <span>Data: Federal Reserve Bank of St. Louis (FRED) · BLS</span>
           <span>
             <Link href="https://bpachter.github.io" color="inherit" underline="hover">← Portfolio</Link>
