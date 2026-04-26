@@ -30,7 +30,7 @@ export function MonetaryConditionsPanel() {
       <Stack spacing={3}>
         {/* Range Selector */}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <RangePicker range={range} onChange={setRange} />
+          <RangePicker value={range} onChange={setRange} />
         </Box>
 
         {/* KPI Row */}
@@ -40,7 +40,7 @@ export function MonetaryConditionsPanel() {
               label="M1 Growth (YoY %)"
               value={m1Latest?.toFixed(1)}
               unit="%"
-              color={m1Latest && m1Latest > 0 ? '#6d91c9' : '#6b7280'}
+              valueColor={m1Latest && m1Latest > 0 ? '#6d91c9' : '#6b7280'}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2.4}>
@@ -48,7 +48,7 @@ export function MonetaryConditionsPanel() {
               label="M2 Growth (YoY %)"
               value={m2Latest?.toFixed(1)}
               unit="%"
-              color={m2Latest && m2Latest > 3 ? '#ef4444' : '#82aec2'}
+              valueColor={m2Latest && m2Latest > 3 ? '#ef4444' : '#82aec2'}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2.4}>
@@ -56,7 +56,7 @@ export function MonetaryConditionsPanel() {
               label="Monetary Base (YoY %)"
               value={baseLatest?.toFixed(1)}
               unit="%"
-              color="#c98f5a"
+              valueColor="#c98f5a"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2.4}>
@@ -64,7 +64,7 @@ export function MonetaryConditionsPanel() {
               label="Bank Reserves ($B)"
               value={reservesLatest?.toFixed(0)}
               unit=""
-              color="#d7b46a"
+              valueColor="#d7b46a"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2.4}>
@@ -72,7 +72,7 @@ export function MonetaryConditionsPanel() {
               label="M2 Velocity"
               value={velocityLatest?.toFixed(2)}
               unit="x"
-              color={velocityLatest && velocityLatest > 1.5 ? '#22c55e' : '#f59e0b'}
+              valueColor={velocityLatest && velocityLatest > 1.5 ? '#22c55e' : '#f59e0b'}
             />
           </Grid>
         </Grid>
@@ -83,7 +83,7 @@ export function MonetaryConditionsPanel() {
           {data.series['M1SL'] && (
             <Grid item xs={12} md={6}>
               <PlotlyChart
-                title="Broad Money Supply Growth (YoY %)"
+                ariaLabel="Broad Money Supply Growth (YoY %)"
                 traces={[
                   {
                     x: data.series['M1SL'].map((o) => o.date),
@@ -131,7 +131,7 @@ export function MonetaryConditionsPanel() {
           {data.series['AMBSL'] && (
             <Grid item xs={12} md={6}>
               <PlotlyChart
-                title="Monetary Base & Bank Reserves"
+                ariaLabel="Monetary Base & Bank Reserves"
                 traces={[
                   {
                     x: data.series['AMBSL'].map((o) => o.date),
@@ -170,7 +170,7 @@ export function MonetaryConditionsPanel() {
           {data.series['DPCBCTSL'] && (
             <Grid item xs={12} md={6}>
               <PlotlyChart
-                title="Fed Lending Facilities (Discount Window + Reverse Repos)"
+                ariaLabel="Fed Lending Facilities (Discount Window + Reverse Repos)"
                 traces={[
                   {
                     x: data.series['DPCBCTSL'].map((o) => o.date),
@@ -208,7 +208,7 @@ export function MonetaryConditionsPanel() {
           {data.series['M2V'] && (
             <Grid item xs={12} md={6}>
               <PlotlyChart
-                title="M2 Velocity (GDP/M2 Ratio)"
+                ariaLabel="M2 Velocity (GDP/M2 Ratio)"
                 traces={[
                   {
                     x: data.series['M2V'].map((o) => o.date),
@@ -234,7 +234,7 @@ export function MonetaryConditionsPanel() {
           {data.series['LMMNRNJ'] && (
             <Grid item xs={12}>
               <PlotlyChart
-                title="Net % Tightening of Bank Lending Standards"
+                ariaLabel="Net % Tightening of Bank Lending Standards"
                 traces={[
                   {
                     x: data.series['LMMNRNJ'].map((o) => o.date),
@@ -283,3 +283,4 @@ export function MonetaryConditionsPanel() {
     </PanelCard>
   )
 }
+

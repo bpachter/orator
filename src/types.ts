@@ -36,6 +36,11 @@ export type ActiveView =
   | 'calendar'
   | 'crisis'
   | 'custom'
+  | 'fed-cycle'
+  | 'recession-early-warning'
+  | 'inflation-decomposition'
+  | 'growth-stagflation'
+  | 'valuation'
 
 export interface YieldSurface {
   dates: string[]

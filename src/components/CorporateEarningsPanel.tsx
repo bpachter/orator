@@ -1,7 +1,6 @@
 import { useCorporateEarnings } from '../hooks/useFredQueries'
 import { ErrorState, LoadingState, PlotlyChart, PanelCard, KpiChip } from './shared'
 import { Box, Grid, Stack, Typography } from '@mui/material'
-import { TrendingDown, TrendingUp } from 'lucide-react'
 
 export function CorporateEarningsPanel() {
   const { data, isLoading, isError } = useCorporateEarnings()
@@ -13,15 +12,6 @@ export function CorporateEarningsPanel() {
   const getLatest = (series: Array<{ date: string; value: number }>) => {
     if (!series || series.length === 0) return null
     return series[series.length - 1].value
-  }
-
-  // Helper: get YoY change
-  const getYoYChange = (series: Array<{ date: string; value: number }>) => {
-    if (!series || series.length < 5) return null
-    const current = series[series.length - 1].value
-    const prior = series[series.length - 5].value
-    if (prior === 0) return null
-    return ((current - prior) / Math.abs(prior)) * 100
   }
 
   const latestProfits = getLatest(data.profits)
@@ -44,8 +34,7 @@ export function CorporateEarningsPanel() {
               label="Corporate Profits (YoY %)"
               value={latestProfits?.toFixed(1)}
               unit="%"
-              color={latestProfits && latestProfits > 0 ? '#22c55e' : '#ef4444'}
-              icon={latestProfits && latestProfits > 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+              valueColor={latestProfits && latestProfits > 0 ? '#22c55e' : '#ef4444'}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2.4}>
@@ -53,8 +42,8 @@ export function CorporateEarningsPanel() {
               label="Net Profit Margin"
               value={latestNetMargin?.toFixed(2)}
               unit="%"
-              color="#6d91c9"
-              subtext={marginChange !== null ? `${marginChange > 0 ? '+' : ''}${marginChange.toFixed(2)}pp` : undefined}
+              valueColor="#6d91c9"
+              caption={marginChange !== null ? `${marginChange > 0 ? '+' : ''}${marginChange.toFixed(2)}pp` : undefined}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2.4}>
@@ -62,7 +51,7 @@ export function CorporateEarningsPanel() {
               label="Operating Margin"
               value={latestOpMargin?.toFixed(2)}
               unit="%"
-              color="#82aec2"
+              valueColor="#82aec2"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2.4}>
@@ -70,7 +59,7 @@ export function CorporateEarningsPanel() {
               label="S&P 500 EPS"
               value={latestEPS?.toFixed(2)}
               unit="$"
-              color="#22c55e"
+              valueColor="#22c55e"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2.4}>
@@ -78,8 +67,8 @@ export function CorporateEarningsPanel() {
               label="Shiller CAPE"
               value={latestPE?.toFixed(1)}
               unit="x"
-              color={latestPE && latestPE > 30 ? '#ef4444' : latestPE && latestPE > 20 ? '#f59e0b' : '#22c55e'}
-              subtext={latestPE && latestPE > 30 ? 'Elevated' : latestPE && latestPE > 20 ? 'Fair' : 'Cheap'}
+              valueColor={latestPE && latestPE > 30 ? '#ef4444' : latestPE && latestPE > 20 ? '#f59e0b' : '#22c55e'}
+              caption={latestPE && latestPE > 30 ? 'Elevated' : latestPE && latestPE > 20 ? 'Fair' : 'Cheap'}
             />
           </Grid>
         </Grid>
@@ -90,7 +79,7 @@ export function CorporateEarningsPanel() {
           {data.profits && data.profits.length > 0 && (
             <Grid item xs={12} md={6}>
               <PlotlyChart
-                title="Corporate Profits (YoY %)"
+                ariaLabel="Corporate Profits (YoY %)"
                 traces={[
                   {
                     x: data.profits.map((o) => o.date),
@@ -116,7 +105,7 @@ export function CorporateEarningsPanel() {
           {data.net_margin && data.net_margin.length > 0 && (
             <Grid item xs={12} md={6}>
               <PlotlyChart
-                title="Net Profit Margin %"
+                ariaLabel="Net Profit Margin %"
                 traces={[
                   {
                     x: data.net_margin.map((o) => o.date),
@@ -142,7 +131,7 @@ export function CorporateEarningsPanel() {
           {data.earnings_per_share && data.earnings_per_share.length > 0 && (
             <Grid item xs={12} md={6}>
               <PlotlyChart
-                title="S&P 500 Earnings Per Share"
+                ariaLabel="S&P 500 Earnings Per Share"
                 traces={[
                   {
                     x: data.earnings_per_share.map((o) => o.date),
@@ -166,7 +155,7 @@ export function CorporateEarningsPanel() {
           {data.pe_ratio && data.pe_ratio.length > 0 && (
             <Grid item xs={12} md={6}>
               <PlotlyChart
-                title="Shiller CAPE Ratio (P/E Adjusted for Inflation)"
+                ariaLabel="Shiller CAPE Ratio (P/E Adjusted for Inflation)"
                 traces={[
                   {
                     x: data.pe_ratio.map((o) => o.date),
@@ -220,3 +209,6 @@ export function CorporateEarningsPanel() {
     </PanelCard>
   )
 }
+
+
+

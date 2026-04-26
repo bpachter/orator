@@ -99,6 +99,11 @@ const CorrelationPanel = lazy(() => import('./components/CorrelationPanel').then
 const CalendarPanel = lazy(() => import('./components/CalendarPanel').then((m) => ({ default: m.CalendarPanel })))
 const CrisisComparePanel = lazy(() => import('./components/CrisisComparePanel').then((m) => ({ default: m.CrisisComparePanel })))
 const CustomDashboardPanel = lazy(() => import('./components/CustomDashboardPanel').then((m) => ({ default: m.CustomDashboardPanel })))
+const FedCycleMonitor = lazy(() => import('./components/dashboards/FedCycleMonitor').then((m) => ({ default: m.FedCycleMonitor })))
+const RecessionEarlyWarning = lazy(() => import('./components/dashboards/RecessionEarlyWarning').then((m) => ({ default: m.RecessionEarlyWarning })))
+const InflationDecomposition = lazy(() => import('./components/dashboards/InflationDecomposition').then((m) => ({ default: m.InflationDecomposition })))
+const GrowthVsStagflation = lazy(() => import('./components/dashboards/GrowthVsStagflation').then((m) => ({ default: m.GrowthVsStagflation })))
+const ValuationDashboard = lazy(() => import('./components/dashboards/ValuationDashboard').then((m) => ({ default: m.ValuationDashboard })))
 
 import { CommandBar } from './components/shared/CommandBar'
 
