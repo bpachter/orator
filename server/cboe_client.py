@@ -59,7 +59,13 @@ def fetch_index(symbol: str, start: str | None = None) -> list[dict]:
         for row in reader:
             # Headers vary: 'DATE'/'Date', 'CLOSE'/'Close'
             date_raw = (row.get("DATE") or row.get("Date") or "").strip()
-            close_raw = (row.get("CLOSE") or row.get("Close") or "").strip()
+            close_raw = (
+                row.get("CLOSE")
+                or row.get("Close")
+                or row.get(sym)
+                or row.get(sym.lower())
+                or ""
+            ).strip()
             if not date_raw or not close_raw:
                 continue
             try:

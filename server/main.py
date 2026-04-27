@@ -683,7 +683,7 @@ def activity(range: str = "10Y") -> ActivityResponse:
 
 @app.get("/api/markets", response_model=MarketsResponse, tags=["markets"])
 def markets(range: str = "10Y") -> MarketsResponse:
-    cache_key = f"markets:{range}"
+    cache_key = f"markets:v2:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
@@ -692,8 +692,17 @@ def markets(range: str = "10Y") -> MarketsResponse:
     end = today_iso()
     series_out: dict[str, list[dict]] = {}
     for s in MARKETS_SERIES:
-        obs = fetch_series(s["id"], start, end)
-        series_out[s["id"]] = obs
+        try:
+            obs = fetch_series(s["id"], start, end)
+            series_out[s["id"]] = obs
+        except ApiError as exc:
+            if exc.status_code == 503:
+                raise
+            logger.warning("Skipping markets series %s: %s", s["id"], exc.message)
+            series_out[s["id"]] = []
+        except Exception as exc:
+            logger.warning("Skipping markets series %s: %s", s["id"], exc)
+            series_out[s["id"]] = []
 
     metadata = [
         SeriesMeta(id=s["id"], label=s["label"], color=s["color"], unit=s.get("unit"))
@@ -865,7 +874,7 @@ def global_macro(range: str = "10Y") -> GlobalMacroResponse:
 
 @app.get("/api/volatility", response_model=VolatilityResponse, tags=["markets"])
 def volatility(range: str = "10Y") -> VolatilityResponse:
-    cache_key = f"volatility:{range}"
+    cache_key = f"volatility:v2:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
@@ -968,7 +977,7 @@ def gdp_breakdown() -> GdpBreakdownResponse:
         fred_fallbacks = [c for c in GDP_COMPONENTS if c.get("fred")]
         for comp in fred_fallbacks:
             try:
-                raw = fetch_series(comp["fred"], start="1990-01-01")
+                raw = fetch_series(comp["fred"], start="1990-01-01", end=today_iso())
                 data = [{"date": o["date"], "value": o["value"]} for o in raw if o["value"] is not None]
                 if data:
                     components_out.append(
@@ -989,21 +998,30 @@ def global_credit() -> GlobalCreditResponse:
     Primary: FRED BIS-mirrored quarterly series (CRDQ{ISO}PABIS).
     Fallback: Direct BIS stats API (may be unavailable).
     """
-    cache_key = "global-credit"
+    cache_key = "global-credit:v2"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
-    # FRED carries BIS credit/GDP data under series IDs: CRDQ{ISO2}PABIS
+    # FRED carries BIS credit/GDP data under country-coded series IDs.
     FRED_BIS_SERIES = {
-        c["iso"]: f"CRDQ{c['iso']}PABIS"
-        for c in BIS_CREDIT_COUNTRIES
+        "US": "CRDQUSAPABIS",
+        "CN": "CRDQCNPABIS",
+        "JP": "CRDQJPPABIS",
+        "DE": "CRDQDEPABIS",
+        "GB": "CRDQGBPABIS",
+        "FR": "CRDQFRPABIS",
+        "CA": "CRDQCAPABIS",
+        "KR": "CRDQKRPABIS",
     }
 
     series_out: list[GlobalCreditSeries] = []
     for country in BIS_CREDIT_COUNTRIES:
         iso = country["iso"]
-        fred_id = FRED_BIS_SERIES[iso]
+        fred_id = FRED_BIS_SERIES.get(iso)
+        if not fred_id:
+            logger.warning("No FRED BIS mapping configured for %s", iso)
+            continue
 
         # Try FRED first (BIS-mirrored series)
         data: list[dict] = []
@@ -1042,17 +1060,18 @@ def global_credit() -> GlobalCreditResponse:
 @app.get("/api/trade", response_model=TradeResponse, tags=["macro"])
 def trade(range: str = "10Y") -> TradeResponse:
     """FRED trade balance and flows series."""
-    cache_key = f"trade:{range}"
+    cache_key = f"trade:v2:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
     start = get_start_for_range(range)
+    end = today_iso()
     series_out: dict[str, list[dict]] = {}
 
     for s in TRADE_SERIES:
         try:
-            series_out[s["id"]] = fetch_series(s["id"], start=start)
+            series_out[s["id"]] = fetch_series(s["id"], start=start, end=end)
         except ApiError as exc:
             logger.warning("Skipping trade series %s: %s", s["id"], exc.message)
             series_out[s["id"]] = []
@@ -1106,17 +1125,19 @@ def corporate_earnings() -> CorporateEarningsResponse:
 @app.get("/api/monetary-conditions", response_model=MonetaryConditionsResponse, tags=["rates"])
 def monetary_conditions(range: str = "10Y") -> MonetaryConditionsResponse:
     """Monetary conditions: M1/M2/M3, monetary base, reserves, lending."""
-    cache_key = f"monetary-conditions:{range}"
+    cache_key = f"monetary-conditions:v2:{range}"
     hit = cache.get(cache_key)
     if hit is not None:
         return hit
 
     start = get_start_for_range(range)
+    end = today_iso()
     series_out: dict[str, list[dict]] = {}
 
     for s in MONETARY_SERIES:
         try:
-            series_out[s["id"]] = fetch_series(s["id"], start=start)
+            obs = fetch_series(s["id"], start=start, end=end)
+            series_out[s["id"]] = yoy(obs) if s.get("yoy") else obs
         except ApiError as exc:
             logger.warning("Skipping monetary series %s: %s", s["id"], exc.message)
             series_out[s["id"]] = []

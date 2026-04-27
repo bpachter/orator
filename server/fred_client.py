@@ -21,7 +21,7 @@ BACKOFF_BASE_SECONDS = 1.0
 
 
 def get_api_key() -> str:
-    key = os.environ.get("FRED_API_KEY", "")
+    key = os.environ.get("FRED_API_KEY", "").strip().lower()
     if not key:
         raise ApiError(503, "FRED_KEY_MISSING", "FRED_API_KEY environment variable is not set")
     return key
