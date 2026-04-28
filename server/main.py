@@ -68,6 +68,7 @@ from .schemas import (
     InflationResponse,
     LaborResponse,
     MacroResponse,
+    MacroSnapshot,
     MarketPricesResponse,
     MarketsResponse,
     MetricsResponse,
@@ -76,6 +77,7 @@ from .schemas import (
     RecessionSignalsResponse,
     SeriesMeta,
     SpreadsResponse,
+    TopSignal,
     TradeResponse,
     VolatilityResponse,
     YieldCurveResponse,
@@ -1153,4 +1155,122 @@ def monetary_conditions(range: str = "10Y") -> MonetaryConditionsResponse:
     result = MonetaryConditionsResponse(updated=today_iso(), series=series_out, metadata=metadata)
     cache.store(cache_key, result)
     return result
+
+
+# ---------------------------------------------------------------------------
+# /api/snapshot — Mithrandir integration: condensed daily macro signal
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/snapshot", response_model=MacroSnapshot, tags=["analytics"])
+def macro_snapshot() -> MacroSnapshot:
+    """Condensed daily macro snapshot for Mithrandir morning brief and external consumers.
+
+    Aggregates: recession composite, stagflation score, yield curve spread,
+    VIX regime, HY spread, unemployment, CPI YoY, and Fed funds rate into
+    a single cached response with a plain-English narrative paragraph.
+
+    Reuses the recession-signals cache when available — cheap to call.
+    Cache TTL: follows ORATOR_CACHE_TTL env var (default 4h).
+    """
+    cache_key = "macro_snapshot_v1"
+    hit = cache.get(cache_key)
+    if hit is not None:
+        return hit
+
+    # Reuse the recession signals computation (has its own cache).
+    rec = recession_signals()
+
+    # Extract series already computed inside recession_signals
+    t10y2y_series = rec.series.get("T10Y2Y", [])
+    vix_series = rec.series.get("VIXCLS", [])
+    unrate_series = rec.series.get("UNRATE", [])
+    hy_series = rec.series.get("BAMLH0A0HYM2", [])
+    cpi_yoy_series = rec.series.get("CPI_YOY", [])  # already YoY-transformed
+
+    spread_val = float(t10y2y_series[-1]["value"]) if t10y2y_series else 0.0
+    vix_val = float(vix_series[-1]["value"]) if vix_series else 20.0
+    unrate_val = float(unrate_series[-1]["value"]) if unrate_series else 4.0
+    hy_val = float(hy_series[-1]["value"]) if hy_series else 400.0
+    cpi_yoy_val = float(cpi_yoy_series[-1]["value"]) if cpi_yoy_series else 3.0
+
+    # Fed funds rate — not in recession signals; short 3-month fetch
+    ffr_val = 5.0
+    try:
+        ffr_series = fetch_series("FEDFUNDS", get_start_for_range("3M"), today_iso())
+        if ffr_series:
+            ffr_val = float(ffr_series[-1]["value"])
+    except Exception as exc:
+        logger.warning("snapshot: FEDFUNDS fetch failed: %s", exc)
+
+    # VIX regime classification
+    if vix_val < 15:
+        vix_regime = "calm"
+    elif vix_val < 25:
+        vix_regime = "normal"
+    elif vix_val < 35:
+        vix_regime = "elevated"
+    else:
+        vix_regime = "crisis"
+
+    # Recession label
+    rec_score = rec.composite_score
+    if rec_score < 0.20:
+        rec_label = "Low"
+    elif rec_score < 0.40:
+        rec_label = "Moderate"
+    elif rec_score < 0.65:
+        rec_label = "Elevated"
+    else:
+        rec_label = "High"
+
+    # Top signals: triggered first (sorted by weight desc), then fill with highest-weight
+    sig_dicts = [s.model_dump() for s in rec.signals]
+    triggered = sorted(
+        [s for s in sig_dicts if s.get("triggered")],
+        key=lambda s: s.get("weight", 1.0),
+        reverse=True,
+    )
+    if not triggered:
+        triggered = sorted(sig_dicts, key=lambda s: s.get("weight", 1.0), reverse=True)
+    top_signals_out = [
+        TopSignal(
+            name=s["label"],
+            value=str(round(s["value"], 2)) if isinstance(s.get("value"), (int, float)) else str(s.get("value", "N/A")),
+            state=s.get("severity", "normal"),
+        )
+        for s in triggered[:5]
+    ]
+
+    # Plain-English narrative
+    narrative = (
+        f"As of {today_iso()}: recession risk is {rec_label} "
+        f"(composite {rec_score:.2f}, stagflation {rec.stagflation_score:.2f}). "
+        f"The 2/10 spread is {spread_val:+.2f}% "
+        f"({'inverted' if spread_val < 0 else 'positive'}). "
+        f"VIX at {vix_val:.1f} ({vix_regime}). "
+        f"HY spread {hy_val:.0f}bps. "
+        f"Unemployment {unrate_val:.1f}%, CPI {cpi_yoy_val:.1f}% YoY, "
+        f"Fed funds {ffr_val:.2f}%."
+    )
+
+    snapshot = MacroSnapshot(
+        date=today_iso(),
+        recession_composite=round(rec_score, 3),
+        recession_label=rec_label,
+        stagflation_score=round(rec.stagflation_score, 3),
+        yield_curve_spread_2_10=round(spread_val, 3),
+        yield_curve_inverted=spread_val < 0,
+        vix=round(vix_val, 2),
+        vix_regime=vix_regime,
+        hy_spread=round(hy_val, 1),
+        unemployment=round(unrate_val, 2),
+        cpi_yoy=round(cpi_yoy_val, 2),
+        fed_funds_rate=round(ffr_val, 2),
+        top_signals=top_signals_out,
+        narrative=narrative,
+    )
+
+    cache.store(cache_key, snapshot)
+    return snapshot
 

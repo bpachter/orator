@@ -16,6 +16,7 @@ import {
   fetchHousing,
   fetchInflation,
   fetchLabor,
+  fetchMacroSnapshot,
   fetchMarketPrices,
   fetchMarkets,
   fetchMonetaryConditions,
@@ -39,8 +40,9 @@ import {
   type HousingResponse,
   type InflationResponse,
   type LaborResponse,
-  type MarketPricesResponse,
   type MacroResponse,
+  type MacroSnapshot,
+  type MarketPricesResponse,
   type MarketsResponse,
   type MonetaryConditionsResponse,
   type RecessionSignalsResponse,
@@ -161,4 +163,13 @@ export function useCorporateEarnings(): UseQueryResult<CorporateEarningsResponse
 
 export function useMonetaryConditions(range: TimeRange = '10Y'): UseQueryResult<MonetaryConditionsResponse> {
   return useQuery({ queryKey: ['monetary-conditions', range], queryFn: () => fetchMonetaryConditions(range), staleTime: FIVE_MIN })
+}
+
+export function useMacroSnapshot(): UseQueryResult<MacroSnapshot> {
+  return useQuery({
+    queryKey: ['macro-snapshot'],
+    queryFn: fetchMacroSnapshot,
+    staleTime: 10 * 60 * 1000, // 10 min client-side stale (server TTL is 4h)
+    retry: 2,
+  })
 }

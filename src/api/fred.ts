@@ -198,6 +198,33 @@ export interface MonetaryConditionsResponse {
   metadata: SeriesMetadata[]
 }
 
+export interface TopSignal {
+  name: string
+  value: string
+  state: 'normal' | 'watch' | 'warning' | 'critical'
+}
+
+export interface MacroSnapshot {
+  date: string
+  recession_composite: number
+  recession_label: 'Low' | 'Moderate' | 'Elevated' | 'High'
+  stagflation_score: number
+  yield_curve_spread_2_10: number
+  yield_curve_inverted: boolean
+  vix: number
+  vix_regime: 'calm' | 'normal' | 'elevated' | 'crisis'
+  hy_spread: number
+  unemployment: number
+  cpi_yoy: number
+  fed_funds_rate: number
+  top_signals: TopSignal[]
+  narrative: string
+}
+
+// ---------------------------------------------------------------------------
+// Fetch functions
+// ---------------------------------------------------------------------------
+
 export interface RecessionSignal {
   id: string
   label: string
@@ -325,4 +352,8 @@ export function fetchMonetaryConditions(range: TimeRange = '10Y'): Promise<Monet
 
 export function fetchMetrics(): Promise<MetricsResponse> {
   return request('/api/metrics')
+}
+
+export function fetchMacroSnapshot(): Promise<MacroSnapshot> {
+  return request('/api/snapshot')
 }

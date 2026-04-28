@@ -55,6 +55,7 @@ import WavesIcon from '@mui/icons-material/Waves'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
 import AccountTreeIcon from '@mui/icons-material/AccountTree'
+import FlashOnIcon from '@mui/icons-material/FlashOn'
 import { useTheme, alpha } from '@mui/material/styles'
 import type { ActiveView } from './types'
 import { useFilters } from './state/filters'
@@ -106,6 +107,7 @@ const GrowthVsStagflation = lazy(() => import('./components/dashboards/GrowthVsS
 const ValuationDashboard = lazy(() => import('./components/dashboards/ValuationDashboard').then((m) => ({ default: m.ValuationDashboard })))
 const MobileNav = lazy(() => import('./components/MobileNav').then((m) => ({ default: m.MobileNav })))
 const MobileDashboard = lazy(() => import('./components/MobileDashboard').then((m) => ({ default: m.MobileDashboard })))
+const MacroSnapshotPanel = lazy(() => import('./components/MacroSnapshotPanel').then((m) => ({ default: m.MacroSnapshotPanel })))
 
 import { CommandBar } from './components/shared/CommandBar'
 
@@ -126,6 +128,7 @@ const NAV_GROUPS: NavGroup[] = [
     id: 'overview',
     label: 'Overview',
     items: [
+      { value: 'snapshot', label: 'Daily Snapshot', icon: <FlashOnIcon fontSize="small" /> },
       { value: 'macro', label: 'Macro Dashboard', icon: <DashboardIcon fontSize="small" /> },
       { value: 'recession', label: 'Recession Signals', icon: <WarningAmberIcon fontSize="small" /> },
     ],
@@ -447,6 +450,7 @@ export default function App() {
                   {filters.view === 'inflation-decomposition' && <InflationDecomposition />}
                   {filters.view === 'growth-stagflation' && <GrowthVsStagflation />}
                   {filters.view === 'valuation' && <ValuationDashboard />}
+                  {filters.view === 'snapshot' && <MacroSnapshotPanel />}
                 </>
               )}
             </Suspense>

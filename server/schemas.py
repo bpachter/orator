@@ -223,3 +223,37 @@ class MonetaryConditionsResponse(BaseModel):
     updated: str
     series: dict[str, list[Observation]]
     metadata: list[SeriesMeta]
+
+
+# ---------------------------------------------------------------------------
+# Mithrandir integration — daily macro snapshot
+# ---------------------------------------------------------------------------
+
+
+class TopSignal(BaseModel):
+    name: str
+    value: str
+    state: str  # 'normal' | 'watch' | 'warning' | 'critical'
+
+
+class MacroSnapshot(BaseModel):
+    """Condensed daily macro snapshot for Mithrandir morning brief and external consumers.
+
+    A single-call summary of today's most important macro signals.
+    TTL: same as ORATOR_CACHE_TTL (default 4h).
+    """
+
+    date: str
+    recession_composite: float = 0.0  # 0–1 importance-weighted risk
+    recession_label: str = "Low"       # "Low" | "Moderate" | "Elevated" | "High"
+    stagflation_score: float = 0.0     # 0–1
+    yield_curve_spread_2_10: float = 0.0  # percentage points (negative = inverted)
+    yield_curve_inverted: bool = False
+    vix: float = 0.0
+    vix_regime: str = "normal"          # "calm" | "normal" | "elevated" | "crisis"
+    hy_spread: float = 0.0              # basis points (ICE BofA HY OAS)
+    unemployment: float = 0.0          # percent
+    cpi_yoy: float = 0.0               # percent year-over-year
+    fed_funds_rate: float = 0.0        # percent
+    top_signals: list[TopSignal] = []  # up to 5 highest-weight signals
+    narrative: str = ""                # one-paragraph plain-English summary

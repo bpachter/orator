@@ -41,6 +41,7 @@ export type ActiveView =
   | 'inflation-decomposition'
   | 'growth-stagflation'
   | 'valuation'
+  | 'snapshot'
 
 export interface YieldSurface {
   dates: string[]

@@ -70,6 +70,7 @@ const VIEW_LABELS: Record<ActiveView, string> = {
   'inflation-decomposition': 'Inflation Decomposition',
   'growth-stagflation': 'Growth vs. Stagflation Scenarios',
   valuation: 'Equity Valuation Dashboard',
+  snapshot: 'Daily Macro Snapshot',
 }
 
 /**
